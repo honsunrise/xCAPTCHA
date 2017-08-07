@@ -3,11 +3,11 @@
 //
 
 #include "filling_plugin.h"
-void filling_plugin::initialization(const captcha_context *context) {
+void filling_plugin::initialization(const captcha_api *api) {
 
 }
 
-void filling_plugin::release(const captcha_context *context) {
+void filling_plugin::release(const captcha_api *api) {
 
 }
 
