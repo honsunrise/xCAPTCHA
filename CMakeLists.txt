@@ -8,3 +8,4 @@ add_subdirectory(src)
 
 set(SOURCE_FILES tools/main.cpp)
 add_executable(captcha_view ${SOURCE_FILES})
+target_link_libraries(captcha_view xCAPTCHA)

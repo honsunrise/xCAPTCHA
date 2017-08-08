@@ -6,13 +6,14 @@
 #define XCAPTCHA_PLUGIN_INTERFACE_H
 #include "captcha.h"
 #include "captcha_api.h"
-
+#include "captcha_config.h"
+using namespace captcha_config;
 class processor_plugin_interface {
  public:
-  virtual void initialization(const captcha_api *context) = 0;
-  virtual void release(const captcha_api *context) = 0;
-  virtual void get_config_define();
-  virtual void set_config() = 0;
+  virtual void initialization(const captcha_api &api) = 0;
+  virtual void release(void *context) = 0;
+  virtual const config_define get_config_define() const = 0;
+  virtual void set_config(const captcha_node &node) = 0;
   virtual captcha &pipe(captcha &in) = 0;
 };
 

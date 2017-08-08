@@ -7,8 +7,10 @@
 
 #include "processor_plugin_interface.h"
 class filling_plugin : processor_plugin_interface {
-  void initialization(const captcha_api *api) override;
-  void release(const captcha_api *api) override;
+  void initialization(const captcha_api &api) override;
+  void release(void *context) override;
+  const config_define get_config_define() const override;
+  void set_config(const captcha_node &node) override;
   captcha &pipe(captcha &in) override;
 };
 

@@ -4,6 +4,7 @@
 
 #ifndef XCAPTCHA_CAPTCHA_API_H
 #define XCAPTCHA_CAPTCHA_API_H
+#include <string>
 class captcha_api {
  public:
   bool get_env(std::string key);
