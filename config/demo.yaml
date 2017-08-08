@@ -1,0 +1,10 @@
+---
+global:
+  width: 128
+  height: 64
+  bits: 32
+
+pipes:
+  filling:
+    color: 0xffaabb
+    test: aaaa
