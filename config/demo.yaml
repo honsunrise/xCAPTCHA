@@ -3,6 +3,8 @@ global:
   width: 128
   height: 64
   bits: 32
+  plugin:
+    path: plugins
 
 pipes:
   filling:

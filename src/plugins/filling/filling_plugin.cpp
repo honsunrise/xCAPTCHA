@@ -7,7 +7,7 @@
 void filling_plugin::initialization(const captcha_api &api) {
 
 }
-void filling_plugin::release(void *context) {
+void filling_plugin::release() {
 
 }
 const config_define filling_plugin::get_config_define() const {

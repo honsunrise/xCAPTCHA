@@ -5,9 +5,12 @@
 #ifndef XCAPTCHA_CAPTCHA_CONFIG_H
 #define XCAPTCHA_CAPTCHA_CONFIG_H
 #include <string>
+#include <utility>
 #include <vector>
 #include <map>
 #include <typeinfo>
+#include <boost/core/noncopyable.hpp>
+
 namespace captcha_config {
 
 namespace utils {
@@ -33,20 +36,29 @@ struct has_type<F, param_pack<H, T...>> {
 struct _base_arg {
   _base_arg() {}
   virtual ~_base_arg() {}
+  virtual _base_arg *clone() {};
 };
 
 struct string_arg : _base_arg {
   string_arg(const char *arg) : arg_value(arg) {}
 
+  string_arg(const std::string &arg) : arg_value(arg) {}
+
   string_arg(std::string &&arg) : arg_value(std::move(arg)) {}
 
-  string_arg(std::string arg) : arg_value(std::move(arg)) {}
+  _base_arg *clone() override {
+    return new string_arg(arg_value);
+  }
 
   std::string arg_value;
 };
 
 struct bool_arg : _base_arg {
   bool_arg(bool b) : arg_value(b) {}
+
+  _base_arg *clone() override {
+    return new bool_arg(arg_value);
+  }
 
   bool arg_value;
 };
@@ -57,14 +69,21 @@ struct _integer_arg : _base_arg {
     static_assert(std::is_integral<T>::value, "Integer required.");
     arg_value = b;
   }
+  _base_arg *clone() override {
+    return new _integer_arg(arg_value);
+  }
 
   T arg_value;
 };
 
 template<typename T>
 struct _list_arg : _base_arg {
-  _list_arg(std::vector<T> &&b) {
-    arg_value = std::move(b);
+  _list_arg(std::vector<T> &&b) : arg_value(std::move(b)) {}
+
+  _list_arg(const std::vector<T> &b) : arg_value(b) {}
+
+  _base_arg *clone() override {
+    return new _list_arg(arg_value);
   }
 
   std::vector<T> arg_value;
@@ -95,95 +114,178 @@ struct enumerate : string_list_arg {
   enumerate(std::vector<std::string> &&arg) : string_list_arg(std::forward<std::vector<std::string>>(arg)) {}
 };
 
+class placeholder : boost::noncopyable {
+ public:
+  virtual ~placeholder() {}
+ public:
+  virtual const std::type_info &type() const noexcept = 0;
+  virtual placeholder *clone() const = 0;
+};
+
+template<typename ValueType>
+class content_holder : public placeholder {
+ public:
+  content_holder(const ValueType &value) : held(value) {
+  }
+
+  content_holder(ValueType &&value) noexcept : held(std::move(value)) {
+  }
+
+ public:
+  const std::type_info &type() const noexcept {
+    return typeid(ValueType);
+  }
+
+  content_holder *clone() const {
+    return new content_holder(held);
+  }
+
+ public:
+  ValueType held;
+};
+
+enum node_type {
+  CONTAINER,
+  VALUE
+};
+
 class config_define {
   class config_define_helper {
    public:
-    config_define_helper(config_define &cd) : cd(cd) {}
-
+    config_define_helper(config_define *cd) : cd(cd) {}
     void set(regex &&v) {
-      cd._rule = new regex(v);
+      cd->_rules.push_back(new regex(v));
     }
     void set(minimum &&v) {
-      cd._rule = new minimum(v);
+      cd->_rules.push_back(new minimum(v));
     }
     void set(maximum &&v) {
-      cd._rule = new maximum(v);
+      cd->_rules.push_back(new maximum(v));
     }
     void set(enumerate &&v) {
-      cd._rule = new enumerate(v);
-    }
-    void set(config_define &&v) {
-      cd = v;
+      cd->_rules.push_back(new enumerate(v));
     }
    private:
-    config_define &cd;
+    config_define *cd;
   };
 
  public:
-  config_define() : _rule(nullptr) {}
-
-  template<typename ValueType>
-  config_define(const ValueType &value) {
-    config_define_helper cdh(*this);
-    cdh.set(value);
+  template<typename ValueType, typename F, typename... Args>
+  config_define(ValueType &&value, F &&f_arg, Args &&...args) {
+    _type = VALUE;
+    _def_value =
+        new content_holder<typename std::decay<ValueType>::type>(std::forward<typename std::decay<ValueType>::type>(
+            value));
+    init_args(std::forward<F>(f_arg), std::forward<Args>(args)...);
   }
 
-  config_define(const config_define &other) : _rule(other._rule) {
+  config_define(const config_define &other) {
+    _type = other._type;
+    if (_type == VALUE) {
+      for (auto i:other._rules) {
+        _rules.push_back(i->clone());
+      }
+      _def_value = other._def_value ? other._def_value->clone() : nullptr;
+    } else if (_type == CONTAINER) {
+      for (auto i:other._sub_node) {
+        _sub_node[i.first] = new config_define(*i.second);
+      }
+    }
   }
 
-  config_define(config_define &&other) noexcept : _rule(other._rule) {
-    other._rule = nullptr;
+  config_define(config_define &&other) noexcept {
+    _type = other._type;
+    if (_type == VALUE) {
+      _rules = std::move(other._rules);
+      _def_value = other._def_value;
+      other._rules.clear();
+      other._def_value = nullptr;
+    } else if (_type == CONTAINER) {
+      _sub_node = std::move(other._sub_node);
+      other._sub_node.clear();
+    }
   }
 
   virtual ~config_define() {
-    delete _rule;
+    clear();
   }
 
   config_define &operator=(const config_define &rhs) {
-    _rule = rhs._rule;
-    _defines = rhs._defines;
-    return *this;
+    clear();
+    _type = rhs._type;
+    if (_type == VALUE) {
+      for (auto i:rhs._rules) {
+        _rules.push_back(i->clone());
+      }
+      _def_value = rhs._def_value ? rhs._def_value->clone() : nullptr;
+    } else if (_type == CONTAINER) {
+      for (auto i:rhs._sub_node) {
+        _sub_node[i.first] = new config_define(*i.second);
+      }
+    }
   }
 
   config_define &operator=(config_define &&rhs) noexcept {
-    std::swap(_rule, rhs._rule);
-    std::swap(_defines, rhs._defines);
-    rhs._rule = nullptr;
-    rhs._defines.clear();
-    return *this;
+    clear();
+    if (_type == VALUE) {
+      _rules = std::move(rhs._rules);
+      _def_value = rhs._def_value;
+      rhs._rules.clear();
+      rhs._def_value = nullptr;
+    } else if (_type == CONTAINER) {
+      _sub_node = std::move(rhs._sub_node);
+      rhs._sub_node.clear();
+    }
   }
 
-  template<typename Args>
-  void add(const std::string &key, Args &&args) {
-    config_define cd;
-    config_define_helper cdh(cd);
-    cdh.set(std::forward<Args>(args));
-    _defines[key] = cd;
+  template<typename KeyType, typename ValueType>
+  bool insert(KeyType &&key, ValueType &&cd) {
+    if (_type == CONTAINER) {
+      _sub_node.insert(std::pair<typename std::decay<KeyType>::type, typename std::decay<ValueType>::type>(std::forward(
+          key), new config_define(std::forward(cd))));
+    }
   }
 
   config_define &operator[](const std::string &key) {
-    return _defines[key];
+    if (_type == CONTAINER) {
+      return *_sub_node[key];
+    }
+    assert(true);
   }
 
-  explicit operator regex() {
-    return *dynamic_cast<regex *>(_rule);
-  }
-
-  explicit operator minimum() {
-    return *dynamic_cast<minimum *>(_rule);
-  }
-
-  explicit operator maximum() {
-    return *dynamic_cast<maximum *>(_rule);
-  }
-
-  explicit operator enumerate() {
-    return *dynamic_cast<enumerate *>(_rule);
+  config_define &operator[](std::string &&key) {
+    if (_type == CONTAINER) {
+      return *_sub_node[std::move(key)];
+    }
+    assert(true);
   }
 
  private:
-  _base_arg *_rule;
-  std::map<std::string, config_define> _defines;
+  void clear() {
+    if (_type == VALUE) {
+      for (auto i : _rules) {
+        delete i;
+      }
+      delete _def_value;
+    } else if (_type == CONTAINER) {
+      for (auto i : _sub_node) {
+        delete i.second;
+      }
+    }
+  }
+
+  void init_args() {}
+
+  template<typename F, typename... Args>
+  void init_args(F &&f_arg, Args &&... args) {
+    config_define_helper adh(this);
+    adh.set(std::forward<F>(f_arg));
+    init_args(std::forward<Args>(args)...);
+  }
+  node_type _type;
+  std::vector<_base_arg *> _rules;
+  placeholder *_def_value;
+  std::map<std::string, config_define *> _sub_node;
 };
 
 class captcha_node {
