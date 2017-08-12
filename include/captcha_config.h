@@ -146,7 +146,8 @@ class content_holder : public placeholder {
 
 enum node_type {
   CONTAINER,
-  VALUE
+  VALUE,
+  NONE
 };
 
 class config_define {
@@ -240,10 +241,15 @@ class config_define {
 
   template<typename KeyType, typename ValueType>
   bool insert(KeyType &&key, ValueType &&cd) {
+    if(_type == NONE) {
+      _type = CONTAINER;
+    }
     if (_type == CONTAINER) {
       _sub_node.insert(std::pair<typename std::decay<KeyType>::type, typename std::decay<ValueType>::type>(std::forward(
           key), new config_define(std::forward(cd))));
+      return true;
     }
+    return false;
   }
 
   config_define &operator[](const std::string &key) {
@@ -282,7 +288,7 @@ class config_define {
     adh.set(std::forward<F>(f_arg));
     init_args(std::forward<Args>(args)...);
   }
-  node_type _type;
+  node_type _type = NONE;
   std::vector<_base_arg *> _rules;
   placeholder *_def_value;
   std::map<std::string, config_define *> _sub_node;
