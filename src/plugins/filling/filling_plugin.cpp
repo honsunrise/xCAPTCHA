@@ -12,8 +12,10 @@ void filling_plugin::release() {
 
 }
 
-const captcha_config::config_define &filling_plugin::get_config_define() const {
-
+captcha_config::config_define filling_plugin::get_config_define() const {
+  captcha_config::config_define config_define;
+  config_define.insert("color", new captcha_config::config_define(0));
+  return config_define;
 }
 
 void filling_plugin::set_config(const captcha_config::config &node) {

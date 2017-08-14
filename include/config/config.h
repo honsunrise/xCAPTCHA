@@ -258,8 +258,7 @@ class config_define_node : public base_node {
   template<typename ValueType, typename... Args>
   explicit config_define_node(ValueType &&value, Args &&...args) {
     _def_value =
-        new content_holder<typename std::decay<ValueType>::type>(std::forward<typename std::decay<ValueType>::type>(
-            value));
+        new content_holder<typename std::decay<ValueType>::type>(std::forward<ValueType>(value));
     init_args(std::forward<Args>(args)...);
   }
 
@@ -391,7 +390,7 @@ class config_define {
 
   template<typename ValueType, typename... Args>
   explicit config_define(ValueType &&value, Args &&...args) {
-    _node = new detail::config_define_node(std::forward(value), std::forward(args)...);
+    _node = new detail::config_define_node(std::forward<ValueType>(value), std::forward<Args>(args)...);
   }
 
   config_define operator[](const std::string &key) {

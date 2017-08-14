@@ -13,7 +13,7 @@ class processor_plugin_interface {
  public:
   virtual void initialization(const captcha_api &api) = 0;
   virtual void release() = 0;
-  virtual const captcha_config::config_define &get_config_define() const = 0;
+  virtual captcha_config::config_define get_config_define() const = 0;
   virtual void set_config(const captcha_config::config &node) = 0;
   virtual captcha &pipe(captcha &in) = 0;
 };

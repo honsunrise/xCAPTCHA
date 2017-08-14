@@ -9,7 +9,7 @@
 class filling_plugin : public processor_plugin_interface {
   void initialization(const captcha_api &api) override;
   void release() override;
-  const captcha_config::config_define &get_config_define() const override;
+  captcha_config::config_define get_config_define() const override;
   void set_config(const captcha_config::config &node) override;
   captcha &pipe(captcha &in) override;
 };
