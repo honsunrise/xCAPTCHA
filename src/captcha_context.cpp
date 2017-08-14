@@ -54,10 +54,11 @@ bool captcha_context::load_config(const std::string &path) {
 
       boost::filesystem::path file(plugin_path);
       file /= it->first.as<std::string>();
-      file += ".pl";
+      file /= it->first.as<std::string>();
+      file += "_plugin.so";
       plugins[plugin_name] = captcha_plugin_stub(file.string());
       plugins[plugin_name].get_interface()->initialization(api);
-      config_define cd = plugins[plugin_name].get_interface()->get_config_define();
+      const captcha_config::config_define &cd = plugins[plugin_name].get_interface()->get_config_define();
     }
   }
   return false;

@@ -4,7 +4,7 @@ global:
   height: 64
   bits: 32
   plugin:
-    path: plugins
+    path: cmake-build-debug/src/plugins
 
 pipes:
   filling:
