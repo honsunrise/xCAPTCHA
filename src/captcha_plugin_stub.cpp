@@ -3,8 +3,6 @@
 //
 #include <dlfcn.h>
 #include "captcha_plugin_stub.h"
-captcha_plugin_stub::captcha_plugin_stub() {}
-
 captcha_plugin_stub::captcha_plugin_stub(const std::string &plugin_path) : plugin_path(plugin_path), handle(nullptr) {
   handle = dlopen(plugin_path.c_str(), RTLD_LAZY);
   if (!handle) {

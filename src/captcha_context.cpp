@@ -10,7 +10,6 @@ captcha_context::captcha_context() {
 
 }
 
-
 captcha_context::~captcha_context() {
 
 }
@@ -59,11 +58,23 @@ bool captcha_context::load_config(const std::string &path) {
       plugins[plugin_name] = captcha_plugin_stub(file.string());
       plugins[plugin_name].get_interface()->initialization(api);
       const captcha_config::config_define &cd = plugins[plugin_name].get_interface()->get_config_define();
+      for (auto it2 = cd.begin(); it2 != cd.end(); ++it2) {
+        std::cout << it2->first << " -----> " << it2->second.as<int>() << std::endl;
+      }
     }
   }
   return false;
 }
 
 captcha captcha_context::generate() {
-  return captcha();
+  cv::Mat image = cv::Mat::zeros(height, width, CV_8UC4);
+  cv::rectangle(image,
+                cv::Point(0, 0),
+                cv::Point(width, height),
+                cv::Scalar(0, 0, 0), -1, 8);
+  captcha &&ca = captcha(image);
+  for (auto plugin:plugins) {
+    ca = plugin.second.get_interface()->pipe(ca);
+  }
+  return ca;
 }

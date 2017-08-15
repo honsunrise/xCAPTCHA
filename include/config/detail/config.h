@@ -2,17 +2,19 @@
 // Created by zhsyourai on 8/15/17.
 //
 
-#ifndef XCAPTCHA_CONFIG_H
-#define XCAPTCHA_CONFIG_H
+#ifndef XCAPTCHA_DETAIL_CONFIG_H
+#define XCAPTCHA_DETAIL_CONFIG_H
+#include <boost/noncopyable.hpp>
+#include <boost/any.hpp>
+#include "iterator.h"
+#include "config/rules.h"
+
 namespace captcha_config {
 namespace detail {
 class base_node;
 class container_node;
 class config_define_node;
 class config_node;
-
-typedef node_iterator_base<base_node> config_define_node_iterator;
-typedef node_iterator_base<const base_node> const_config_define_node_iterator;
 
 class placeholder : boost::noncopyable {
  public:
@@ -52,6 +54,10 @@ class base_node {
 
 class container_node : public base_node {
  public:
+  typedef node_iterator_base <base_node> iterator;
+  typedef node_iterator_base<const base_node> const_iterator;
+  typedef size_t size_type;
+
   container_node() {}
 
   container_node(const container_node &other) {
@@ -73,22 +79,22 @@ class container_node : public base_node {
   };
 
   // size/iterator
-  std::size_t size() const {
+  size_type size() const {
     return _sub_node.size();
   }
 
-  const_config_define_node_iterator begin() const {
-    return const_config_define_node_iterator(_sub_node.begin(), _sub_node.begin());
+  const_iterator begin() const {
+    return const_iterator(_sub_node.begin());
   }
-  config_define_node_iterator begin() {
-    return config_define_node_iterator(_sub_node.begin(), _sub_node.begin());
+  iterator begin() {
+    return iterator(_sub_node.begin());
   }
 
-  const_config_define_node_iterator end() const {
-    return const_config_define_node_iterator(_sub_node.end(), _sub_node.end());
+  const_iterator end() const {
+    return const_iterator(_sub_node.end());
   }
-  config_define_node_iterator end() {
-    return config_define_node_iterator(_sub_node.end(), _sub_node.end());
+  iterator end() {
+    return iterator(_sub_node.end());
   }
 
   bool insert(const std::string &key, base_node *node) {
@@ -124,17 +130,17 @@ class config_define_node : public base_node {
   class config_define_helper {
    public:
     config_define_helper(config_define_node *cd) : cd(cd) {}
-    void set(regex &&v) {
-      cd->_rules.push_back(new regex(v));
+    void set(rules::regex &&v) {
+      cd->_rules.push_back(new rules::regex(v));
     }
-    void set(minimum &&v) {
-      cd->_rules.push_back(new minimum(v));
+    void set(rules::minimum &&v) {
+      cd->_rules.push_back(new rules::minimum(v));
     }
-    void set(maximum &&v) {
-      cd->_rules.push_back(new maximum(v));
+    void set(rules::maximum &&v) {
+      cd->_rules.push_back(new rules::maximum(v));
     }
-    void set(enumerate &&v) {
-      cd->_rules.push_back(new enumerate(v));
+    void set(rules::enumerate &&v) {
+      cd->_rules.push_back(new rules::enumerate(v));
     }
    private:
     config_define_node *cd;
@@ -190,6 +196,10 @@ class config_define_node : public base_node {
     return new config_define_node(*this);
   }
 
+  template <typename T> T as() const {
+    return dynamic_cast<content_holder<T>*>(_def_value)->held;
+  }
+
   void clear() override {
     for (auto i : _rules) {
       delete i;
@@ -207,7 +217,7 @@ class config_define_node : public base_node {
     init_args(std::forward<Args>(args)...);
   }
 
-  std::vector<_base_arg *> _rules;
+  std::vector<rules::_base_arg *> _rules;
   placeholder *_def_value;
 };
 
@@ -259,4 +269,4 @@ class config_node : public base_node {
 };
 }
 }
-#endif //XCAPTCHA_CONFIG_H
+#endif //XCAPTCHA_DETAIL_CONFIG_H

@@ -8,9 +8,10 @@
 #include <boost/core/noncopyable.hpp>
 #include "processor_plugin_interface.h"
 
-class captcha_plugin_stub : boost::noncopyable {
+class captcha_plugin_stub {
  public:
-  captcha_plugin_stub();
+  captcha_plugin_stub() = default;
+  captcha_plugin_stub(const captcha_plugin_stub&) = default;
   explicit captcha_plugin_stub(const std::string &plugin_path);
   virtual ~captcha_plugin_stub();
   processor_plugin_interface *get_interface();

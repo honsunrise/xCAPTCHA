@@ -4,6 +4,7 @@
 
 #ifndef XCAPTCHA_UTILS_H
 #define XCAPTCHA_UTILS_H
+#include <type_traits>
 namespace captcha_config {
 namespace utils {
 
