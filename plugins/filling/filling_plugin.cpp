@@ -13,7 +13,7 @@ void filling_plugin::release() {
 }
 
 captcha_config::config_define filling_plugin::get_config_define() const {
-  captcha_config::config_define config_define;
+  captcha_config::config_define config_define(captcha_config::config_define_node_type::CONTAINER);
   config_define.insert("color", new captcha_config::config_define(0));
   return config_define;
 }
