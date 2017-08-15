@@ -4,7 +4,7 @@
 
 #ifndef XCAPTCHA_CAPTCHA_H
 #define XCAPTCHA_CAPTCHA_H
-#include <stdint.h>
+#include <cstdint>
 #include <opencv2/opencv.hpp>
 
 class captcha {
