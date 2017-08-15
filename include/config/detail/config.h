@@ -225,8 +225,8 @@ class config_node : public base_node {
  public:
   config_node() : _def_value(nullptr) {}
 
-  template<typename ValueType, typename F>
-  config_node(ValueType &&value, F &&f_arg) {
+  template<typename ValueType>
+  config_node(ValueType &&value) {
     _def_value =
         new content_holder<typename std::decay<ValueType>::type>(std::forward<typename std::decay<ValueType>::type>(
             value));

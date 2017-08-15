@@ -41,6 +41,7 @@ class config_define {
   template<typename ValueType, typename... Args>
   explicit config_define(ValueType &&value, Args &&...args) {
     _node = new detail::config_define_node(std::forward<ValueType>(value), std::forward<Args>(args)...);
+    _node_type = &typeid(ValueType);
   }
 
   template <typename T> T as() const {
@@ -122,7 +123,19 @@ class config_define {
     return iterator(node->end());
   }
 
+  bool is_container() const {
+    if (_node && typeid(*_node) == typeid(detail::container_node)) {
+      return true;
+    }
+    return false;
+  }
+
+  std::type_info type() const {
+    return *_node_type;
+  }
+
  private:
+  std::type_info *_node_type;
   detail::base_node *_node;
 };
 
@@ -146,9 +159,9 @@ class config {
 
   explicit config(detail::base_node *node) : _node(node) {}
 
-  template<typename ValueType, typename... Args>
-  explicit config(ValueType &&value, Args &&...args) {
-    _node = new detail::config_define_node(std::forward(value), std::forward(args)...);
+  template<typename ValueType>
+  explicit config(ValueType &&value) {
+    _node = new detail::config_node(std::forward<ValueType>(value));
   }
 
   config operator[](const std::string &key) {

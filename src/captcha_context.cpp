@@ -2,7 +2,6 @@
 // Created by zhsyourai on 8/4/17.
 //
 
-#include <yaml-cpp/yaml.h>
 #include <boost/filesystem.hpp>
 #include "captcha_context.h"
 
@@ -47,23 +46,53 @@ bool captcha_context::load_config(const std::string &path) {
   }
   auto &&pipes = config["pipes"];
   if (pipes) {
-    for (auto it = pipes.begin(); it != pipes.end(); ++it) {
-      std::string plugin_name = it->first.as<std::string>();
-      YAML::Node plugin_config = it->second;
+    for (auto pipe : pipes) {
+      std::string plugin_name = pipe.first.as<std::string>();
+      YAML::Node plugin_config = pipe.second;
 
       boost::filesystem::path file(plugin_path);
-      file /= it->first.as<std::string>();
-      file /= it->first.as<std::string>();
+      file /= pipe.first.as<std::string>();
+      file /= pipe.first.as<std::string>();
       file += "_plugin.so";
+
       plugins[plugin_name] = captcha_plugin_stub(file.string());
       plugins[plugin_name].get_interface()->initialization(api);
       const captcha_config::config_define &cd = plugins[plugin_name].get_interface()->get_config_define();
-      for (auto it2 = cd.begin(); it2 != cd.end(); ++it2) {
-        std::cout << it2->first << " -----> " << it2->second.as<int>() << std::endl;
-      }
+      captcha_config::config &&really = check_config(cd, plugin_config);
+      plugins[plugin_name].get_interface()->set_config(really);
     }
   }
   return false;
+}
+
+
+void captcha_context::check_config(const captcha_config::config_define &config_define,
+                                   const YAML::Node &plugin_config,
+                                   captcha_config::config &config) {
+  for (auto it : config_define) {
+    if(it.second.is_container()) {
+      captcha_config::config *inside = new captcha_config::config();
+      check_config(it.second, plugin_config[it.first], *inside);
+      config.insert(it.first, inside);
+    } else if (plugin_config[it.first]) {
+      config.insert(it.first, new captcha_config::config(plugin_config[it.first]));
+    } else {
+      config.insert(it.first, new captcha_config::config());
+    }
+  }
+}
+
+captcha_config::config captcha_context::check_config(const captcha_config::config_define &config_define,
+                                    const YAML::Node &plugin_config) {
+  captcha_config::config really(captcha_config::config::config_node_type::CONTAINER);
+
+  for (auto it2 : config_define) {
+    for (auto it3 : it2.second) {
+      std::cout << it3.first << " -----> " << it3.second.as<uint32_t>() << std::endl;
+      really.insert(it3.first, new captcha_config::config(it3.second.as<uint32_t>()));
+    }
+  }
+  return really;
 }
 
 captcha captcha_context::generate() {

@@ -8,5 +8,8 @@ global:
 
 pipes:
   filling:
-    color: 0xffaabb
+    color:
+      r: 0
+      g: 128
+      b: 256
     test: aaaa

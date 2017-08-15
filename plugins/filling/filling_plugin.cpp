@@ -13,13 +13,26 @@ void filling_plugin::release() {
 }
 
 captcha_config::config_define filling_plugin::get_config_define() const {
-  captcha_config::config_define config_define(captcha_config::config_define::config_define_node_type::CONTAINER);
-  config_define.insert("color", new captcha_config::config_define(0));
-  return config_define;
+  captcha_config::config_define color(captcha_config::config_define::config_define_node_type::CONTAINER);
+  captcha_config::config_define *rgb =
+      new captcha_config::config_define(captcha_config::config_define::config_define_node_type::CONTAINER);
+  rgb->insert("r", new captcha_config::config_define(uint32_t(0),
+                                                captcha_config::rules::minimum(0),
+                                                captcha_config::rules::maximum(255)));
+  rgb->insert("g", new captcha_config::config_define(uint32_t(0),
+                                                captcha_config::rules::minimum(0),
+                                                captcha_config::rules::maximum(255)));
+  rgb->insert("b", new captcha_config::config_define(uint32_t(0),
+                                                captcha_config::rules::minimum(0),
+                                                captcha_config::rules::maximum(255)));
+  color.insert("color", rgb);
+  return color;
 }
 
 void filling_plugin::set_config(const captcha_config::config &node) {
-
+  b = 255;
+  g = 255;
+  r = 255;
 }
 
 captcha filling_plugin::pipe(captcha &in) {
@@ -27,7 +40,7 @@ captcha filling_plugin::pipe(captcha &in) {
   cv::rectangle(image,
                 cv::Point(0, 0),
                 cv::Point(image.cols, image.rows),
-                cv::Scalar(255, 0, 0), -1, 8);
+                cv::Scalar(b, g, r), -1, 8);
   return captcha(image);
 }
 
