@@ -1,24 +1,20 @@
 //
-// Created by zhsyourai on 8/4/17.
+// Created by zhsyourai on 8/17/17.
 //
 
-#ifndef XCAPTCHA_FILLING_PLUGIN_H
-#define XCAPTCHA_FILLING_PLUGIN_H
+#ifndef XCAPTCHA_DISTORTION_PLUGIN_H
+#define XCAPTCHA_DISTORTION_PLUGIN_H
 
 #include <cstdint>
 #include <cstddef>
 #include "processor_plugin_interface.h"
-class filling_plugin : public processor_plugin_interface {
+class distortion_plugin : public processor_plugin_interface {
  public:
   void initialization(const captcha_api &api) override;
   void release() override;
-  captcha_config::config_define get_config_define() const override;
+  config_define get_config_define() const override;
   void set_config(const captcha_config::config &node) override;
   captcha pipe(captcha &in) override;
- private:
-  uint32_t r = 0;
-  uint32_t g = 0;
-  uint32_t b = 0;
 };
 
 extern "C" {
@@ -26,5 +22,4 @@ processor_plugin_interface *create();
 
 void destroy(processor_plugin_interface *plugin_interface);
 }
-
-#endif //XCAPTCHA_FILLING_PLUGIN_H
+#endif //XCAPTCHA_DISTORTION_PLUGIN_H
