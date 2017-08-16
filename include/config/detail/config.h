@@ -165,6 +165,13 @@ class config_define_node : public base_node {
     _def_value = other._def_value ? other._def_value->clone() : nullptr;
   }
 
+  config_define_node(config_define_node &other) {
+    for (auto i:other._rules) {
+      _rules.push_back(i->clone());
+    }
+    _def_value = other._def_value ? other._def_value->clone() : nullptr;
+  }
+
   config_define_node(config_define_node &&other) noexcept {
     _rules = std::move(other._rules);
     _def_value = other._def_value;
@@ -200,6 +207,10 @@ class config_define_node : public base_node {
     return dynamic_cast<content_holder<T>*>(_def_value)->held;
   }
 
+  placeholder *get_value() {
+    return _def_value;
+  }
+
   void clear() override {
     for (auto i : _rules) {
       delete i;
@@ -232,9 +243,15 @@ class config_node : public base_node {
             value));
   }
 
-  config_node(const config_node &other) {
+  explicit config_node(const config_node &other) {
     _def_value = other._def_value ? other._def_value->clone() : nullptr;
   }
+
+  explicit config_node(config_node &other) {
+    _def_value = other._def_value ? other._def_value->clone() : nullptr;
+  }
+
+  explicit config_node(placeholder *_def_value) : _def_value(_def_value) {}
 
   config_node(config_node &&other) noexcept {
     _def_value = other._def_value;
@@ -258,6 +275,14 @@ class config_node : public base_node {
 
   config_node *clone() override {
     return new config_node(*this);
+  }
+
+  template <typename T> T as() const {
+    return dynamic_cast<content_holder<T>*>(_def_value)->held;
+  }
+
+  placeholder *get_value() {
+    return _def_value;
   }
 
   void clear() override {

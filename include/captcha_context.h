@@ -21,7 +21,9 @@ class captcha_context {
   void check_config(const captcha_config::config_define &config_define,
                     const YAML::Node &plugin_config, captcha_config::config &config);
 
-  captcha_api api;
+  captcha_config::detail::placeholder* yaml_node_2_type(const YAML::Node &node, const std::type_info &type);
+
+    captcha_api api;
   std::string config_path;
   int32_t width;
   int32_t height;

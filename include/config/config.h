@@ -41,7 +41,6 @@ class config_define {
   template<typename ValueType, typename... Args>
   explicit config_define(ValueType &&value, Args &&...args) {
     _node = new detail::config_define_node(std::forward<ValueType>(value), std::forward<Args>(args)...);
-    _node_type = &typeid(ValueType);
   }
 
   template <typename T> T as() const {
@@ -124,23 +123,30 @@ class config_define {
   }
 
   bool is_container() const {
-    if (_node && typeid(*_node) == typeid(detail::container_node)) {
-      return true;
-    }
-    return false;
+    return _node && typeid(*_node) == typeid(detail::container_node);
   }
 
-  std::type_info type() const {
-    return *_node_type;
+  detail::placeholder *get_value() const {
+    if (!_node) {
+
+    }
+    if (typeid(*_node) != typeid(detail::config_define_node)) {
+
+    }
+    auto *node = dynamic_cast<detail::config_define_node *>(_node);
+    return node->get_value();
   }
 
  private:
-  std::type_info *_node_type;
   detail::base_node *_node;
 };
 
 class config {
  public:
+  typedef iterator_base<config> iterator;
+  typedef iterator_base<const config> const_iterator;
+  typedef size_t size_type;
+
   enum class config_node_type : char {
     CONTAINER,
     CONFIG,
@@ -164,7 +170,12 @@ class config {
     _node = new detail::config_node(std::forward<ValueType>(value));
   }
 
-  config operator[](const std::string &key) {
+  explicit config(detail::placeholder *_def_value) {
+    _node = new detail::config_node(_def_value);
+  }
+
+
+  config operator[](const std::string &key) const {
     if (!_node) {
 
     }
@@ -186,6 +197,76 @@ class config {
     }
     auto *node = dynamic_cast<detail::container_node *>(_node);
     return node->insert(key, c->_node);
+  }
+
+  template <typename T> T as() const {
+    if (!_node) {
+
+    }
+    if (typeid(*_node) != typeid(detail::config_node)) {
+
+    }
+    auto *node = dynamic_cast<detail::config_node *>(_node);
+    node->as<T>();
+  }
+
+  const_iterator begin() const {
+    if (!_node) {
+
+    }
+    if (typeid(*_node) != typeid(detail::container_node)) {
+
+    }
+    auto *node = dynamic_cast<detail::container_node *>(_node);
+    return const_iterator(node->begin());
+  }
+
+  iterator begin() {
+    if (!_node) {
+
+    }
+    if (typeid(*_node) != typeid(detail::container_node)) {
+
+    }
+    auto *node = dynamic_cast<detail::container_node *>(_node);
+    return iterator(node->begin());
+  }
+
+  const_iterator end() const {
+    if (!_node) {
+
+    }
+    if (typeid(*_node) != typeid(detail::container_node)) {
+
+    }
+    auto *node = dynamic_cast<detail::container_node *>(_node);
+    return const_iterator(node->end());
+  }
+
+  iterator end() {
+    if (!_node) {
+
+    }
+    if (typeid(*_node) != typeid(detail::container_node)) {
+
+    }
+    auto *node = dynamic_cast<detail::container_node *>(_node);
+    return iterator(node->end());
+  }
+
+  detail::placeholder *get_value() const {
+    if (!_node) {
+
+    }
+    if (typeid(*_node) != typeid(detail::config_node)) {
+
+    }
+    auto *node = dynamic_cast<detail::config_node *>(_node);
+    return node->get_value();
+  }
+
+  bool is_container() const {
+    return _node && typeid(*_node) == typeid(detail::container_node);
   }
 
  private:

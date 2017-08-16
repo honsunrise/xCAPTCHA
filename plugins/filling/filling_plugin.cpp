@@ -30,9 +30,10 @@ captcha_config::config_define filling_plugin::get_config_define() const {
 }
 
 void filling_plugin::set_config(const captcha_config::config &node) {
-  b = 255;
-  g = 255;
-  r = 255;
+  const captcha_config::config &color = node["color"];
+  r = color["r"].as<uint32_t>();
+  g = color["g"].as<uint32_t>();
+  b = color["b"].as<uint32_t>();
 }
 
 captcha filling_plugin::pipe(captcha &in) {

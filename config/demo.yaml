@@ -9,7 +9,7 @@ global:
 pipes:
   filling:
     color:
-      r: 0
+      r: 256
       g: 128
       b: 256
     test: aaaa

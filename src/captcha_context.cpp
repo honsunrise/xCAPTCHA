@@ -4,6 +4,7 @@
 
 #include <boost/filesystem.hpp>
 #include "captcha_context.h"
+using namespace captcha_config;
 
 captcha_context::captcha_context() {
 
@@ -15,8 +16,8 @@ captcha_context::~captcha_context() {
 
 bool captcha_context::load_config(const std::string &path) {
   config_path = path;
-  YAML::Node config = YAML::LoadFile(config_path);
-  auto &&global = config["global"];
+  YAML::Node raw_config = YAML::LoadFile(config_path);
+  auto &&global = raw_config["global"];
   if (global) {
     if (global["width"]) {
       width = global["width"].as<int32_t>();
@@ -44,7 +45,7 @@ bool captcha_context::load_config(const std::string &path) {
     }
 
   }
-  auto &&pipes = config["pipes"];
+  auto &&pipes = raw_config["pipes"];
   if (pipes) {
     for (auto pipe : pipes) {
       std::string plugin_name = pipe.first.as<std::string>();
@@ -57,41 +58,43 @@ bool captcha_context::load_config(const std::string &path) {
 
       plugins[plugin_name] = captcha_plugin_stub(file.string());
       plugins[plugin_name].get_interface()->initialization(api);
-      const captcha_config::config_define &cd = plugins[plugin_name].get_interface()->get_config_define();
-      captcha_config::config &&really = check_config(cd, plugin_config);
+      const config_define &cd = plugins[plugin_name].get_interface()->get_config_define();
+      config &&really = check_config(cd, plugin_config);
       plugins[plugin_name].get_interface()->set_config(really);
     }
   }
   return false;
 }
 
+detail::placeholder* captcha_context::yaml_node_2_type(const YAML::Node &node, const std::type_info &type) {
+  if(type == typeid(int32_t)) {
+    return new detail::content_holder<int32_t>(node.as<int32_t>());
+  } else if (type == typeid(uint32_t)) {
+    return new detail::content_holder<uint32_t>(node.as<uint32_t>());
+  }
+  return nullptr;
+}
 
-void captcha_context::check_config(const captcha_config::config_define &config_define,
+void captcha_context::check_config(const config_define &config_define,
                                    const YAML::Node &plugin_config,
-                                   captcha_config::config &config) {
+                                   config &cfg) {
   for (auto it : config_define) {
     if(it.second.is_container()) {
-      captcha_config::config *inside = new captcha_config::config();
+      config *inside = new config(config::config_node_type::CONTAINER);
       check_config(it.second, plugin_config[it.first], *inside);
-      config.insert(it.first, inside);
+      cfg.insert(it.first, inside);
     } else if (plugin_config[it.first]) {
-      config.insert(it.first, new captcha_config::config(plugin_config[it.first]));
+      cfg.insert(it.first, new config(yaml_node_2_type(plugin_config[it.first], it.second.get_value()->type())));
     } else {
-      config.insert(it.first, new captcha_config::config());
+      cfg.insert(it.first, new config(it.second.get_value()));
     }
   }
 }
 
-captcha_config::config captcha_context::check_config(const captcha_config::config_define &config_define,
+config captcha_context::check_config(const config_define &config_define,
                                     const YAML::Node &plugin_config) {
-  captcha_config::config really(captcha_config::config::config_node_type::CONTAINER);
-
-  for (auto it2 : config_define) {
-    for (auto it3 : it2.second) {
-      std::cout << it3.first << " -----> " << it3.second.as<uint32_t>() << std::endl;
-      really.insert(it3.first, new captcha_config::config(it3.second.as<uint32_t>()));
-    }
-  }
+  config really(config::config_node_type::CONTAINER);
+  check_config(config_define, plugin_config, really);
   return really;
 }
 

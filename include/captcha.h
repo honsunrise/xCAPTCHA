@@ -11,13 +11,13 @@ class captcha {
  public:
   captcha();
   captcha(const captcha &other);
-  captcha(captcha &&other) noexcept ;
+  captcha(captcha &&other) noexcept;
 
   captcha(int32_t rows, int32_t cols);
-  captcha(const cv::Mat &mat);
+  explicit captcha(const cv::Mat &mat);
 
   captcha &operator=(const captcha &other);
-  captcha &operator=(captcha &&other) noexcept ;
+  captcha &operator=(captcha &&other) noexcept;
 
   explicit operator cv::Mat();
   virtual ~captcha();
