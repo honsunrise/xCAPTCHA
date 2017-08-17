@@ -16,6 +16,11 @@ class container_node;
 class config_define_node;
 class config_node;
 
+template<typename> struct is_basic_json : std::false_type {};
+
+NLOHMANN_BASIC_JSON_TPL_DECLARATION
+struct is_basic_json<NLOHMANN_BASIC_JSON_TPL> : std::true_type {};
+
 class placeholder : boost::noncopyable {
  public:
   virtual ~placeholder() {}

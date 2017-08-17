@@ -10,89 +10,480 @@
 
 namespace captcha_config {
 namespace detail {
-template<typename V>
-struct node_iterator_value : public std::pair<std::string, V *> {
-  typedef std::pair<std::string, V *> kv;
 
-  node_iterator_value() : kv() {}
-  explicit node_iterator_value(const std::string &key, V &value) : kv(key, &value) {}
-};
-
-template<typename V>
-class node_iterator_base : public std::iterator<std::forward_iterator_tag, V, std::ptrdiff_t, V *, V> {
+class primitive_iterator_t {
  public:
-  typedef typename std::decay<V>::type type;
-  typedef std::map<std::string, type *> node_map;
-  typedef node_iterator_value<type> value_type;
+  using difference_type = std::ptrdiff_t;
 
- private:
-  template<typename W>
-  struct node_iterator_type {
-    typedef typename node_map::iterator map;
-  };
-
-  template<typename W>
-  struct node_iterator_type<const W> {
-    typedef typename node_map::const_iterator map;
-  };
-
- public:
-  typedef typename node_iterator_type<V>::map MapIter;
-
- private:
-  struct enabler {};
-
-  struct proxy {
-    explicit proxy(const node_iterator_value<type> &x) : m_ref(x) {}
-    node_iterator_value<type> *operator->() { return std::addressof(m_ref); }
-    explicit operator node_iterator_value<type> *() { return std::addressof(m_ref); }
-
-    node_iterator_value<type> m_ref;
-  };
-
- public:
-  node_iterator_base() : m_mapIt() {}
-
-  explicit node_iterator_base(MapIter mapIt) : m_mapIt(mapIt) {}
-
-  template<typename W>
-  explicit node_iterator_base(const node_iterator_base<W> &rhs,
-                              typename std::enable_if<std::is_convertible<W *, type *>::value,
-                                                      enabler>::type = enabler()) : m_mapIt(rhs.m_mapIt) {}
-
-  template<typename>
-  friend
-  class iterator_base;
-
-  template<typename W>
-  bool operator==(const node_iterator_base<W> &rhs) const {
-    return m_mapIt == rhs.m_mapIt;
+  constexpr difference_type get_value() const noexcept {
+    return m_it;
   }
 
-  template<typename W>
-  bool operator!=(const node_iterator_base<W> &rhs) const {
-    return !(*this == rhs);
+  void set_begin() noexcept {
+    m_it = begin_value;
   }
 
-  node_iterator_base<V> &operator++() {
-    ++m_mapIt;
+  void set_end() noexcept {
+    m_it = end_value;
+  }
+
+  constexpr bool is_begin() const noexcept {
+    return (m_it == begin_value);
+  }
+
+  constexpr bool is_end() const noexcept {
+    return (m_it == end_value);
+  }
+
+  friend constexpr bool operator==(primitive_iterator_t lhs, primitive_iterator_t rhs) noexcept {
+    return (lhs.m_it == rhs.m_it);
+  }
+
+  friend constexpr bool operator!=(primitive_iterator_t lhs, primitive_iterator_t rhs) noexcept {
+    return not(lhs == rhs);
+  }
+
+  friend constexpr bool operator<(primitive_iterator_t lhs, primitive_iterator_t rhs) noexcept {
+    return lhs.m_it < rhs.m_it;
+  }
+
+  friend constexpr bool operator<=(primitive_iterator_t lhs, primitive_iterator_t rhs) noexcept {
+    return lhs.m_it <= rhs.m_it;
+  }
+
+  friend constexpr bool operator>(primitive_iterator_t lhs, primitive_iterator_t rhs) noexcept {
+    return lhs.m_it > rhs.m_it;
+  }
+
+  friend constexpr bool operator>=(primitive_iterator_t lhs, primitive_iterator_t rhs) noexcept {
+    return lhs.m_it >= rhs.m_it;
+  }
+
+  primitive_iterator_t operator+(difference_type i) {
+    auto result = *this;
+    result += i;
+    return result;
+  }
+
+  friend constexpr difference_type operator-(primitive_iterator_t lhs, primitive_iterator_t rhs) noexcept {
+    return lhs.m_it - rhs.m_it;
+  }
+
+  friend std::ostream &operator<<(std::ostream &os, primitive_iterator_t it) {
+    return os << it.m_it;
+  }
+
+  primitive_iterator_t &operator++() {
+    ++m_it;
     return *this;
   }
 
-  node_iterator_base<V> operator++(int) {
-    node_iterator_base<V> iterator_pre(*this);
-    ++(*this);
-    return iterator_pre;
+  primitive_iterator_t operator++(int) {
+    auto result = *this;
+    m_it++;
+    return result;
   }
 
-  value_type operator*() const {
-    return value_type(m_mapIt->first, *m_mapIt->second);
+  primitive_iterator_t &operator--() {
+    --m_it;
+    return *this;
   }
 
-  proxy operator->() const { return proxy(**this); }
+  primitive_iterator_t operator--(int) {
+    auto result = *this;
+    m_it--;
+    return result;
+  }
+
+  primitive_iterator_t &operator+=(difference_type n) {
+    m_it += n;
+    return *this;
+  }
+
+  primitive_iterator_t &operator-=(difference_type n) {
+    m_it -= n;
+    return *this;
+  }
 
  private:
-  MapIter m_mapIt;
+  static constexpr difference_type begin_value = 0;
+  static constexpr difference_type end_value = begin_value + 1;
+
+  difference_type m_it = std::numeric_limits<std::ptrdiff_t>::denorm_min();
+};
+
+template<typename ConfigType>
+struct internal_iterator {
+  typename ConfigType::object_t::iterator object_iterator{};
+  typename ConfigType::array_t::iterator array_iterator{};
+  primitive_iterator_t primitive_iterator{};
+};
+
+template<typename ConfigType>
+class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigType> {
+  friend ConfigType;
+
+  using object_t = typename ConfigType::object_t;
+  using array_t = typename ConfigType::array_t;
+  // make sure ConfigType is basic_json or const basic_json
+  static_assert(is_basic_json<typename std::remove_const<ConfigType>::type>::value,
+                "iter_impl only accepts (const) basic_json");
+
+ public:
+  using value_type = typename ConfigType::value_type;
+  using difference_type = typename ConfigType::difference_type;
+  using pointer = typename std::conditional<std::is_const<ConfigType>::value,
+                                            typename ConfigType::const_pointer,
+                                            typename ConfigType::pointer>::type;
+  using reference =
+  typename std::conditional<std::is_const<ConfigType>::value,
+                            typename ConfigType::const_reference,
+                            typename ConfigType::reference>::type;
+  using iterator_category = std::random_access_iterator_tag;
+
+  iter_impl() = default;
+
+  explicit iter_impl(pointer object) noexcept : m_object(object) {
+    assert(m_object != nullptr);
+
+    switch (m_object->m_type) {
+      case value_t::object: {
+        m_it.object_iterator = typename object_t::iterator();
+        break;
+      }
+
+      case value_t::array: {
+        m_it.array_iterator = typename array_t::iterator();
+        break;
+      }
+
+      default: {
+        m_it.primitive_iterator = primitive_iterator_t();
+        break;
+      }
+    }
+  }
+
+  iter_impl(const iter_impl<typename std::remove_const<ConfigType>::type> &other) noexcept
+      : m_object(other.m_object), m_it(other.m_it) {}
+
+  iter_impl &operator=(const iter_impl<typename std::remove_const<ConfigType>::type> &other) noexcept {
+    m_object = other.m_object;
+    m_it = other.m_it;
+    return *this;
+  }
+
+ private:
+  void set_begin() noexcept {
+    assert(m_object != nullptr);
+
+    switch (m_object->m_type) {
+      case value_t::object: {
+        m_it.object_iterator = m_object->m_value.object->begin();
+        break;
+      }
+
+      case value_t::array: {
+        m_it.array_iterator = m_object->m_value.array->begin();
+        break;
+      }
+
+      case value_t::null: {
+        // set to end so begin()==end() is true: null is empty
+        m_it.primitive_iterator.set_end();
+        break;
+      }
+
+      default: {
+        m_it.primitive_iterator.set_begin();
+        break;
+      }
+    }
+  }
+
+  void set_end() noexcept {
+    assert(m_object != nullptr);
+
+    switch (m_object->m_type) {
+      case value_t::object: {
+        m_it.object_iterator = m_object->m_value.object->end();
+        break;
+      }
+
+      case value_t::array: {
+        m_it.array_iterator = m_object->m_value.array->end();
+        break;
+      }
+
+      default: {
+        m_it.primitive_iterator.set_end();
+        break;
+      }
+    }
+  }
+
+ public:
+  reference operator*() const {
+    assert(m_object != nullptr);
+
+    switch (m_object->m_type) {
+      case value_t::object: {
+        assert(m_it.object_iterator != m_object->m_value.object->end());
+        return m_it.object_iterator->second;
+      }
+
+      case value_t::array: {
+        assert(m_it.array_iterator != m_object->m_value.array->end());
+        return *m_it.array_iterator;
+      }
+
+      case value_t::null: {
+        JSON_THROW(invalid_iterator::create(214, "cannot get value"));
+      }
+
+      default: {
+        if (JSON_LIKELY(m_it.primitive_iterator.is_begin())) {
+          return *m_object;
+        }
+
+        JSON_THROW(invalid_iterator::create(214, "cannot get value"));
+      }
+    }
+  }
+
+  pointer operator->() const {
+    assert(m_object != nullptr);
+
+    switch (m_object->m_type) {
+      case value_t::object: {
+        assert(m_it.object_iterator != m_object->m_value.object->end());
+        return &(m_it.object_iterator->second);
+      }
+
+      case value_t::array: {
+        assert(m_it.array_iterator != m_object->m_value.array->end());
+        return &*m_it.array_iterator;
+      }
+
+      default: {
+        if (JSON_LIKELY(m_it.primitive_iterator.is_begin())) {
+          return m_object;
+        }
+
+        JSON_THROW(invalid_iterator::create(214, "cannot get value"));
+      }
+    }
+  }
+
+  iter_impl operator++(int) {
+    auto result = *this;
+    ++(*this);
+    return result;
+  }
+
+  iter_impl &operator++() {
+    assert(m_object != nullptr);
+
+    switch (m_object->m_type) {
+      case value_t::object: {
+        std::advance(m_it.object_iterator, 1);
+        break;
+      }
+
+      case value_t::array: {
+        std::advance(m_it.array_iterator, 1);
+        break;
+      }
+
+      default: {
+        ++m_it.primitive_iterator;
+        break;
+      }
+    }
+
+    return *this;
+  }
+
+  iter_impl operator--(int) {
+    auto result = *this;
+    --(*this);
+    return result;
+  }
+
+
+  iter_impl &operator--() {
+    assert(m_object != nullptr);
+
+    switch (m_object->m_type) {
+      case value_t::object: {
+        std::advance(m_it.object_iterator, -1);
+        break;
+      }
+
+      case value_t::array: {
+        std::advance(m_it.array_iterator, -1);
+        break;
+      }
+
+      default: {
+        --m_it.primitive_iterator;
+        break;
+      }
+    }
+
+    return *this;
+  }
+
+  bool operator==(const iter_impl &other) const {
+    // if objects are not the same, the comparison is undefined
+    if (JSON_UNLIKELY(m_object != other.m_object)) {
+      JSON_THROW(invalid_iterator::create(212, "cannot compare iterators of different containers"));
+    }
+
+    assert(m_object != nullptr);
+
+    switch (m_object->m_type) {
+      case value_t::object:return (m_it.object_iterator == other.m_it.object_iterator);
+
+      case value_t::array:return (m_it.array_iterator == other.m_it.array_iterator);
+
+      default:return (m_it.primitive_iterator == other.m_it.primitive_iterator);
+    }
+  }
+
+  bool operator!=(const iter_impl &other) const {
+    return not operator==(other);
+  }
+
+  bool operator<(const iter_impl &other) const {
+    // if objects are not the same, the comparison is undefined
+    if (JSON_UNLIKELY(m_object != other.m_object)) {
+      JSON_THROW(invalid_iterator::create(212, "cannot compare iterators of different containers"));
+    }
+
+    assert(m_object != nullptr);
+
+    switch (m_object->m_type) {
+      case value_t::object:JSON_THROW(invalid_iterator::create(213, "cannot compare order of object iterators"));
+
+      case value_t::array:return (m_it.array_iterator < other.m_it.array_iterator);
+
+      default:return (m_it.primitive_iterator < other.m_it.primitive_iterator);
+    }
+  }
+
+  bool operator<=(const iter_impl &other) const {
+    return not other.operator<(*this);
+  }
+
+  bool operator>(const iter_impl &other) const {
+    return not operator<=(other);
+  }
+
+  bool operator>=(const iter_impl &other) const {
+    return not operator<(other);
+  }
+
+  iter_impl &operator+=(difference_type i) {
+    assert(m_object != nullptr);
+
+    switch (m_object->m_type) {
+      case value_t::object:std::advance(m_it.object_iterator, i);
+        break;
+
+      case value_t::array: {
+        std::advance(m_it.array_iterator, i);
+        break;
+      }
+
+      default: {
+        m_it.primitive_iterator += i;
+        break;
+      }
+    }
+
+    return *this;
+  }
+
+  iter_impl &operator-=(difference_type i) {
+    return operator+=(-i);
+  }
+
+  iter_impl operator+(difference_type i) const {
+    auto result = *this;
+    result += i;
+    return result;
+  }
+
+  friend iter_impl operator+(difference_type i, const iter_impl &it) {
+    auto result = it;
+    result += i;
+    return result;
+  }
+
+  iter_impl operator-(difference_type i) const {
+    auto result = *this;
+    result -= i;
+    return result;
+  }
+
+  difference_type operator-(const iter_impl &other) const {
+    assert(m_object != nullptr);
+
+    switch (m_object->m_type) {
+      case value_t::object: {
+        difference_type result = 0;
+        for (auto it = other; it != *this; ++it, ++result);
+        return result;
+      }
+
+      case value_t::array:return m_it.array_iterator - other.m_it.array_iterator;
+
+      default:return m_it.primitive_iterator - other.m_it.primitive_iterator;
+    }
+  }
+
+  reference operator[](difference_type n) const {
+    assert(m_object != nullptr);
+
+    switch (m_object->m_type) {
+      case value_t::object: {
+        auto it = *this;
+        std::advance(it.m_it.object_iterator, n);
+        return *it;
+      }
+
+      case value_t::array:return *std::next(m_it.array_iterator, n);
+
+      case value_t::null:JSON_THROW(invalid_iterator::create(214, "cannot get value"));
+
+      default: {
+        if (JSON_LIKELY(m_it.primitive_iterator.get_value() == -n)) {
+          return *m_object;
+        }
+
+        JSON_THROW(invalid_iterator::create(214, "cannot get value"));
+      }
+    }
+  }
+
+  typename object_t::key_type key() const {
+    assert(m_object != nullptr);
+
+    if (JSON_LIKELY(m_object->is_object())) {
+      return m_it.object_iterator->first;
+    }
+
+    JSON_THROW(invalid_iterator::create(207, "cannot use key() for non-object iterators"));
+  }
+
+  reference value() const {
+    return operator*();
+  }
+
+ private:
+  pointer m_object = nullptr;
+  internal_iterator<typename std::remove_const<ConfigType>::type> m_it = {};
 };
 }
 }
