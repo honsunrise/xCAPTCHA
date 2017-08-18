@@ -67,12 +67,7 @@ bool captcha_context::load_config(const std::string &path) {
 }
 
 detail::placeholder* captcha_context::yaml_node_2_type(const YAML::Node &node, const std::type_info &type) {
-  if(type == typeid(int32_t)) {
-    return new detail::content_holder<int32_t>(node.as<int32_t>());
-  } else if (type == typeid(uint32_t)) {
-    return new detail::content_holder<uint32_t>(node.as<uint32_t>());
-  }
-  return nullptr;
+  return new detail::content_holder<typename type>(node.as<typename type>());
 }
 
 void captcha_context::check_config(const config_define &config_define,
