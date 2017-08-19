@@ -5,7 +5,7 @@
 #ifndef XCAPTCHA_CONFIG_PATH_H
 #define XCAPTCHA_CONFIG_PATH_H
 #include <string>
-#include "declaration.h"
+#include "config/detail/declaration.h"
 
 namespace captcha_config {
 

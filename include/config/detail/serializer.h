@@ -258,7 +258,7 @@ template<typename BasicJsonType, typename CompatibleObjectType,
     utils::enable_if_t<utils::is_compatible_object_type<BasicJsonType, CompatibleObjectType>::value, int> = 0>
 void from_json(const BasicJsonType &j, CompatibleObjectType &obj) {
   if (JSON_UNLIKELY(not j.is_object())) {
-    JSON_THROW(type_error::create(302, "type must be object, but is " + std::string(j.type_name())));
+    JSON_THROW(type_error::create(302, "type must be map, but is " + std::string(j.type_name())));
   }
 
   auto inner_object = j.template get_ptr<const typename BasicJsonType::object_t *>();

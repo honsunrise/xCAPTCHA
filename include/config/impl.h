@@ -5,7 +5,7 @@
 #ifndef XCAPTCHA_IMPL_H
 #define XCAPTCHA_IMPL_H
 #include "config.h"
-#include "declaration.h"
+#include "config/detail/declaration.h"
 #include "config_path.h"
 
 namespace captcha_config {
@@ -281,12 +281,12 @@ void config_path::flatten(const std::string &reference_string,
     }
 
     case detail::value_t::map: {
-      if (value.m_value.object->empty()) {
+      if (value.m_value.map->empty()) {
         // flatten empty map as null
         result[reference_string] = nullptr;
       } else {
         // iterate map and use keys as reference string
-        for (const auto &element : *value.m_value.object) {
+        for (const auto &element : *value.m_value.map) {
           flatten(reference_string + "/" + escape(element.first), element.second, result);
         }
       }
@@ -304,14 +304,14 @@ void config_path::flatten(const std::string &reference_string,
 XCAPTCHA_BASIC_CONFIG_TPL_DECLARATION
 XCAPTCHA_BASIC_CONFIG_TPL
 config_path::unflatten(const XCAPTCHA_BASIC_CONFIG_TPL &value) {
-  if (JSON_UNLIKELY(not value.is_object())) {
+  if (JSON_UNLIKELY(not value.is_map())) {
     JSON_THROW(detail::type_error::create(314, "only objects can be unflattened"));
   }
 
   XCAPTCHA_BASIC_CONFIG_TPL result;
 
   // iterate the JSON map values
-  for (const auto &element : *value.m_value.object) {
+  for (const auto &element : *value.m_value.map) {
     if (JSON_UNLIKELY(not element.second.is_primitive())) {
       JSON_THROW(detail::type_error::create(315, "values in map must be primitive"));
     }
