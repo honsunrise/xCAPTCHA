@@ -15,7 +15,7 @@ class config_ref {
  public:
   using value_type = BasicConfigType;
 
-  config_ref(value_type &&value)
+  config_ref(value_type &&value) noexcept
       : owned_value(std::move(value)),
         value_ref(&owned_value),
         is_rvalue(true) {}
@@ -36,7 +36,7 @@ class config_ref {
         is_rvalue(true) {}
 
   // class should be movable only
-  config_ref(config_ref &&) = default;
+  config_ref(config_ref &&) noexcept = default;
   config_ref(const config_ref &) = delete;
   config_ref &operator=(const config_ref &) = delete;
 
