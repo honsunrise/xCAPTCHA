@@ -9,7 +9,7 @@
 
 namespace captcha_config {
 
-class json_pointer {
+class config_path {
   /// allow basic_json to access private members
   XCAPTCHA_BASIC_CONFIG_TPL_DECLARATION
   friend
@@ -37,7 +37,7 @@ class json_pointer {
 
   @since version 2.0.0
   */
-  explicit json_pointer(const std::string &s = "") : reference_tokens(split(s)) {}
+  explicit config_path(const std::string &s = "") : reference_tokens(split(s)) {}
 
   /*!
   @brief return a string representation of the JSON pointer
@@ -87,12 +87,12 @@ class json_pointer {
     return reference_tokens.empty();
   }
 
-  json_pointer top() const {
+  config_path top() const {
     if (JSON_UNLIKELY(is_root())) {
       JSON_THROW(detail::out_of_range::create(405, "JSON pointer has no parent"));
     }
 
-    json_pointer result = *this;
+    config_path result = *this;
     result.reference_tokens = {reference_tokens[0]};
     return result;
   }
@@ -304,11 +304,11 @@ class json_pointer {
   static XCAPTCHA_BASIC_CONFIG_TPL
   unflatten(const XCAPTCHA_BASIC_CONFIG_TPL &value);
 
-  friend bool operator==(json_pointer const &lhs,
-                         json_pointer const &rhs) noexcept;
+  friend bool operator==(config_path const &lhs,
+                         config_path const &rhs) noexcept;
 
-  friend bool operator!=(json_pointer const &lhs,
-                         json_pointer const &rhs) noexcept;
+  friend bool operator!=(config_path const &lhs,
+                         config_path const &rhs) noexcept;
 
   /// the reference tokens
   std::vector<std::string> reference_tokens;

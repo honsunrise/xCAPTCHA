@@ -5,7 +5,7 @@
 #ifndef XCAPTCHA_UTILS_H
 #define XCAPTCHA_UTILS_H
 #include <type_traits>
-#include "declaration.h"
+#include "config/declaration.h"
 // allow to disable exceptions
 #if (defined(__cpp_exceptions) || defined(__EXCEPTIONS) || defined(_CPPUNWIND)) && not defined(JSON_NOEXCEPTION)
   #define JSON_THROW(exception) throw exception

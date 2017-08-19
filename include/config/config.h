@@ -9,54 +9,42 @@
 #include <vector>
 #include <map>
 #include <typeinfo>
-#include "config/detail/config.h"
+#include "config/detail/ref.h"
+#include "config/detail/value_type.h"
 #include "config/detail/exception.h"
-#include "utils.h"
+#include "config/detail/utils.h"
+#include "config/detail/iterator.h"
+#include "config/detail/typed_constructor.h"
 #include "rules.h"
 #include "config_path.h"
 #include "declaration.h"
 
 namespace captcha_config {
 
-template<typename = void, typename = void>
-struct adl_serializer;
-
-// forward declaration of basic_config (required to split the class)
-template<template<typename U, typename V, typename... Args> class ObjectType =
-std::map,
-    template<typename U, typename... Args> class ArrayType = std::vector,
-    class StringType = std::string, class BooleanType = bool,
-    class NumberIntegerType = std::int64_t,
-    class NumberUnsignedType = std::uint64_t,
-    class NumberFloatType = double,
-    template<typename U> class AllocatorType = std::allocator,
-    template<typename T, typename SFINAE = void> class JSONSerializer =
-    adl_serializer>
-class basic_config;
-
 XCAPTCHA_BASIC_CONFIG_TPL_DECLARATION
 class basic_config {
  private:
-  template<detail::value_t> friend struct detail::external_constructor;
-  friend ::captcha_config::json_pointer;
-  template<typename BasicConfigType> friend class ::captcha_config::detail::iter_impl;
+  friend config_path;
+  template<detail::value_t> friend struct detail::typed_constructor;
+  template<typename BasicConfigType> friend class detail::iter_impl;
+
   using basic_config_t = XCAPTCHA_BASIC_CONFIG_TPL;
 
-  using primitive_iterator_t = ::captcha_config::detail::primitive_iterator_t;
+  using primitive_iterator_t = detail::primitive_iterator_t;
   template<typename BasicConfigType>
-  using internal_iterator = ::captcha_config::detail::internal_iterator<BasicConfigType>;
+  using internal_iterator = detail::internal_iterator<BasicConfigType>;
   template<typename BasicConfigType>
-  using iter_impl = ::captcha_config::detail::iter_impl<BasicConfigType>;
-  template<typename Base> using json_reverse_iterator = ::captcha_config::detail::json_reverse_iterator<Base>;
+  using iter_impl = detail::iter_impl<BasicConfigType>;
+  template<typename Base> using json_reverse_iterator = detail::json_reverse_iterator<Base>;
 
  public:
   using value_t = detail::value_t;
   // forward declarations
-  using json_pointer = ::captcha_config::json_pointer;
+  using json_pointer = config_path;
   template<typename T, typename SFINAE>
   using json_serializer = JSONSerializer<T, SFINAE>;
 
-  using initializer_list_t = std::initializer_list<detail::json_ref<basic_config>>;
+  using initializer_list_t = std::initializer_list<detail::config_ref<basic_config>>;
 
 
   using exception = detail::exception;
@@ -136,7 +124,7 @@ class basic_config {
     config_value(number_float_t v) noexcept : number_float(v) {}
     config_value(value_t t) {
       switch (t) {
-        case value_t::object: {
+        case value_t::map: {
           object = create<map_t>();
           break;
         }
@@ -216,7 +204,7 @@ class basic_config {
 
     void destroy(value_t t) {
       switch (t) {
-        case value_t::object: {
+        case value_t::map: {
           AllocatorType<map_t> alloc;
           alloc.destroy(object);
           alloc.deallocate(object, 1);
@@ -245,7 +233,7 @@ class basic_config {
   };
 
   void assert_invariant() const {
-    assert(m_type != value_t::object or m_value.object != nullptr);
+    assert(m_type != value_t::map or m_value.object != nullptr);
     assert(m_type != value_t::array or m_value.array != nullptr);
     assert(m_type != value_t::string or m_value.string != nullptr);
   }
@@ -279,30 +267,30 @@ class basic_config {
     // check if each element is an array with two elements whose first
     // element is a string
     bool is_an_object = std::all_of(init.begin(), init.end(),
-                                    [](const detail::json_ref<basic_config> &element_ref) {
+                                    [](const detail::config_ref<basic_config> &element_ref) {
                                       return (element_ref->is_array() and element_ref->size() == 2
                                           and (*element_ref)[0].is_string());
                                     });
 
     // adjust type if type deduction is not wanted
     if (not type_deduction) {
-      // if array is wanted, do not create an object though possible
+      // if array is wanted, do not create an map though possible
       if (manual_type == value_t::array) {
         is_an_object = false;
       }
 
-      // if object is wanted but impossible, throw an exception
-      if (JSON_UNLIKELY(manual_type == value_t::object and not is_an_object)) {
-        JSON_THROW(type_error::create(301, "cannot create object from initializer list"));
+      // if map is wanted but impossible, throw an exception
+      if (JSON_UNLIKELY(manual_type == value_t::map and not is_an_object)) {
+        JSON_THROW(type_error::create(301, "cannot create map from initializer list"));
       }
     }
 
     if (is_an_object) {
-      // the initializer list is a list of pairs -> create object
-      m_type = value_t::object;
-      m_value = value_t::object;
+      // the initializer list is a list of pairs -> create map
+      m_type = value_t::map;
+      m_value = value_t::map;
 
-      std::for_each(init.begin(), init.end(), [this](const detail::json_ref<basic_config> &element_ref) {
+      std::for_each(init.begin(), init.end(), [this](const detail::config_ref<basic_config> &element_ref) {
         auto element = element_ref.moved_or_copied();
         m_value.object->emplace(
             std::move(*((*element.m_value.array)[0].m_value.string)),
@@ -322,7 +310,7 @@ class basic_config {
   }
 
   static basic_config object(initializer_list_t init = {}) {
-    return basic_config(init, false, value_t::object);
+    return basic_config(init, false, value_t::map);
   }
 
 
@@ -391,7 +379,7 @@ class basic_config {
         break;
       }
 
-      case value_t::object: {
+      case value_t::map: {
         m_value.object = create<map_t>(first.m_it.object_iterator,
                                        last.m_it.object_iterator);
         break;
@@ -411,7 +399,7 @@ class basic_config {
   }
 
 
-  basic_config(const detail::json_ref<basic_config> &ref)
+  basic_config(const detail::config_ref<basic_config> &ref)
       : basic_config(ref.moved_or_copied()) {}
 
   basic_config(const basic_config &other)
@@ -420,7 +408,7 @@ class basic_config {
     other.assert_invariant();
 
     switch (m_type) {
-      case value_t::object: {
+      case value_t::map: {
         m_value = *other.m_value.object;
         break;
       }
@@ -534,7 +522,7 @@ class basic_config {
   }
 
   constexpr bool is_object() const noexcept {
-    return (m_type == value_t::object);
+    return (m_type == value_t::map);
   }
 
 
@@ -759,7 +747,7 @@ class basic_config {
 
   template<typename ValueType, typename std::enable_if<
       not std::is_pointer<ValueType>::value and
-          not std::is_same<ValueType, detail::json_ref<basic_config>>::value and
+          not std::is_same<ValueType, detail::config_ref<basic_config>>::value and
           not std::is_same<ValueType, typename string_t::value_type>::value
 #ifndef _MSC_VER  // fix for issue #167 operator<< ambiguity under VS2015
           and not std::is_same<ValueType, std::initializer_list<typename string_t::value_type>>::value
@@ -867,9 +855,9 @@ class basic_config {
   }
 
   reference operator[](const typename map_t::key_type &key) {
-    // implicitly convert null value to an empty object
+    // implicitly convert null value to an empty map
     if (is_null()) {
-      m_type = value_t::object;
+      m_type = value_t::map;
       m_value.object = create<map_t>();
       assert_invariant();
     }
@@ -895,10 +883,10 @@ class basic_config {
 
   template<typename T>
   reference operator[](T *key) {
-    // implicitly convert null to object
+    // implicitly convert null to map
     if (is_null()) {
-      m_type = value_t::object;
-      m_value = value_t::object;
+      m_type = value_t::map;
+      m_value = value_t::map;
       assert_invariant();
     }
 
@@ -1018,7 +1006,7 @@ class basic_config {
         break;
       }
 
-      case value_t::object: {
+      case value_t::map: {
         result.m_it.object_iterator = m_value.object->erase(pos.m_it.object_iterator);
         break;
       }
@@ -1069,7 +1057,7 @@ class basic_config {
         break;
       }
 
-      case value_t::object: {
+      case value_t::map: {
         result.m_it.object_iterator = m_value.object->erase(first.m_it.object_iterator,
                                                             last.m_it.object_iterator);
         break;
@@ -1205,7 +1193,7 @@ class basic_config {
         return m_value.array->empty();
       }
 
-      case value_t::object: {
+      case value_t::map: {
         // delegate call to map_t::empty()
         return m_value.object->empty();
       }
@@ -1229,7 +1217,7 @@ class basic_config {
         return m_value.array->size();
       }
 
-      case value_t::object: {
+      case value_t::map: {
         // delegate call to map_t::size()
         return m_value.object->size();
       }
@@ -1248,7 +1236,7 @@ class basic_config {
         return m_value.array->max_size();
       }
 
-      case value_t::object: {
+      case value_t::map: {
         // delegate call to map_t::max_size()
         return m_value.object->max_size();
       }
@@ -1293,7 +1281,7 @@ class basic_config {
         break;
       }
 
-      case value_t::object: {
+      case value_t::map: {
         m_value.object->clear();
         break;
       }
@@ -1308,7 +1296,7 @@ class basic_config {
       JSON_THROW(type_error::create(308, "cannot use push_back() with " + std::string(type_name())));
     }
 
-    // transform null object into an array
+    // transform null map into an array
     if (is_null()) {
       m_type = value_t::array;
       m_value = value_t::array;
@@ -1317,7 +1305,7 @@ class basic_config {
 
     // add element to array (move semantics)
     m_value.array->push_back(std::move(val));
-    // invalidate object
+    // invalidate map
     val.m_type = value_t::null;
   }
 
@@ -1332,7 +1320,7 @@ class basic_config {
       JSON_THROW(type_error::create(308, "cannot use push_back() with " + std::string(type_name())));
     }
 
-    // transform null object into an array
+    // transform null map into an array
     if (is_null()) {
       m_type = value_t::array;
       m_value = value_t::array;
@@ -1354,10 +1342,10 @@ class basic_config {
       JSON_THROW(type_error::create(308, "cannot use push_back() with " + std::string(type_name())));
     }
 
-    // transform null object into an object
+    // transform null map into an map
     if (is_null()) {
-      m_type = value_t::object;
-      m_value = value_t::object;
+      m_type = value_t::map;
+      m_value = value_t::map;
       assert_invariant();
     }
 
@@ -1392,7 +1380,7 @@ class basic_config {
       JSON_THROW(type_error::create(311, "cannot use emplace_back() with " + std::string(type_name())));
     }
 
-    // transform null object into an array
+    // transform null map into an array
     if (is_null()) {
       m_type = value_t::array;
       m_value = value_t::array;
@@ -1410,10 +1398,10 @@ class basic_config {
       JSON_THROW(type_error::create(311, "cannot use emplace() with " + std::string(type_name())));
     }
 
-    // transform null object into an object
+    // transform null map into an map
     if (is_null()) {
-      m_type = value_t::object;
-      m_value = value_t::object;
+      m_type = value_t::map;
+      m_value = value_t::map;
       assert_invariant();
     }
 
@@ -1476,7 +1464,7 @@ class basic_config {
       JSON_THROW(invalid_iterator::create(202, "iterator does not fit current value"));
     }
 
-    // check if range iterators belong to the same JSON object
+    // check if range iterators belong to the same JSON map
     if (JSON_UNLIKELY(first.m_object != last.m_object)) {
       JSON_THROW(invalid_iterator::create(210, "iterators do not fit"));
     }
@@ -1517,7 +1505,7 @@ class basic_config {
       JSON_THROW(type_error::create(309, "cannot use insert() with " + std::string(type_name())));
     }
 
-    // check if range iterators belong to the same JSON object
+    // check if range iterators belong to the same JSON map
     if (JSON_UNLIKELY(first.m_object != last.m_object)) {
       JSON_THROW(invalid_iterator::create(210, "iterators do not fit"));
     }
@@ -1532,9 +1520,9 @@ class basic_config {
   }
 
   void update(const_reference j) {
-    // implicitly convert null value to an empty object
+    // implicitly convert null value to an empty map
     if (is_null()) {
-      m_type = value_t::object;
+      m_type = value_t::map;
       m_value.object = create<map_t>();
       assert_invariant();
     }
@@ -1552,9 +1540,9 @@ class basic_config {
   }
 
   void update(const_iterator first, const_iterator last) {
-    // implicitly convert null value to an empty object
+    // implicitly convert null value to an empty map
     if (is_null()) {
-      m_type = value_t::object;
+      m_type = value_t::map;
       m_value.object = create<map_t>();
       assert_invariant();
     }
@@ -1563,7 +1551,7 @@ class basic_config {
       JSON_THROW(type_error::create(312, "cannot use update() with " + std::string(type_name())));
     }
 
-    // check if range iterators belong to the same JSON object
+    // check if range iterators belong to the same JSON map
     if (JSON_UNLIKELY(first.m_object != last.m_object)) {
       JSON_THROW(invalid_iterator::create(210, "iterators do not fit"));
     }
@@ -1626,7 +1614,7 @@ class basic_config {
       switch (lhs_type) {
         case value_t::array:return (*lhs.m_value.array == *rhs.m_value.array);
 
-        case value_t::object:return (*lhs.m_value.object == *rhs.m_value.object);
+        case value_t::map:return (*lhs.m_value.object == *rhs.m_value.object);
 
         case value_t::null:return true;
 
@@ -1695,7 +1683,7 @@ class basic_config {
       switch (lhs_type) {
         case value_t::array:return (*lhs.m_value.array) < (*rhs.m_value.array);
 
-        case value_t::object:return *lhs.m_value.object < *rhs.m_value.object;
+        case value_t::map:return *lhs.m_value.object < *rhs.m_value.object;
 
         case value_t::null:return false;
 
@@ -1795,7 +1783,7 @@ class basic_config {
     {
       switch (m_type) {
         case value_t::null:return "null";
-        case value_t::object:return "object";
+        case value_t::map:return "map";
         case value_t::array:return "array";
         case value_t::string:return "string";
         case value_t::boolean:return "boolean";
@@ -1829,7 +1817,7 @@ class basic_config {
 
 
   basic_config flatten() const {
-    basic_config result(value_t::object);
+    basic_config result(value_t::map);
     json_pointer::flatten("", *this, result);
     return result;
   }

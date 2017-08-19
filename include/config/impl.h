@@ -11,7 +11,7 @@
 namespace captcha_config {
 XCAPTCHA_BASIC_CONFIG_TPL_DECLARATION
 XCAPTCHA_BASIC_CONFIG_TPL &
-json_pointer::get_and_create(XCAPTCHA_BASIC_CONFIG_TPL &j) const {
+config_path::get_and_create(XCAPTCHA_BASIC_CONFIG_TPL &j) const {
   using size_type = typename XCAPTCHA_BASIC_CONFIG_TPL::size_type;
   auto result = &j;
 
@@ -24,14 +24,14 @@ json_pointer::get_and_create(XCAPTCHA_BASIC_CONFIG_TPL &j) const {
           // start a new array if reference token is 0
           result = &result->operator[](0);
         } else {
-          // start a new object otherwise
+          // start a new map otherwise
           result = &result->operator[](reference_token);
         }
         break;
       }
 
-      case detail::value_t::object: {
-        // create an entry in the object
+      case detail::value_t::map: {
+        // create an entry in the map
         result = &result->operator[](reference_token);
         break;
       }
@@ -64,7 +64,7 @@ single value; that is, with an empty list of reference tokens.
 
 XCAPTCHA_BASIC_CONFIG_TPL_DECLARATION
 XCAPTCHA_BASIC_CONFIG_TPL &
-json_pointer::get_unchecked(XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
+config_path::get_unchecked(XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
   using size_type = typename XCAPTCHA_BASIC_CONFIG_TPL::size_type;
   for (const auto &reference_token : reference_tokens) {
 // convert null values to arrays or objects before continuing
@@ -76,15 +76,15 @@ json_pointer::get_unchecked(XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
                         return (x >= '0' and x <= '9');
                       });
 
-// change value to array for numbers or "-" or to object otherwise
+// change value to array for numbers or "-" or to map otherwise
       *ptr = (nums or reference_token == "-")
              ? detail::value_t::array
-             : detail::value_t::object;
+             : detail::value_t::map;
     }
 
     switch (ptr->m_type) {
-      case detail::value_t::object: {
-        // use unchecked object access
+      case detail::value_t::map: {
+        // use unchecked map access
         ptr = &ptr->operator[](reference_token);
         break;
       }
@@ -124,11 +124,11 @@ json_pointer::get_unchecked(XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
 
 XCAPTCHA_BASIC_CONFIG_TPL_DECLARATION
 XCAPTCHA_BASIC_CONFIG_TPL &
-json_pointer::get_checked(XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
+config_path::get_checked(XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
   using size_type = typename XCAPTCHA_BASIC_CONFIG_TPL::size_type;
   for (const auto &reference_token : reference_tokens) {
     switch (ptr->m_type) {
-      case detail::value_t::object: {
+      case detail::value_t::map: {
         // note: at performs range check
         ptr = &ptr->at(reference_token);
         break;
@@ -170,12 +170,12 @@ json_pointer::get_checked(XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
 
 XCAPTCHA_BASIC_CONFIG_TPL_DECLARATION
 const XCAPTCHA_BASIC_CONFIG_TPL &
-json_pointer::get_unchecked(const XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
+config_path::get_unchecked(const XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
   using size_type = typename XCAPTCHA_BASIC_CONFIG_TPL::size_type;
   for (const auto &reference_token : reference_tokens) {
     switch (ptr->m_type) {
-      case detail::value_t::object: {
-        // use unchecked object access
+      case detail::value_t::map: {
+        // use unchecked map access
         ptr = &ptr->operator[](reference_token);
         break;
       }
@@ -217,11 +217,11 @@ json_pointer::get_unchecked(const XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
 
 XCAPTCHA_BASIC_CONFIG_TPL_DECLARATION
 const XCAPTCHA_BASIC_CONFIG_TPL &
-json_pointer::get_checked(const XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
+config_path::get_checked(const XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
   using size_type = typename XCAPTCHA_BASIC_CONFIG_TPL::size_type;
   for (const auto &reference_token : reference_tokens) {
     switch (ptr->m_type) {
-      case detail::value_t::object: {
+      case detail::value_t::map: {
         // note: at performs range check
         ptr = &ptr->at(reference_token);
         break;
@@ -262,7 +262,7 @@ json_pointer::get_checked(const XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
 }
 
 XCAPTCHA_BASIC_CONFIG_TPL_DECLARATION
-void json_pointer::flatten(const std::string &reference_string,
+void config_path::flatten(const std::string &reference_string,
                            const XCAPTCHA_BASIC_CONFIG_TPL &value,
                            XCAPTCHA_BASIC_CONFIG_TPL &result) {
   switch (value.m_type) {
@@ -280,12 +280,12 @@ void json_pointer::flatten(const std::string &reference_string,
       break;
     }
 
-    case detail::value_t::object: {
+    case detail::value_t::map: {
       if (value.m_value.object->empty()) {
-        // flatten empty object as null
+        // flatten empty map as null
         result[reference_string] = nullptr;
       } else {
-        // iterate object and use keys as reference string
+        // iterate map and use keys as reference string
         for (const auto &element : *value.m_value.object) {
           flatten(reference_string + "/" + escape(element.first), element.second, result);
         }
@@ -303,34 +303,34 @@ void json_pointer::flatten(const std::string &reference_string,
 
 XCAPTCHA_BASIC_CONFIG_TPL_DECLARATION
 XCAPTCHA_BASIC_CONFIG_TPL
-json_pointer::unflatten(const XCAPTCHA_BASIC_CONFIG_TPL &value) {
+config_path::unflatten(const XCAPTCHA_BASIC_CONFIG_TPL &value) {
   if (JSON_UNLIKELY(not value.is_object())) {
     JSON_THROW(detail::type_error::create(314, "only objects can be unflattened"));
   }
 
   XCAPTCHA_BASIC_CONFIG_TPL result;
 
-  // iterate the JSON object values
+  // iterate the JSON map values
   for (const auto &element : *value.m_value.object) {
     if (JSON_UNLIKELY(not element.second.is_primitive())) {
-      JSON_THROW(detail::type_error::create(315, "values in object must be primitive"));
+      JSON_THROW(detail::type_error::create(315, "values in map must be primitive"));
     }
 
     // assign value to reference pointed to by JSON pointer; Note that if
     // the JSON pointer is "" (i.e., points to the whole value), function
     // get_and_create returns a reference to result itself. An assignment
     // will then create a primitive value.
-    json_pointer(element.first).get_and_create(result) = element.second;
+    config_path(element.first).get_and_create(result) = element.second;
   }
 
   return result;
 }
 
-inline bool operator==(json_pointer const &lhs, json_pointer const &rhs) noexcept {
+inline bool operator==(config_path const &lhs, config_path const &rhs) noexcept {
   return (lhs.reference_tokens == rhs.reference_tokens);
 }
 
-inline bool operator!=(json_pointer const &lhs, json_pointer const &rhs) noexcept {
+inline bool operator!=(config_path const &lhs, config_path const &rhs) noexcept {
   return not(lhs == rhs);
 }
 } // namespace captcha_config

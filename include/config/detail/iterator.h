@@ -7,6 +7,9 @@
 #include <map>
 #include <utility>
 #include <vector>
+#include <cassert>
+#include "utils.h"
+#include "value_type.h"
 
 namespace captcha_config {
 namespace detail {
@@ -126,7 +129,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
   using object_t = typename ConfigType::object_t;
   using array_t = typename ConfigType::array_t;
   // make sure ConfigType is basic_config or const basic_config
-  static_assert(is_basic_json<typename std::remove_const<ConfigType>::type>::value,
+  static_assert(utils::is_basic_json<typename std::remove_const<ConfigType>::type>::value,
                 "iter_impl only accepts (const) basic_config");
 
  public:
@@ -147,7 +150,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
     assert(m_object != nullptr);
 
     switch (m_object->m_type) {
-      case value_t::object: {
+      case value_t::map: {
         m_it.object_iterator = typename object_t::iterator();
         break;
       }
@@ -178,7 +181,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
     assert(m_object != nullptr);
 
     switch (m_object->m_type) {
-      case value_t::object: {
+      case value_t::map: {
         m_it.object_iterator = m_object->m_value.object->begin();
         break;
       }
@@ -205,7 +208,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
     assert(m_object != nullptr);
 
     switch (m_object->m_type) {
-      case value_t::object: {
+      case value_t::map: {
         m_it.object_iterator = m_object->m_value.object->end();
         break;
       }
@@ -227,7 +230,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
     assert(m_object != nullptr);
 
     switch (m_object->m_type) {
-      case value_t::object: {
+      case value_t::map: {
         assert(m_it.object_iterator != m_object->m_value.object->end());
         return m_it.object_iterator->second;
       }
@@ -255,7 +258,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
     assert(m_object != nullptr);
 
     switch (m_object->m_type) {
-      case value_t::object: {
+      case value_t::map: {
         assert(m_it.object_iterator != m_object->m_value.object->end());
         return &(m_it.object_iterator->second);
       }
@@ -285,7 +288,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
     assert(m_object != nullptr);
 
     switch (m_object->m_type) {
-      case value_t::object: {
+      case value_t::map: {
         std::advance(m_it.object_iterator, 1);
         break;
       }
@@ -314,7 +317,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
     assert(m_object != nullptr);
 
     switch (m_object->m_type) {
-      case value_t::object: {
+      case value_t::map: {
         std::advance(m_it.object_iterator, -1);
         break;
       }
@@ -342,7 +345,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
     assert(m_object != nullptr);
 
     switch (m_object->m_type) {
-      case value_t::object:return (m_it.object_iterator == other.m_it.object_iterator);
+      case value_t::map:return (m_it.object_iterator == other.m_it.object_iterator);
 
       case value_t::array:return (m_it.array_iterator == other.m_it.array_iterator);
 
@@ -363,7 +366,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
     assert(m_object != nullptr);
 
     switch (m_object->m_type) {
-      case value_t::object:JSON_THROW(invalid_iterator::create(213, "cannot compare order of object iterators"));
+      case value_t::map:JSON_THROW(invalid_iterator::create(213, "cannot compare order of map iterators"));
 
       case value_t::array:return (m_it.array_iterator < other.m_it.array_iterator);
 
@@ -387,7 +390,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
     assert(m_object != nullptr);
 
     switch (m_object->m_type) {
-      case value_t::object:std::advance(m_it.object_iterator, i);
+      case value_t::map:std::advance(m_it.object_iterator, i);
         break;
 
       case value_t::array: {
@@ -430,7 +433,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
     assert(m_object != nullptr);
 
     switch (m_object->m_type) {
-      case value_t::object: {
+      case value_t::map: {
         difference_type result = 0;
         for (auto it = other; it != *this; ++it, ++result);
         return result;
@@ -446,7 +449,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
     assert(m_object != nullptr);
 
     switch (m_object->m_type) {
-      case value_t::object: {
+      case value_t::map: {
         auto it = *this;
         std::advance(it.m_it.object_iterator, n);
         return *it;
@@ -473,7 +476,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
       return m_it.object_iterator->first;
     }
 
-    JSON_THROW(invalid_iterator::create(207, "cannot use key() for non-object iterators"));
+    JSON_THROW(invalid_iterator::create(207, "cannot use key() for non-map iterators"));
   }
 
   reference value() const {
