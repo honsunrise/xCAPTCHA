@@ -15,6 +15,7 @@
 #include "config/detail/utils.h"
 #include "config/detail/iterator.h"
 #include "config/detail/typed_constructor.h"
+#include "config/detail/serializer.h"
 #include "rules.h"
 #include "config_path.h"
 #include "declaration.h"
@@ -42,7 +43,7 @@ class basic_config {
   // forward declarations
   using json_pointer = config_path;
   template<typename T, typename SFINAE>
-  using json_serializer = JSONSerializer<T, SFINAE>;
+  using serializer = Serializer<T, SFINAE>;
 
   using initializer_list_t = std::initializer_list<detail::config_ref<basic_config>>;
 
@@ -255,9 +256,9 @@ class basic_config {
           not utils::is_basic_json_nested_type<basic_config_t, U>::value and
           utils::has_to_json<basic_config, U>::value,
                           int> = 0>
-  basic_config(CompatibleType &&val) noexcept(noexcept(JSONSerializer<U>::to_json(
+  basic_config(CompatibleType &&val) noexcept(noexcept(Serializer<U>::to_json(
       std::declval<basic_config_t &>(), std::forward<CompatibleType>(val)))) {
-    JSONSerializer<U>::to_json(*this, std::forward<CompatibleType>(val));
+    Serializer<U>::to_json(*this, std::forward<CompatibleType>(val));
     assert_invariant();
   }
 
@@ -643,7 +644,7 @@ class basic_config {
               not utils::has_non_default_from_json<basic_config_t, ValueType>::value,
           int> = 0>
   ValueType get() const noexcept(noexcept(
-  JSONSerializer<ValueType>::from_json(std::declval<const basic_config_t &>(), std::declval<ValueType &>()))) {
+  Serializer<ValueType>::from_json(std::declval<const basic_config_t &>(), std::declval<ValueType &>()))) {
     // we cannot static_assert on ValueTypeCV being non-const, because
     // there is support for get<const basic_config_t>(), which is why we
     // still need the uncvref
@@ -653,7 +654,7 @@ class basic_config {
                   "types must be DefaultConstructible when used with get()");
 
     ValueType ret;
-    JSONSerializer<ValueType>::from_json(*this, ret);
+    Serializer<ValueType>::from_json(*this, ret);
     return ret;
   }
 
@@ -664,10 +665,10 @@ class basic_config {
           utils::has_non_default_from_json<basic_config_t,
                                             ValueType>::value, int> = 0>
   ValueType get() const noexcept(noexcept(
-  JSONSerializer<ValueTypeCV>::from_json(std::declval<const basic_config_t &>()))) {
+  Serializer<ValueTypeCV>::from_json(std::declval<const basic_config_t &>()))) {
     static_assert(not std::is_reference<ValueTypeCV>::value,
                   "get() cannot be used with reference types, you might want to use get_ref()");
-    return JSONSerializer<ValueTypeCV>::from_json(*this);
+    return Serializer<ValueTypeCV>::from_json(*this);
   }
 
 
@@ -1112,7 +1113,7 @@ class basic_config {
     auto result = cend();
 
     if (is_object()) {
-      result.m_it.object_iterator = m_value.object->find(key);
+      result.m_it.map_iterator = m_value.object->find(key);
     }
 
     return result;
@@ -1516,7 +1517,7 @@ class basic_config {
       JSON_THROW(invalid_iterator::create(202, "iterators first and last must point to objects"));
     }
 
-    m_value.object->insert(first.m_it.object_iterator, last.m_it.object_iterator);
+    m_value.object->insert(first.m_it.map_iterator, last.m_it.map_iterator);
   }
 
   void update(const_reference j) {

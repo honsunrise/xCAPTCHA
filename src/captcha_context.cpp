@@ -66,15 +66,9 @@ bool captcha_context::load_config(const std::string &path) {
   return false;
 }
 
-detail::placeholder* captcha_context::yaml_node_2_type(const YAML::Node &node, const std::type_info &type) {
-  return new detail::content_holder<typename type>(node.as<typename type>());
-}
-
-void captcha_context::check_config(const config_define &config_define,
-                                   const YAML::Node &plugin_config,
-                                   config &cfg) {
+void captcha_context::check_config(const config_define &config_define, const YAML::Node &plugin_config, config &cfg) {
   for (auto it : config_define) {
-    if(it.second.is_container()) {
+    if (it.second.is_container()) {
       config *inside = new config(config::config_node_type::CONTAINER);
       check_config(it.second, plugin_config[it.first], *inside);
       cfg.insert(it.first, inside);
@@ -87,7 +81,7 @@ void captcha_context::check_config(const config_define &config_define,
 }
 
 config captcha_context::check_config(const config_define &config_define,
-                                    const YAML::Node &plugin_config) {
+                                     const YAML::Node &plugin_config) {
   config really(config::config_node_type::CONTAINER);
   check_config(config_define, plugin_config, really);
   return really;
@@ -105,3 +99,4 @@ captcha captcha_context::generate() {
   }
   return ca;
 }
+

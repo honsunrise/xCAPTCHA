@@ -33,9 +33,6 @@ template<typename>
 struct is_basic_json : std::false_type {};
 
 XCAPTCHA_BASIC_CONFIG_TPL_DECLARATION
-class basic_config;
-
-XCAPTCHA_BASIC_CONFIG_TPL_DECLARATION
 struct is_basic_json<XCAPTCHA_BASIC_CONFIG_TPL> : std::true_type {};
 
 template<bool B, typename T = void>
@@ -210,7 +207,7 @@ struct is_compatible_integer_type
 };
 
 
-// trait checking if JSONSerializer<T>::from_json(json const&, udt&) exists
+// trait checking if Serializer<T>::from_json(json const&, udt&) exists
 template<typename BasicJsonType, typename T>
 struct has_from_json
 {
@@ -223,10 +220,10 @@ struct has_from_json
 
  public:
   static constexpr bool value = std::is_integral<decltype(
-                                                 detect(std::declval<typename BasicJsonType::template json_serializer<T, void>>()))>::value;
+                                                 detect(std::declval<typename BasicJsonType::template serializer<T, void>>()))>::value;
 };
 
-// This trait checks if JSONSerializer<T>::from_json(json const&) exists
+// This trait checks if Serializer<T>::from_json(json const&) exists
 // this overload is used for non-default-constructible user-defined-types
 template<typename BasicJsonType, typename T>
 struct has_non_default_from_json
@@ -241,10 +238,10 @@ struct has_non_default_from_json
 
  public:
   static constexpr bool value = std::is_integral<decltype(detect(
-      std::declval<typename BasicJsonType::template json_serializer<T, void>>()))>::value;
+      std::declval<typename BasicJsonType::template erializer<T, void>>()))>::value;
 };
 
-// This trait checks if BasicJsonType::json_serializer<T>::to_json exists
+// This trait checks if BasicJsonType::serializer<T>::to_json exists
 template<typename BasicJsonType, typename T>
 struct has_to_json
 {
@@ -256,7 +253,7 @@ struct has_to_json
 
  public:
   static constexpr bool value = std::is_integral<decltype(detect(
-      std::declval<typename BasicJsonType::template json_serializer<T, void>>()))>::value;
+      std::declval<typename BasicJsonType::template serializer<T, void>>()))>::value;
 };
 
 template<typename... T>

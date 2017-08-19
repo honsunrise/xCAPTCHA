@@ -21,15 +21,14 @@ class captcha_context {
   void check_config(const captcha_config::config_define &config_define,
                     const YAML::Node &plugin_config, captcha_config::config &config);
 
-  captcha_config::detail::placeholder* yaml_node_2_type(const YAML::Node &node, const std::type_info &type);
-
-    captcha_api api;
+  captcha_api api;
   std::string config_path;
   int32_t width;
   int32_t height;
   int32_t bits;
   std::string plugin_path;
   std::map<std::string, captcha_plugin_stub> plugins;
+  void check_config(const config_define &config_define, const YAML::Node &plugin_config, config &cfg);
 };
 
 #endif //XCAPTCHA_CAPTCHA_CONTEXT_H

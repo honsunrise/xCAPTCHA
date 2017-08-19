@@ -117,7 +117,7 @@ class primitive_iterator_t {
 
 template<typename ConfigType>
 struct internal_iterator {
-  typename ConfigType::object_t::iterator object_iterator{};
+  typename ConfigType::map_t::iterator map_iterator{};
   typename ConfigType::array_t::iterator array_iterator{};
   primitive_iterator_t primitive_iterator{};
 };
@@ -126,7 +126,7 @@ template<typename ConfigType>
 class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigType> {
   friend ConfigType;
 
-  using object_t = typename ConfigType::object_t;
+  using map_t = typename ConfigType::map_t;
   using array_t = typename ConfigType::array_t;
   // make sure ConfigType is basic_config or const basic_config
   static_assert(utils::is_basic_json<typename std::remove_const<ConfigType>::type>::value,
@@ -151,7 +151,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
 
     switch (m_object->m_type) {
       case value_t::map: {
-        m_it.object_iterator = typename object_t::iterator();
+        m_it.map_iterator = typename map_t::iterator();
         break;
       }
 
@@ -182,7 +182,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
 
     switch (m_object->m_type) {
       case value_t::map: {
-        m_it.object_iterator = m_object->m_value.object->begin();
+        m_it.map_iterator = m_object->m_value.object->begin();
         break;
       }
 
@@ -209,7 +209,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
 
     switch (m_object->m_type) {
       case value_t::map: {
-        m_it.object_iterator = m_object->m_value.object->end();
+        m_it.map_iterator = m_object->m_value.object->end();
         break;
       }
 
@@ -231,8 +231,8 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
 
     switch (m_object->m_type) {
       case value_t::map: {
-        assert(m_it.object_iterator != m_object->m_value.object->end());
-        return m_it.object_iterator->second;
+        assert(m_it.map_iterator != m_object->m_value.object->end());
+        return m_it.map_iterator->second;
       }
 
       case value_t::array: {
@@ -259,8 +259,8 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
 
     switch (m_object->m_type) {
       case value_t::map: {
-        assert(m_it.object_iterator != m_object->m_value.object->end());
-        return &(m_it.object_iterator->second);
+        assert(m_it.map_iterator != m_object->m_value.object->end());
+        return &(m_it.map_iterator->second);
       }
 
       case value_t::array: {
@@ -289,7 +289,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
 
     switch (m_object->m_type) {
       case value_t::map: {
-        std::advance(m_it.object_iterator, 1);
+        std::advance(m_it.map_iterator, 1);
         break;
       }
 
@@ -318,7 +318,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
 
     switch (m_object->m_type) {
       case value_t::map: {
-        std::advance(m_it.object_iterator, -1);
+        std::advance(m_it.map_iterator, -1);
         break;
       }
 
@@ -345,7 +345,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
     assert(m_object != nullptr);
 
     switch (m_object->m_type) {
-      case value_t::map:return (m_it.object_iterator == other.m_it.object_iterator);
+      case value_t::map:return (m_it.map_iterator == other.m_it.map_iterator);
 
       case value_t::array:return (m_it.array_iterator == other.m_it.array_iterator);
 
@@ -390,7 +390,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
     assert(m_object != nullptr);
 
     switch (m_object->m_type) {
-      case value_t::map:std::advance(m_it.object_iterator, i);
+      case value_t::map:std::advance(m_it.map_iterator, i);
         break;
 
       case value_t::array: {
@@ -451,7 +451,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
     switch (m_object->m_type) {
       case value_t::map: {
         auto it = *this;
-        std::advance(it.m_it.object_iterator, n);
+        std::advance(it.m_it.map_iterator, n);
         return *it;
       }
 
@@ -469,11 +469,11 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
     }
   }
 
-  typename object_t::key_type key() const {
+  typename map_t::key_type key() const {
     assert(m_object != nullptr);
 
     if (JSON_LIKELY(m_object->is_object())) {
-      return m_it.object_iterator->first;
+      return m_it.map_iterator->first;
     }
 
     JSON_THROW(invalid_iterator::create(207, "cannot use key() for non-map iterators"));
