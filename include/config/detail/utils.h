@@ -7,24 +7,23 @@
 
 #include <type_traits>
 #include "declaration.h"
-// allow to disable exceptions
-#if (defined(__cpp_exceptions) || defined(__EXCEPTIONS) || defined(_CPPUNWIND)) && not defined(JSON_NOEXCEPTION)
-#define JSON_THROW(exception) throw exception
-#define JSON_TRY try
-#define JSON_CATCH(exception) catch(exception)
+#if (defined(__cpp_exceptions) || defined(__EXCEPTIONS) || defined(_CPPUNWIND)) && (!defined(CONFIG_NOEXCEPTION))
+#define CONFIG_THROW(exception) throw exception
+#define CONFIG_TRY try
+#define CONFIG_CATCH(exception) catch(exception)
 #else
-#define JSON_THROW(exception) std::abort()
-#define JSON_TRY if(true)
-#define JSON_CATCH(exception) if(false)
+#define CONFIG_THROW(exception) std::abort()
+#define CONFIG_TRY if(true)
+#define CONFIG_CATCH(exception) if(false)
 #endif
 
 // manual branch prediction
 #if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
-#define JSON_LIKELY(x)      __builtin_expect(!!(x), 1)
-#define JSON_UNLIKELY(x)    __builtin_expect(!!(x), 0)
+#define CONFIG_LIKELY(x)      __builtin_expect(!!(x), 1)
+#define CONFIG_UNLIKELY(x)    __builtin_expect(!!(x), 0)
 #else
-#define JSON_LIKELY(x)      x
-#define JSON_UNLIKELY(x)    x
+#define CONFIG_LIKELY(x)      x
+#define CONFIG_UNLIKELY(x)    x
 #endif
 
 namespace captcha_config {
@@ -133,7 +132,7 @@ contains a `mapped_type`, whereas `std::vector` fails the test.
 @sa http://stackoverflow.com/a/7728728/266378
 @since version 1.0.0, overworked in version 2.0.6
 */
-#define NLOHMANN_JSON_HAS_HELPER(type)                                        \
+#define CONFIG_HAS_HELPER(type)                                        \
     template<typename T> struct has_##type {                                  \
     private:                                                                  \
         template<typename U, typename = typename U::type>                     \
@@ -144,15 +143,15 @@ contains a `mapped_type`, whereas `std::vector` fails the test.
                 std::is_integral<decltype(detect(std::declval<T>()))>::value; \
     }
 
-NLOHMANN_JSON_HAS_HELPER(mapped_type);
+CONFIG_HAS_HELPER(mapped_type);
 
-NLOHMANN_JSON_HAS_HELPER(key_type);
+CONFIG_HAS_HELPER(key_type);
 
-NLOHMANN_JSON_HAS_HELPER(value_type);
+CONFIG_HAS_HELPER(value_type);
 
-NLOHMANN_JSON_HAS_HELPER(iterator);
+CONFIG_HAS_HELPER(iterator);
 
-#undef NLOHMANN_JSON_HAS_HELPER
+#undef CONFIG_HAS_HELPER
 
 template<bool B, class RealType, class CompatibleObjectType>
 struct is_compatible_object_type_impl : std::false_type {

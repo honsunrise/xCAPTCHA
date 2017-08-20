@@ -39,11 +39,11 @@ config_path::get_and_create(XCAPTCHA_BASIC_CONFIG_TPL &j) const {
 
       case detail::value_t::array: {
         // create an entry in the array
-        JSON_TRY {
+        CONFIG_TRY {
           result = &result->operator[](static_cast<size_type>(std::stoi(reference_token)));
         }
-        JSON_CATCH(std::invalid_argument &) {
-          JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token +
+        CONFIG_CATCH(std::invalid_argument &) {
+          CONFIG_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token +
               "' is not a number"));
         }
         break;
@@ -55,7 +55,7 @@ token _and_ the current value is primitive. In this case, we have
 an error situation, because primitive values may only occur as
 single value; that is, with an empty list of reference tokens.
 */
-      default:JSON_THROW(detail::type_error::create(313, "invalid value to unflatten"));
+      default:CONFIG_THROW(detail::type_error::create(313, "invalid value to unflatten"));
     }
   }
 
@@ -91,8 +91,8 @@ config_path::get_unchecked(XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
 
       case detail::value_t::array: {
         // error condition (cf. RFC 6901, Sect. 4)
-        if (JSON_UNLIKELY(reference_token.size() > 1 and reference_token[0] == '0')) {
-          JSON_THROW(detail::parse_error::create(106, 0,
+        if (CONFIG_UNLIKELY(reference_token.size() > 1 and reference_token[0] == '0')) {
+          CONFIG_THROW(detail::parse_error::create(106, 0,
                                                  "array index '" + reference_token +
                                                      "' must not begin with '0'"));
         }
@@ -102,19 +102,19 @@ config_path::get_unchecked(XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
           ptr = &ptr->operator[](ptr->m_value.array->size());
         } else {
           // convert array index to number; unchecked access
-          JSON_TRY {
+          CONFIG_TRY {
             ptr = &ptr->operator[](
                 static_cast<size_type>(std::stoi(reference_token)));
           }
-          JSON_CATCH(std::invalid_argument &) {
-            JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token +
+          CONFIG_CATCH(std::invalid_argument &) {
+            CONFIG_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token +
                 "' is not a number"));
           }
         }
         break;
       }
 
-      default:JSON_THROW(
+      default:CONFIG_THROW(
             detail::out_of_range::create(404, "unresolved reference token '" + reference_token + "'"));
     }
   }
@@ -135,33 +135,33 @@ config_path::get_checked(XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
       }
 
       case detail::value_t::array: {
-        if (JSON_UNLIKELY(reference_token == "-")) {
+        if (CONFIG_UNLIKELY(reference_token == "-")) {
           // "-" always fails the range check
-          JSON_THROW(detail::out_of_range::create(402,
+          CONFIG_THROW(detail::out_of_range::create(402,
                                                   "array index '-' (" +
                                                       std::to_string(ptr->m_value.array->size()) +
                                                       ") is out of range"));
         }
 
         // error condition (cf. RFC 6901, Sect. 4)
-        if (JSON_UNLIKELY(reference_token.size() > 1 and reference_token[0] == '0')) {
-          JSON_THROW(detail::parse_error::create(106, 0,
+        if (CONFIG_UNLIKELY(reference_token.size() > 1 and reference_token[0] == '0')) {
+          CONFIG_THROW(detail::parse_error::create(106, 0,
                                                  "array index '" + reference_token +
                                                      "' must not begin with '0'"));
         }
 
         // note: at performs range check
-        JSON_TRY {
+        CONFIG_TRY {
           ptr = &ptr->at(static_cast<size_type>(std::stoi(reference_token)));
         }
-        JSON_CATCH(std::invalid_argument &) {
-          JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token +
+        CONFIG_CATCH(std::invalid_argument &) {
+          CONFIG_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token +
               "' is not a number"));
         }
         break;
       }
 
-      default:JSON_THROW(
+      default:CONFIG_THROW(
             detail::out_of_range::create(404, "unresolved reference token '" + reference_token + "'"));
     }
   }
@@ -182,34 +182,34 @@ config_path::get_unchecked(const XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
       }
 
       case detail::value_t::array: {
-        if (JSON_UNLIKELY(reference_token == "-")) {
+        if (CONFIG_UNLIKELY(reference_token == "-")) {
           // "-" cannot be used for const access
-          JSON_THROW(detail::out_of_range::create(402,
+          CONFIG_THROW(detail::out_of_range::create(402,
                                                   "array index '-' (" +
                                                       std::to_string(ptr->m_value.array->size()) +
                                                       ") is out of range"));
         }
 
         // error condition (cf. RFC 6901, Sect. 4)
-        if (JSON_UNLIKELY(reference_token.size() > 1 and reference_token[0] == '0')) {
-          JSON_THROW(detail::parse_error::create(106, 0,
+        if (CONFIG_UNLIKELY(reference_token.size() > 1 and reference_token[0] == '0')) {
+          CONFIG_THROW(detail::parse_error::create(106, 0,
                                                  "array index '" + reference_token +
                                                      "' must not begin with '0'"));
         }
 
         // use unchecked array access
-        JSON_TRY {
+        CONFIG_TRY {
           ptr = &ptr->operator[](
               static_cast<size_type>(std::stoi(reference_token)));
         }
-        JSON_CATCH(std::invalid_argument &) {
-          JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token +
+        CONFIG_CATCH(std::invalid_argument &) {
+          CONFIG_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token +
               "' is not a number"));
         }
         break;
       }
 
-      default:JSON_THROW(
+      default:CONFIG_THROW(
             detail::out_of_range::create(404, "unresolved reference token '" + reference_token + "'"));
     }
   }
@@ -230,33 +230,33 @@ config_path::get_checked(const XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
       }
 
       case detail::value_t::array: {
-        if (JSON_UNLIKELY(reference_token == "-")) {
+        if (CONFIG_UNLIKELY(reference_token == "-")) {
           // "-" always fails the range check
-          JSON_THROW(detail::out_of_range::create(402,
+          CONFIG_THROW(detail::out_of_range::create(402,
                                                   "array index '-' (" +
                                                       std::to_string(ptr->m_value.array->size()) +
                                                       ") is out of range"));
         }
 
         // error condition (cf. RFC 6901, Sect. 4)
-        if (JSON_UNLIKELY(reference_token.size() > 1 and reference_token[0] == '0')) {
-          JSON_THROW(detail::parse_error::create(106, 0,
+        if (CONFIG_UNLIKELY(reference_token.size() > 1 and reference_token[0] == '0')) {
+          CONFIG_THROW(detail::parse_error::create(106, 0,
                                                  "array index '" + reference_token +
                                                      "' must not begin with '0'"));
         }
 
         // note: at performs range check
-        JSON_TRY {
+        CONFIG_TRY {
           ptr = &ptr->at(static_cast<size_type>(std::stoi(reference_token)));
         }
-        JSON_CATCH(std::invalid_argument &) {
-          JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token +
+        CONFIG_CATCH(std::invalid_argument &) {
+          CONFIG_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token +
               "' is not a number"));
         }
         break;
       }
 
-      default:JSON_THROW(
+      default:CONFIG_THROW(
             detail::out_of_range::create(404, "unresolved reference token '" + reference_token + "'"));
     }
   }
@@ -307,16 +307,16 @@ void config_path::flatten(const std::string &reference_string,
 XCAPTCHA_BASIC_CONFIG_TPL_DECLARATION
 XCAPTCHA_BASIC_CONFIG_TPL
 config_path::unflatten(const XCAPTCHA_BASIC_CONFIG_TPL &value) {
-  if (JSON_UNLIKELY(not value.is_map())) {
-    JSON_THROW(detail::type_error::create(314, "only objects can be unflattened"));
+  if (CONFIG_UNLIKELY(not value.is_map())) {
+    CONFIG_THROW(detail::type_error::create(314, "only objects can be unflattened"));
   }
 
   XCAPTCHA_BASIC_CONFIG_TPL result;
 
   // iterate the JSON map values
   for (const auto &element : *value.m_value.map) {
-    if (JSON_UNLIKELY(not element.second.is_primitive())) {
-      JSON_THROW(detail::type_error::create(315, "values in map must be primitive"));
+    if (CONFIG_UNLIKELY(not element.second.is_primitive())) {
+      CONFIG_THROW(detail::type_error::create(315, "values in map must be primitive"));
     }
 
     // assign value to reference pointed to by JSON pointer; Note that if

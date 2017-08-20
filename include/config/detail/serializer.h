@@ -21,25 +21,25 @@ namespace detail {
 
 template<typename BasicConfigType, typename T, utils::enable_if_t<
     std::is_same<T, typename BasicConfigType::boolean_t>::value, int> = 0>
-void to_json(BasicConfigType &j, T b) noexcept {
+void to_config(BasicConfigType &j, T b) noexcept {
   typed_constructor<value_t::boolean>::construct(j, b);
 }
 
 template<typename BasicConfigType, typename CompatibleString,
     utils::enable_if_t<std::is_constructible<typename BasicConfigType::string_t,
                                              CompatibleString>::value, int> = 0>
-void to_json(BasicConfigType &j, const CompatibleString &s) {
+void to_config(BasicConfigType &j, const CompatibleString &s) {
   typed_constructor<value_t::string>::construct(j, s);
 }
 
 template<typename BasicConfigType>
-void to_json(BasicConfigType &j, typename BasicConfigType::string_t &&s) {
+void to_config(BasicConfigType &j, typename BasicConfigType::string_t &&s) {
   typed_constructor<value_t::string>::construct(j, std::move(s));
 }
 
 template<typename BasicConfigType, typename FloatType,
     utils::enable_if_t<std::is_floating_point<FloatType>::value, int> = 0>
-void to_json(BasicConfigType &j, FloatType val) noexcept {
+void to_config(BasicConfigType &j, FloatType val) noexcept {
   typed_constructor<value_t::number_float>::construct(j,
                                                       static_cast<typename BasicConfigType::number_float_t>(val));
 }
@@ -48,7 +48,7 @@ template<
     typename BasicConfigType, typename CompatibleNumberUnsignedType,
     utils::enable_if_t<utils::is_compatible_integer_type<typename BasicConfigType::number_unsigned_t,
                                                          CompatibleNumberUnsignedType>::value, int> = 0>
-void to_json(BasicConfigType &j, CompatibleNumberUnsignedType val) noexcept {
+void to_config(BasicConfigType &j, CompatibleNumberUnsignedType val) noexcept {
   typed_constructor<value_t::number_unsigned>::construct(j,
                                                          static_cast<typename BasicConfigType::number_unsigned_t>(val));
 }
@@ -57,20 +57,20 @@ template<
     typename BasicConfigType, typename CompatibleNumberIntegerType,
     utils::enable_if_t<utils::is_compatible_integer_type<typename BasicConfigType::number_integer_t,
                                                          CompatibleNumberIntegerType>::value, int> = 0>
-void to_json(BasicConfigType &j, CompatibleNumberIntegerType val) noexcept {
+void to_config(BasicConfigType &j, CompatibleNumberIntegerType val) noexcept {
   typed_constructor<value_t::number_integer>::construct(j,
                                                         static_cast<typename BasicConfigType::number_integer_t>(val));
 }
 
 template<typename BasicConfigType, typename EnumType,
     utils::enable_if_t<std::is_enum<EnumType>::value, int> = 0>
-void to_json(BasicConfigType &j, EnumType e) noexcept {
+void to_config(BasicConfigType &j, EnumType e) noexcept {
   using underlying_type = typename std::underlying_type<EnumType>::type;
   typed_constructor<value_t::number_integer>::construct(j, static_cast<underlying_type>(e));
 }
 
 template<typename BasicConfigType>
-void to_json(BasicConfigType &j, const std::vector<bool> &e) {
+void to_config(BasicConfigType &j, const std::vector<bool> &e) {
   typed_constructor<value_t::array>::construct(j, e);
 }
 
@@ -80,12 +80,12 @@ template<
         utils::is_compatible_array_type<BasicConfigType, CompatibleArrayType>::value or
             std::is_same<typename BasicConfigType::array_t, CompatibleArrayType>::value,
         int> = 0>
-void to_json(BasicConfigType &j, const CompatibleArrayType &arr) {
+void to_config(BasicConfigType &j, const CompatibleArrayType &arr) {
   typed_constructor<value_t::array>::construct(j, arr);
 }
 
 template<typename BasicConfigType>
-void to_json(BasicConfigType &j, typename BasicConfigType::array_t &&arr) {
+void to_config(BasicConfigType &j, typename BasicConfigType::array_t &&arr) {
   typed_constructor<value_t::array>::construct(j, std::move(arr));
 }
 
@@ -93,12 +93,12 @@ template<
     typename BasicConfigType, typename CompatibleObjectType,
     utils::enable_if_t<utils::is_compatible_map_type<BasicConfigType, CompatibleObjectType>::value,
         int> = 0>
-void to_json(BasicConfigType &j, const CompatibleObjectType &obj) {
+void to_config(BasicConfigType &j, const CompatibleObjectType &obj) {
   typed_constructor<value_t::map>::construct(j, obj);
 }
 
 template<typename BasicConfigType>
-void to_json(BasicConfigType &j, typename BasicConfigType::object_t &&obj) {
+void to_config(BasicConfigType &j, typename BasicConfigType::object_t &&obj) {
   typed_constructor<value_t::map>::construct(j, std::move(obj));
 }
 
@@ -106,23 +106,23 @@ template<typename BasicConfigType, typename T, std::size_t N,
     utils::enable_if_t<not std::is_constructible<
         typename BasicConfigType::string_t, T (&)[N]>::value,
                        int> = 0>
-void to_json(BasicConfigType &j, T (&arr)[N]) {
+void to_config(BasicConfigType &j, T (&arr)[N]) {
   typed_constructor<value_t::array>::construct(j, arr);
 }
 
 template<typename BasicConfigType, typename... Args>
-void to_json(BasicConfigType &j, const std::pair<Args...> &p) {
+void to_config(BasicConfigType &j, const std::pair<Args...> &p) {
   j = {p.first, p.second};
 }
 
 template<typename BasicConfigType, typename Tuple, std::size_t... Idx>
-void to_json_tuple_impl(BasicConfigType &j, const Tuple &t, utils::index_sequence<Idx...>) {
+void to_config_tuple_impl(BasicConfigType &j, const Tuple &t, utils::index_sequence<Idx...>) {
   j = {std::get<Idx>(t)...};
 }
 
 template<typename BasicConfigType, typename... Args>
-void to_json(BasicConfigType &j, const std::tuple<Args...> &t) {
-  to_json_tuple_impl(j, t, utils::index_sequence_for<Args...> {});
+void to_config(BasicConfigType &j, const std::tuple<Args...> &t) {
+  to_config_tuple_impl(j, t, utils::index_sequence_for<Args...> {});
 }
 
 // overloads for basic_json template parameters
@@ -146,53 +146,53 @@ void get_arithmetic_value(const BasicConfigType &j, ArithmeticType &val) {
       break;
     }
 
-    default:JSON_THROW(type_error::create(302, "type must be number, but is " + std::string(j.type_name())));
+    default:CONFIG_THROW(type_error::create(302, "type must be number, but is " + std::string(j.type_name())));
   }
 }
 
 template<typename BasicConfigType>
-void from_json(const BasicConfigType &j, typename BasicConfigType::boolean_t &b) {
-  if (JSON_UNLIKELY(not j.is_boolean())) {
-    JSON_THROW(type_error::create(302, "type must be boolean, but is " + std::string(j.type_name())));
+void from_config(const BasicConfigType &j, typename BasicConfigType::boolean_t &b) {
+  if (CONFIG_UNLIKELY(not j.is_boolean())) {
+    CONFIG_THROW(type_error::create(302, "type must be boolean, but is " + std::string(j.type_name())));
   }
   b = *j.template get_ptr<const typename BasicConfigType::boolean_t *>();
 }
 
 template<typename BasicConfigType>
-void from_json(const BasicConfigType &j, typename BasicConfigType::string_t &s) {
-  if (JSON_UNLIKELY(not j.is_string())) {
-    JSON_THROW(type_error::create(302, "type must be string, but is " + std::string(j.type_name())));
+void from_config(const BasicConfigType &j, typename BasicConfigType::string_t &s) {
+  if (CONFIG_UNLIKELY(not j.is_string())) {
+    CONFIG_THROW(type_error::create(302, "type must be string, but is " + std::string(j.type_name())));
   }
   s = *j.template get_ptr<const typename BasicConfigType::string_t *>();
 }
 
 template<typename BasicConfigType>
-void from_json(const BasicConfigType &j, typename BasicConfigType::number_float_t &val) {
+void from_config(const BasicConfigType &j, typename BasicConfigType::number_float_t &val) {
   get_arithmetic_value(j, val);
 }
 
 template<typename BasicConfigType>
-void from_json(const BasicConfigType &j, typename BasicConfigType::number_unsigned_t &val) {
+void from_config(const BasicConfigType &j, typename BasicConfigType::number_unsigned_t &val) {
   get_arithmetic_value(j, val);
 }
 
 template<typename BasicConfigType>
-void from_json(const BasicConfigType &j, typename BasicConfigType::number_integer_t &val) {
+void from_config(const BasicConfigType &j, typename BasicConfigType::number_integer_t &val) {
   get_arithmetic_value(j, val);
 }
 
 template<typename BasicConfigType, typename EnumType,
     utils::enable_if_t<std::is_enum<EnumType>::value, int> = 0>
-void from_json(const BasicConfigType &j, EnumType &e) {
+void from_config(const BasicConfigType &j, EnumType &e) {
   typename std::underlying_type<EnumType>::type val;
   get_arithmetic_value(j, val);
   e = static_cast<EnumType>(val);
 }
 
 template<typename BasicConfigType>
-void from_json(const BasicConfigType &j, typename BasicConfigType::array_t &arr) {
-  if (JSON_UNLIKELY(not j.is_array())) {
-    JSON_THROW(type_error::create(302, "type must be array, but is " + std::string(j.type_name())));
+void from_config(const BasicConfigType &j, typename BasicConfigType::array_t &arr) {
+  if (CONFIG_UNLIKELY(not j.is_array())) {
+    CONFIG_THROW(type_error::create(302, "type must be array, but is " + std::string(j.type_name())));
   }
   arr = *j.template get_ptr<const typename BasicConfigType::array_t *>();
 }
@@ -200,9 +200,9 @@ void from_json(const BasicConfigType &j, typename BasicConfigType::array_t &arr)
 // forward_list doesn't have an insert method
 template<typename BasicConfigType, typename T, typename Allocator,
     utils::enable_if_t<std::is_convertible<BasicConfigType, T>::value, int> = 0>
-void from_json(const BasicConfigType &j, std::forward_list<T, Allocator> &l) {
-  if (JSON_UNLIKELY(not j.is_array())) {
-    JSON_THROW(type_error::create(302, "type must be array, but is " + std::string(j.type_name())));
+void from_config(const BasicConfigType &j, std::forward_list<T, Allocator> &l) {
+  if (CONFIG_UNLIKELY(not j.is_array())) {
+    CONFIG_THROW(type_error::create(302, "type must be array, but is " + std::string(j.type_name())));
   }
   std::transform(j.rbegin(), j.rend(),
                  std::front_inserter(l), [](const BasicConfigType &i) {
@@ -212,19 +212,19 @@ void from_json(const BasicConfigType &j, std::forward_list<T, Allocator> &l) {
 
 template<typename BasicConfigType, typename CompatibleArrayType>
 void
-from_json_array_impl(const BasicConfigType &j, CompatibleArrayType &arr, utils::priority_tag<0> /*unused*/) {
+from_config_array_impl(const BasicConfigType &j, CompatibleArrayType &arr, utils::priority_tag<0> /*unused*/) {
   using std::end;
 
   std::transform(j.begin(), j.end(),
                  std::inserter(arr, end(arr)), [](const BasicConfigType &i) {
-        // get<BasicConfigType>() returns *this, this won't call a from_json
+        // get<BasicConfigType>() returns *this, this won't call a from_config
         // method when value_type is BasicConfigType
         return i.template get<typename CompatibleArrayType::value_type>();
       });
 }
 
 template<typename BasicConfigType, typename CompatibleArrayType>
-auto from_json_array_impl(const BasicConfigType &j, CompatibleArrayType &arr, utils::priority_tag<1> /*unused*/)
+auto from_config_array_impl(const BasicConfigType &j, CompatibleArrayType &arr, utils::priority_tag<1> /*unused*/)
 -> decltype(
 arr.reserve(std::declval<typename CompatibleArrayType::size_type>()),
     void()) {
@@ -233,14 +233,14 @@ arr.reserve(std::declval<typename CompatibleArrayType::size_type>()),
   arr.reserve(j.size());
   std::transform(j.begin(), j.end(),
                  std::inserter(arr, end(arr)), [](const BasicConfigType &i) {
-        // get<BasicConfigType>() returns *this, this won't call a from_json
+        // get<BasicConfigType>() returns *this, this won't call a from_config
         // method when value_type is BasicConfigType
         return i.template get<typename CompatibleArrayType::value_type>();
       });
 }
 
 template<typename BasicConfigType, typename T, std::size_t N>
-void from_json_array_impl(const BasicConfigType &j, std::array<T, N> &arr, utils::priority_tag<2> /*unused*/) {
+void from_config_array_impl(const BasicConfigType &j, std::array<T, N> &arr, utils::priority_tag<2> /*unused*/) {
   for (std::size_t i = 0; i < N; ++i) {
     arr[i] = j.at(i).template get<T>();
   }
@@ -250,19 +250,19 @@ template<typename BasicConfigType, typename CompatibleArrayType,
     utils::enable_if_t<utils::is_compatible_array_type<BasicConfigType, CompatibleArrayType>::value and
         std::is_convertible<BasicConfigType, typename CompatibleArrayType::value_type>::value and
         not std::is_same<typename BasicConfigType::array_t, CompatibleArrayType>::value, int> = 0>
-void from_json(const BasicConfigType &j, CompatibleArrayType &arr) {
-  if (JSON_UNLIKELY(not j.is_array())) {
-    JSON_THROW(type_error::create(302, "type must be array, but is " + std::string(j.type_name())));
+void from_config(const BasicConfigType &j, CompatibleArrayType &arr) {
+  if (CONFIG_UNLIKELY(not j.is_array())) {
+    CONFIG_THROW(type_error::create(302, "type must be array, but is " + std::string(j.type_name())));
   }
 
-  from_json_array_impl(j, arr, utils::priority_tag<2> {});
+  from_config_array_impl(j, arr, utils::priority_tag<2> {});
 }
 
 template<typename BasicConfigType, typename CompatibleObjectType,
     utils::enable_if_t<utils::is_compatible_map_type<BasicConfigType, CompatibleObjectType>::value, int> = 0>
-void from_json(const BasicConfigType &j, CompatibleObjectType &obj) {
-  if (JSON_UNLIKELY(not j.is_object())) {
-    JSON_THROW(type_error::create(302, "type must be map, but is " + std::string(j.type_name())));
+void from_config(const BasicConfigType &j, CompatibleObjectType &obj) {
+  if (CONFIG_UNLIKELY(not j.is_object())) {
+    CONFIG_THROW(type_error::create(302, "type must be map, but is " + std::string(j.type_name())));
   }
 
   auto inner_object = j.template get_ptr<const typename BasicConfigType::object_t *>();
@@ -287,7 +287,7 @@ template<typename BasicConfigType, typename ArithmeticType,
             not std::is_same<ArithmeticType, typename BasicConfigType::number_float_t>::value and
             not std::is_same<ArithmeticType, typename BasicConfigType::boolean_t>::value,
         int> = 0>
-void from_json(const BasicConfigType &j, ArithmeticType &val) {
+void from_config(const BasicConfigType &j, ArithmeticType &val) {
   switch (static_cast<value_t>(j)) {
     case value_t::number_unsigned: {
       val = static_cast<ArithmeticType>(*j.template get_ptr<const typename BasicConfigType::number_unsigned_t *>());
@@ -306,40 +306,40 @@ void from_json(const BasicConfigType &j, ArithmeticType &val) {
       break;
     }
 
-    default:JSON_THROW(type_error::create(302, "type must be number, but is " + std::string(j.type_name())));
+    default:CONFIG_THROW(type_error::create(302, "type must be number, but is " + std::string(j.type_name())));
   }
 }
 
 template<typename BasicConfigType, typename... Args>
-void from_json(const BasicConfigType &j, std::pair<Args...> &p) {
+void from_config(const BasicConfigType &j, std::pair<Args...> &p) {
   p = {j.at(0), j.at(1)};
 }
 
 template<typename BasicConfigType, typename Tuple, std::size_t... Idx>
-void from_json_tuple_impl(const BasicConfigType &j, Tuple &t, utils::index_sequence<Idx...>) {
+void from_config_tuple_impl(const BasicConfigType &j, Tuple &t, utils::index_sequence<Idx...>) {
   t = std::make_tuple(j.at(Idx)...);
 }
 
 template<typename BasicConfigType, typename... Args>
-void from_json(const BasicConfigType &j, std::tuple<Args...> &t) {
-  from_json_tuple_impl(j, t, utils::index_sequence_for<Args...> {});
+void from_config(const BasicConfigType &j, std::tuple<Args...> &t) {
+  from_config_tuple_impl(j, t, utils::index_sequence_for<Args...> {});
 }
 
 struct to_config_fn {
  private:
   template<typename BasicConfigType, typename T>
-  auto call(BasicConfigType &j, T &&val, utils::priority_tag<1> /*unused*/) const noexcept(noexcept(to_json(j,
+  auto call(BasicConfigType &j, T &&val, utils::priority_tag<1> /*unused*/) const noexcept(noexcept(to_config(j,
                                                                                                             std::forward<
                                                                                                                 T>(
                                                                                                                 val))))
-  -> decltype(to_json(j, std::forward<T>(val)), void()) {
-    return to_json(j, std::forward<T>(val));
+  -> decltype(to_config(j, std::forward<T>(val)), void()) {
+    return to_config(j, std::forward<T>(val));
   }
 
   template<typename BasicConfigType, typename T>
   void call(BasicConfigType & /*unused*/, T && /*unused*/, utils::priority_tag<0> /*unused*/) const noexcept {
     static_assert(sizeof(BasicConfigType) == 0,
-                  "could not find to_json() method in T's namespace");
+                  "could not find to_config() method in T's namespace");
   }
 
  public:
@@ -355,16 +355,16 @@ struct from_config_fn {
  private:
   template<typename BasicConfigType, typename T>
   auto call(const BasicConfigType &j, T &val, utils::priority_tag<1> /*unused*/) const
-  noexcept(noexcept(from_json(j, val)))
-  -> decltype(from_json(j, val), void()) {
-    return from_json(j, val);
+  noexcept(noexcept(from_config(j, val)))
+  -> decltype(from_config(j, val), void()) {
+    return from_config(j, val);
   }
 
   template<typename BasicConfigType, typename T>
   void
   call(const BasicConfigType & /*unused*/, T & /*unused*/, utils::priority_tag<0> /*unused*/) const noexcept {
     static_assert(sizeof(BasicConfigType) == 0,
-                  "could not find from_json() method in T's namespace");
+                  "could not find from_config() method in T's namespace");
   }
 
  public:

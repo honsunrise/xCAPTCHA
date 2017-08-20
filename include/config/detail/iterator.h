@@ -244,15 +244,15 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
       }
 
       case value_t::null: {
-        JSON_THROW(invalid_iterator::create(214, "cannot get value"));
+        CONFIG_THROW(invalid_iterator::create(214, "cannot get value"));
       }
 
       default: {
-        if (JSON_LIKELY(m_it.primitive_iterator.is_begin())) {
+        if (CONFIG_LIKELY(m_it.primitive_iterator.is_begin())) {
           return *m_object;
         }
 
-        JSON_THROW(invalid_iterator::create(214, "cannot get value"));
+        CONFIG_THROW(invalid_iterator::create(214, "cannot get value"));
       }
     }
   }
@@ -272,11 +272,11 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
       }
 
       default: {
-        if (JSON_LIKELY(m_it.primitive_iterator.is_begin())) {
+        if (CONFIG_LIKELY(m_it.primitive_iterator.is_begin())) {
           return m_object;
         }
 
-        JSON_THROW(invalid_iterator::create(214, "cannot get value"));
+        CONFIG_THROW(invalid_iterator::create(214, "cannot get value"));
       }
     }
   }
@@ -341,8 +341,8 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
 
   bool operator==(const iter_impl &other) const {
     // if objects are not the same, the comparison is undefined
-    if (JSON_UNLIKELY(m_object != other.m_object)) {
-      JSON_THROW(invalid_iterator::create(212, "cannot compare iterators of different containers"));
+    if (CONFIG_UNLIKELY(m_object != other.m_object)) {
+      CONFIG_THROW(invalid_iterator::create(212, "cannot compare iterators of different containers"));
     }
 
     assert(m_object != nullptr);
@@ -362,14 +362,14 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
 
   bool operator<(const iter_impl &other) const {
     // if objects are not the same, the comparison is undefined
-    if (JSON_UNLIKELY(m_object != other.m_object)) {
-      JSON_THROW(invalid_iterator::create(212, "cannot compare iterators of different containers"));
+    if (CONFIG_UNLIKELY(m_object != other.m_object)) {
+      CONFIG_THROW(invalid_iterator::create(212, "cannot compare iterators of different containers"));
     }
 
     assert(m_object != nullptr);
 
     switch (m_object->m_type) {
-      case value_t::map:JSON_THROW(invalid_iterator::create(213, "cannot compare order of map iterators"));
+      case value_t::map:CONFIG_THROW(invalid_iterator::create(213, "cannot compare order of map iterators"));
 
       case value_t::array:return (m_it.array_iterator < other.m_it.array_iterator);
 
@@ -460,14 +460,14 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
 
       case value_t::array:return *std::next(m_it.array_iterator, n);
 
-      case value_t::null:JSON_THROW(invalid_iterator::create(214, "cannot get value"));
+      case value_t::null:CONFIG_THROW(invalid_iterator::create(214, "cannot get value"));
 
       default: {
-        if (JSON_LIKELY(m_it.primitive_iterator.get_value() == -n)) {
+        if (CONFIG_LIKELY(m_it.primitive_iterator.get_value() == -n)) {
           return *m_object;
         }
 
-        JSON_THROW(invalid_iterator::create(214, "cannot get value"));
+        CONFIG_THROW(invalid_iterator::create(214, "cannot get value"));
       }
     }
   }
@@ -475,11 +475,11 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
   typename map_t::key_type key() const {
     assert(m_object != nullptr);
 
-    if (JSON_LIKELY(m_object->is_map())) {
+    if (CONFIG_LIKELY(m_object->is_map())) {
       return m_it.map_iterator->first;
     }
 
-    JSON_THROW(invalid_iterator::create(207, "cannot use key() for non-map iterators"));
+    CONFIG_THROW(invalid_iterator::create(207, "cannot use key() for non-map iterators"));
   }
 
   reference value() const {

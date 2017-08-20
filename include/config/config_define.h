@@ -165,8 +165,8 @@ class basic_config_define {
         }
 
         default: {
-          if (JSON_UNLIKELY(t == value_t::null)) {
-            JSON_THROW(other_error::create(500, "961c151d2e87f2686a955a9be24d316f1362bf21 2.1.1")); // LCOV_EXCL_LINE
+          if (CONFIG_UNLIKELY(t == value_t::null)) {
+            CONFIG_THROW(other_error::create(500, "961c151d2e87f2686a955a9be24d316f1362bf21 2.1.1")); // LCOV_EXCL_LINE
           }
           break;
         }
@@ -282,8 +282,8 @@ class basic_config_define {
       }
 
       // if map is wanted but impossible, throw an exception
-      if (JSON_UNLIKELY(manual_type == value_t::map and not is_an_object)) {
-        JSON_THROW(type_error::create(301, "cannot create map from initializer list"));
+      if (CONFIG_UNLIKELY(manual_type == value_t::map and not is_an_object)) {
+        CONFIG_THROW(type_error::create(301, "cannot create map from initializer list"));
       }
     }
 
@@ -329,8 +329,8 @@ class basic_config_define {
     assert(last.m_object != nullptr);
 
     // make sure iterator fits the current value
-    if (JSON_UNLIKELY(first.m_object != last.m_object)) {
-      JSON_THROW(invalid_iterator::create(201, "iterators are not compatible"));
+    if (CONFIG_UNLIKELY(first.m_object != last.m_object)) {
+      CONFIG_THROW(invalid_iterator::create(201, "iterators are not compatible"));
     }
 
     // copy type from first iterator
@@ -343,9 +343,9 @@ class basic_config_define {
       case value_t::number_integer:
       case value_t::number_unsigned:
       case value_t::string: {
-        if (JSON_UNLIKELY(not first.m_it.primitive_iterator.is_begin()
+        if (CONFIG_UNLIKELY(not first.m_it.primitive_iterator.is_begin()
                               or not last.m_it.primitive_iterator.is_end())) {
-          JSON_THROW(invalid_iterator::create(204, "iterators out of range"));
+          CONFIG_THROW(invalid_iterator::create(204, "iterators out of range"));
         }
         break;
       }
@@ -391,7 +391,7 @@ class basic_config_define {
         break;
       }
 
-      default:JSON_THROW(invalid_iterator::create(206, "cannot construct with iterators from " +
+      default:CONFIG_THROW(invalid_iterator::create(206, "cannot construct with iterators from " +
             std::string(first.m_object->type_name())));
     }
 
@@ -542,11 +542,11 @@ class basic_config_define {
 
  private:
   boolean_t get_impl(boolean_t * /*unused*/) const {
-    if (JSON_LIKELY(is_boolean())) {
+    if (CONFIG_LIKELY(is_boolean())) {
       return m_value.boolean;
     }
 
-    JSON_THROW(type_error::create(302, "type must be boolean, but is " + std::string(type_name())));
+    CONFIG_THROW(type_error::create(302, "type must be boolean, but is " + std::string(type_name())));
   }
 
   map_t *get_impl_ptr(map_t * /*unused*/) noexcept {
@@ -610,11 +610,11 @@ class basic_config_define {
     // delegate the call to get_ptr<>()
     auto ptr = obj.template get_ptr<typename std::add_pointer<ReferenceType>::type>();
 
-    if (JSON_LIKELY(ptr != nullptr)) {
+    if (CONFIG_LIKELY(ptr != nullptr)) {
       return *ptr;
     }
 
-    JSON_THROW(type_error::create(303,
+    CONFIG_THROW(type_error::create(303,
                                   "incompatible ReferenceType for get_ref, actual type is "
                                       + std::string(obj.type_name())));
   }
@@ -754,61 +754,61 @@ class basic_config_define {
 
   reference at(size_type idx) {
     // at only works for arrays
-    if (JSON_LIKELY(is_array())) {
-      JSON_TRY {
+    if (CONFIG_LIKELY(is_array())) {
+      CONFIG_TRY {
         return m_value.array->at(idx);
       }
-      JSON_CATCH (std::out_of_range &) {
+      CONFIG_CATCH (std::out_of_range &) {
         // create better exception explanation
-        JSON_THROW(out_of_range::create(401, "array index " + std::to_string(idx) + " is out of range"));
+        CONFIG_THROW(out_of_range::create(401, "array index " + std::to_string(idx) + " is out of range"));
       }
     } else {
-      JSON_THROW(type_error::create(304, "cannot use at() with " + std::string(type_name())));
+      CONFIG_THROW(type_error::create(304, "cannot use at() with " + std::string(type_name())));
     }
   }
 
   const_reference at(size_type idx) const {
     // at only works for arrays
-    if (JSON_LIKELY(is_array())) {
-      JSON_TRY {
+    if (CONFIG_LIKELY(is_array())) {
+      CONFIG_TRY {
         return m_value.array->at(idx);
       }
-      JSON_CATCH (std::out_of_range &) {
+      CONFIG_CATCH (std::out_of_range &) {
         // create better exception explanation
-        JSON_THROW(out_of_range::create(401, "array index " + std::to_string(idx) + " is out of range"));
+        CONFIG_THROW(out_of_range::create(401, "array index " + std::to_string(idx) + " is out of range"));
       }
     } else {
-      JSON_THROW(type_error::create(304, "cannot use at() with " + std::string(type_name())));
+      CONFIG_THROW(type_error::create(304, "cannot use at() with " + std::string(type_name())));
     }
   }
 
   reference at(const typename map_t::key_type &key) {
     // at only works for objects
-    if (JSON_LIKELY(is_map())) {
-      JSON_TRY {
+    if (CONFIG_LIKELY(is_map())) {
+      CONFIG_TRY {
         return m_value.map->at(key);
       }
-      JSON_CATCH (std::out_of_range &) {
+      CONFIG_CATCH (std::out_of_range &) {
         // create better exception explanation
-        JSON_THROW(out_of_range::create(403, "key '" + key + "' not found"));
+        CONFIG_THROW(out_of_range::create(403, "key '" + key + "' not found"));
       }
     } else {
-      JSON_THROW(type_error::create(304, "cannot use at() with " + std::string(type_name())));
+      CONFIG_THROW(type_error::create(304, "cannot use at() with " + std::string(type_name())));
     }
   }
 
   const_reference at(const typename map_t::key_type &key) const {
     // at only works for objects
-    if (JSON_LIKELY(is_map())) {
-      JSON_TRY {
+    if (CONFIG_LIKELY(is_map())) {
+      CONFIG_TRY {
         return m_value.map->at(key);
       }
-      JSON_CATCH (std::out_of_range &) {
+      CONFIG_CATCH (std::out_of_range &) {
         // create better exception explanation
-        JSON_THROW(out_of_range::create(403, "key '" + key + "' not found"));
+        CONFIG_THROW(out_of_range::create(403, "key '" + key + "' not found"));
       }
     } else {
-      JSON_THROW(type_error::create(304, "cannot use at() with " + std::string(type_name())));
+      CONFIG_THROW(type_error::create(304, "cannot use at() with " + std::string(type_name())));
     }
   }
 
@@ -821,7 +821,7 @@ class basic_config_define {
     }
 
     // operator[] only works for arrays
-    if (JSON_LIKELY(is_array())) {
+    if (CONFIG_LIKELY(is_array())) {
       // fill up array with null values if given idx is outside range
       if (idx >= m_value.array->size()) {
         m_value.array->insert(m_value.array->end(),
@@ -832,16 +832,16 @@ class basic_config_define {
       return m_value.array->operator[](idx);
     }
 
-    JSON_THROW(type_error::create(305, "cannot use operator[] with " + std::string(type_name())));
+    CONFIG_THROW(type_error::create(305, "cannot use operator[] with " + std::string(type_name())));
   }
 
   const_reference operator[](size_type idx) const {
     // const operator[] only works for arrays
-    if (JSON_LIKELY(is_array())) {
+    if (CONFIG_LIKELY(is_array())) {
       return m_value.array->operator[](idx);
     }
 
-    JSON_THROW(type_error::create(305, "cannot use operator[] with " + std::string(type_name())));
+    CONFIG_THROW(type_error::create(305, "cannot use operator[] with " + std::string(type_name())));
   }
 
   reference operator[](const typename map_t::key_type &key) {
@@ -853,21 +853,21 @@ class basic_config_define {
     }
 
     // operator[] only works for objects
-    if (JSON_LIKELY(is_map())) {
+    if (CONFIG_LIKELY(is_map())) {
       return m_value.map->operator[](key);
     }
 
-    JSON_THROW(type_error::create(305, "cannot use operator[] with " + std::string(type_name())));
+    CONFIG_THROW(type_error::create(305, "cannot use operator[] with " + std::string(type_name())));
   }
 
   const_reference operator[](const typename map_t::key_type &key) const {
     // const operator[] only works for objects
-    if (JSON_LIKELY(is_map())) {
+    if (CONFIG_LIKELY(is_map())) {
       assert(m_value.map->find(key) != m_value.map->end());
       return m_value.map->find(key)->second;
     }
 
-    JSON_THROW(type_error::create(305, "cannot use operator[] with " + std::string(type_name())));
+    CONFIG_THROW(type_error::create(305, "cannot use operator[] with " + std::string(type_name())));
   }
 
   template<typename T>
@@ -880,29 +880,29 @@ class basic_config_define {
     }
 
     // at only works for objects
-    if (JSON_LIKELY(is_map())) {
+    if (CONFIG_LIKELY(is_map())) {
       return m_value.map->operator[](key);
     }
 
-    JSON_THROW(type_error::create(305, "cannot use operator[] with " + std::string(type_name())));
+    CONFIG_THROW(type_error::create(305, "cannot use operator[] with " + std::string(type_name())));
   }
 
   template<typename T>
   const_reference operator[](T *key) const {
     // at only works for objects
-    if (JSON_LIKELY(is_map())) {
+    if (CONFIG_LIKELY(is_map())) {
       assert(m_value.map->find(key) != m_value.map->end());
       return m_value.map->find(key)->second;
     }
 
-    JSON_THROW(type_error::create(305, "cannot use operator[] with " + std::string(type_name())));
+    CONFIG_THROW(type_error::create(305, "cannot use operator[] with " + std::string(type_name())));
   }
 
   template<class ValueType, typename std::enable_if<
       std::is_convertible<basic_config_define, ValueType>::value, int>::type = 0>
   ValueType value(const typename map_t::key_type &key, const ValueType &default_value) const {
     // at only works for objects
-    if (JSON_LIKELY(is_map())) {
+    if (CONFIG_LIKELY(is_map())) {
       // if key is found, return value and given default value otherwise
       const auto it = find(key);
       if (it != end()) {
@@ -911,7 +911,7 @@ class basic_config_define {
 
       return default_value;
     } else {
-      JSON_THROW(type_error::create(306, "cannot use value() with " + std::string(type_name())));
+      CONFIG_THROW(type_error::create(306, "cannot use value() with " + std::string(type_name())));
     }
   }
 
@@ -923,17 +923,17 @@ class basic_config_define {
       std::is_convertible<basic_config_define, ValueType>::value, int>::type = 0>
   ValueType value(const config_path &ptr, const ValueType &default_value) const {
     // at only works for objects
-    if (JSON_LIKELY(is_map())) {
+    if (CONFIG_LIKELY(is_map())) {
       // if pointer resolves a value, return it or use default value
-      JSON_TRY {
+      CONFIG_TRY {
         return ptr.get_checked(this);
       }
-      JSON_CATCH (out_of_range &) {
+      CONFIG_CATCH (out_of_range &) {
         return default_value;
       }
     }
 
-    JSON_THROW(type_error::create(306, "cannot use value() with " + std::string(type_name())));
+    CONFIG_THROW(type_error::create(306, "cannot use value() with " + std::string(type_name())));
   }
 
   string_t value(const config_path &ptr, const char *default_value) const {
@@ -966,8 +966,8 @@ class basic_config_define {
   = 0>
   IteratorType erase(IteratorType pos) {
     // make sure iterator fits the current value
-    if (JSON_UNLIKELY(this != pos.m_object)) {
-      JSON_THROW(invalid_iterator::create(202, "iterator does not fit current value"));
+    if (CONFIG_UNLIKELY(this != pos.m_object)) {
+      CONFIG_THROW(invalid_iterator::create(202, "iterator does not fit current value"));
     }
 
     IteratorType result = end();
@@ -978,8 +978,8 @@ class basic_config_define {
       case value_t::number_integer:
       case value_t::number_unsigned:
       case value_t::string: {
-        if (JSON_UNLIKELY(not pos.m_it.primitive_iterator.is_begin())) {
-          JSON_THROW(invalid_iterator::create(205, "iterator out of range"));
+        if (CONFIG_UNLIKELY(not pos.m_it.primitive_iterator.is_begin())) {
+          CONFIG_THROW(invalid_iterator::create(205, "iterator out of range"));
         }
 
         if (is_string()) {
@@ -1004,7 +1004,7 @@ class basic_config_define {
         break;
       }
 
-      default:JSON_THROW(type_error::create(307, "cannot use erase() with " + std::string(type_name())));
+      default:CONFIG_THROW(type_error::create(307, "cannot use erase() with " + std::string(type_name())));
     }
 
     return result;
@@ -1016,8 +1016,8 @@ class basic_config_define {
   = 0>
   IteratorType erase(IteratorType first, IteratorType last) {
     // make sure iterator fits the current value
-    if (JSON_UNLIKELY(this != first.m_object or this != last.m_object)) {
-      JSON_THROW(invalid_iterator::create(203, "iterators do not fit current value"));
+    if (CONFIG_UNLIKELY(this != first.m_object or this != last.m_object)) {
+      CONFIG_THROW(invalid_iterator::create(203, "iterators do not fit current value"));
     }
 
     IteratorType result = end();
@@ -1028,9 +1028,9 @@ class basic_config_define {
       case value_t::number_integer:
       case value_t::number_unsigned:
       case value_t::string: {
-        if (JSON_LIKELY(not first.m_it.primitive_iterator.is_begin()
+        if (CONFIG_LIKELY(not first.m_it.primitive_iterator.is_begin()
                             or not last.m_it.primitive_iterator.is_end())) {
-          JSON_THROW(invalid_iterator::create(204, "iterators out of range"));
+          CONFIG_THROW(invalid_iterator::create(204, "iterators out of range"));
         }
 
         if (is_string()) {
@@ -1057,7 +1057,7 @@ class basic_config_define {
         break;
       }
 
-      default:JSON_THROW(type_error::create(307, "cannot use erase() with " + std::string(type_name())));
+      default:CONFIG_THROW(type_error::create(307, "cannot use erase() with " + std::string(type_name())));
     }
 
     return result;
@@ -1065,23 +1065,23 @@ class basic_config_define {
 
   size_type erase(const typename map_t::key_type &key) {
     // this erase only works for objects
-    if (JSON_LIKELY(is_map())) {
+    if (CONFIG_LIKELY(is_map())) {
       return m_value.map->erase(key);
     }
 
-    JSON_THROW(type_error::create(307, "cannot use erase() with " + std::string(type_name())));
+    CONFIG_THROW(type_error::create(307, "cannot use erase() with " + std::string(type_name())));
   }
 
   void erase(const size_type idx) {
     // this erase only works for arrays
-    if (JSON_LIKELY(is_array())) {
-      if (JSON_UNLIKELY(idx >= size())) {
-        JSON_THROW(out_of_range::create(401, "array index " + std::to_string(idx) + " is out of range"));
+    if (CONFIG_LIKELY(is_array())) {
+      if (CONFIG_UNLIKELY(idx >= size())) {
+        CONFIG_THROW(out_of_range::create(401, "array index " + std::to_string(idx) + " is out of range"));
       }
 
       m_value.array->erase(m_value.array->begin() + static_cast<difference_type>(idx));
     } else {
-      JSON_THROW(type_error::create(307, "cannot use erase() with " + std::string(type_name())));
+      CONFIG_THROW(type_error::create(307, "cannot use erase() with " + std::string(type_name())));
     }
   }
 
@@ -1287,8 +1287,8 @@ class basic_config_define {
 
   void push_back(basic_config_define &&val) {
     // push_back only works for null objects or arrays
-    if (JSON_UNLIKELY(not(is_null() or is_array()))) {
-      JSON_THROW(type_error::create(308, "cannot use push_back() with " + std::string(type_name())));
+    if (CONFIG_UNLIKELY(not(is_null() or is_array()))) {
+      CONFIG_THROW(type_error::create(308, "cannot use push_back() with " + std::string(type_name())));
     }
 
     // transform null map into an array
@@ -1311,8 +1311,8 @@ class basic_config_define {
 
   void push_back(const basic_config_define &val) {
     // push_back only works for null objects or arrays
-    if (JSON_UNLIKELY(not(is_null() or is_array()))) {
-      JSON_THROW(type_error::create(308, "cannot use push_back() with " + std::string(type_name())));
+    if (CONFIG_UNLIKELY(not(is_null() or is_array()))) {
+      CONFIG_THROW(type_error::create(308, "cannot use push_back() with " + std::string(type_name())));
     }
 
     // transform null map into an array
@@ -1333,8 +1333,8 @@ class basic_config_define {
 
   void push_back(const typename map_t::value_type &val) {
     // push_back only works for null objects or objects
-    if (JSON_UNLIKELY(not(is_null() or is_map()))) {
-      JSON_THROW(type_error::create(308, "cannot use push_back() with " + std::string(type_name())));
+    if (CONFIG_UNLIKELY(not(is_null() or is_map()))) {
+      CONFIG_THROW(type_error::create(308, "cannot use push_back() with " + std::string(type_name())));
     }
 
     // transform null map into an map
@@ -1371,8 +1371,8 @@ class basic_config_define {
   template<class... Args>
   void emplace_back(Args &&... args) {
     // emplace_back only works for null objects or arrays
-    if (JSON_UNLIKELY(not(is_null() or is_array()))) {
-      JSON_THROW(type_error::create(311, "cannot use emplace_back() with " + std::string(type_name())));
+    if (CONFIG_UNLIKELY(not(is_null() or is_array()))) {
+      CONFIG_THROW(type_error::create(311, "cannot use emplace_back() with " + std::string(type_name())));
     }
 
     // transform null map into an array
@@ -1389,8 +1389,8 @@ class basic_config_define {
   template<class... Args>
   std::pair<iterator, bool> emplace(Args &&... args) {
     // emplace only works for null objects or arrays
-    if (JSON_UNLIKELY(not(is_null() or is_map()))) {
-      JSON_THROW(type_error::create(311, "cannot use emplace() with " + std::string(type_name())));
+    if (CONFIG_UNLIKELY(not(is_null() or is_map()))) {
+      CONFIG_THROW(type_error::create(311, "cannot use emplace() with " + std::string(type_name())));
     }
 
     // transform null map into an map
@@ -1412,10 +1412,10 @@ class basic_config_define {
 
   iterator insert(const_iterator pos, const basic_config_define &val) {
     // insert only works for arrays
-    if (JSON_LIKELY(is_array())) {
+    if (CONFIG_LIKELY(is_array())) {
       // check if iterator pos fits to this JSON value
-      if (JSON_UNLIKELY(pos.m_object != this)) {
-        JSON_THROW(invalid_iterator::create(202, "iterator does not fit current value"));
+      if (CONFIG_UNLIKELY(pos.m_object != this)) {
+        CONFIG_THROW(invalid_iterator::create(202, "iterator does not fit current value"));
       }
 
       // insert to array and return iterator
@@ -1424,7 +1424,7 @@ class basic_config_define {
       return result;
     }
 
-    JSON_THROW(type_error::create(309, "cannot use insert() with " + std::string(type_name())));
+    CONFIG_THROW(type_error::create(309, "cannot use insert() with " + std::string(type_name())));
   }
 
   iterator insert(const_iterator pos, basic_config_define &&val) {
@@ -1433,10 +1433,10 @@ class basic_config_define {
 
   iterator insert(const_iterator pos, size_type cnt, const basic_config_define &val) {
     // insert only works for arrays
-    if (JSON_LIKELY(is_array())) {
+    if (CONFIG_LIKELY(is_array())) {
       // check if iterator pos fits to this JSON value
-      if (JSON_UNLIKELY(pos.m_object != this)) {
-        JSON_THROW(invalid_iterator::create(202, "iterator does not fit current value"));
+      if (CONFIG_UNLIKELY(pos.m_object != this)) {
+        CONFIG_THROW(invalid_iterator::create(202, "iterator does not fit current value"));
       }
 
       // insert to array and return iterator
@@ -1445,27 +1445,27 @@ class basic_config_define {
       return result;
     }
 
-    JSON_THROW(type_error::create(309, "cannot use insert() with " + std::string(type_name())));
+    CONFIG_THROW(type_error::create(309, "cannot use insert() with " + std::string(type_name())));
   }
 
   iterator insert(const_iterator pos, const_iterator first, const_iterator last) {
     // insert only works for arrays
-    if (JSON_UNLIKELY(not is_array())) {
-      JSON_THROW(type_error::create(309, "cannot use insert() with " + std::string(type_name())));
+    if (CONFIG_UNLIKELY(not is_array())) {
+      CONFIG_THROW(type_error::create(309, "cannot use insert() with " + std::string(type_name())));
     }
 
     // check if iterator pos fits to this JSON value
-    if (JSON_UNLIKELY(pos.m_object != this)) {
-      JSON_THROW(invalid_iterator::create(202, "iterator does not fit current value"));
+    if (CONFIG_UNLIKELY(pos.m_object != this)) {
+      CONFIG_THROW(invalid_iterator::create(202, "iterator does not fit current value"));
     }
 
     // check if range iterators belong to the same JSON map
-    if (JSON_UNLIKELY(first.m_object != last.m_object)) {
-      JSON_THROW(invalid_iterator::create(210, "iterators do not fit"));
+    if (CONFIG_UNLIKELY(first.m_object != last.m_object)) {
+      CONFIG_THROW(invalid_iterator::create(210, "iterators do not fit"));
     }
 
-    if (JSON_UNLIKELY(first.m_object == this or last.m_object == this)) {
-      JSON_THROW(invalid_iterator::create(211, "passed iterators may not belong to container"));
+    if (CONFIG_UNLIKELY(first.m_object == this or last.m_object == this)) {
+      CONFIG_THROW(invalid_iterator::create(211, "passed iterators may not belong to container"));
     }
 
     // insert to array and return iterator
@@ -1479,13 +1479,13 @@ class basic_config_define {
 
   iterator insert(const_iterator pos, initializer_list_t ilist) {
     // insert only works for arrays
-    if (JSON_UNLIKELY(not is_array())) {
-      JSON_THROW(type_error::create(309, "cannot use insert() with " + std::string(type_name())));
+    if (CONFIG_UNLIKELY(not is_array())) {
+      CONFIG_THROW(type_error::create(309, "cannot use insert() with " + std::string(type_name())));
     }
 
     // check if iterator pos fits to this JSON value
-    if (JSON_UNLIKELY(pos.m_object != this)) {
-      JSON_THROW(invalid_iterator::create(202, "iterator does not fit current value"));
+    if (CONFIG_UNLIKELY(pos.m_object != this)) {
+      CONFIG_THROW(invalid_iterator::create(202, "iterator does not fit current value"));
     }
 
     // insert to array and return iterator
@@ -1496,19 +1496,19 @@ class basic_config_define {
 
   void insert(const_iterator first, const_iterator last) {
     // insert only works for objects
-    if (JSON_UNLIKELY(not is_map())) {
-      JSON_THROW(type_error::create(309, "cannot use insert() with " + std::string(type_name())));
+    if (CONFIG_UNLIKELY(not is_map())) {
+      CONFIG_THROW(type_error::create(309, "cannot use insert() with " + std::string(type_name())));
     }
 
     // check if range iterators belong to the same JSON map
-    if (JSON_UNLIKELY(first.m_object != last.m_object)) {
-      JSON_THROW(invalid_iterator::create(210, "iterators do not fit"));
+    if (CONFIG_UNLIKELY(first.m_object != last.m_object)) {
+      CONFIG_THROW(invalid_iterator::create(210, "iterators do not fit"));
     }
 
     // passed iterators must belong to objects
-    if (JSON_UNLIKELY(not first.m_object->is_map()
+    if (CONFIG_UNLIKELY(not first.m_object->is_map()
                           or not last.m_object->is_map())) {
-      JSON_THROW(invalid_iterator::create(202, "iterators first and last must point to objects"));
+      CONFIG_THROW(invalid_iterator::create(202, "iterators first and last must point to objects"));
     }
 
     m_value.map->insert(first.m_it.map_iterator, last.m_it.map_iterator);
@@ -1522,11 +1522,11 @@ class basic_config_define {
       assert_invariant();
     }
 
-    if (JSON_UNLIKELY(not is_map())) {
-      JSON_THROW(type_error::create(312, "cannot use update() with " + std::string(type_name())));
+    if (CONFIG_UNLIKELY(not is_map())) {
+      CONFIG_THROW(type_error::create(312, "cannot use update() with " + std::string(type_name())));
     }
-    if (JSON_UNLIKELY(not j.is_map())) {
-      JSON_THROW(type_error::create(312, "cannot use update() with " + std::string(j.type_name())));
+    if (CONFIG_UNLIKELY(not j.is_map())) {
+      CONFIG_THROW(type_error::create(312, "cannot use update() with " + std::string(j.type_name())));
     }
 
     for (auto it = j.begin(); it != j.end(); ++it) {
@@ -1542,19 +1542,19 @@ class basic_config_define {
       assert_invariant();
     }
 
-    if (JSON_UNLIKELY(not is_map())) {
-      JSON_THROW(type_error::create(312, "cannot use update() with " + std::string(type_name())));
+    if (CONFIG_UNLIKELY(not is_map())) {
+      CONFIG_THROW(type_error::create(312, "cannot use update() with " + std::string(type_name())));
     }
 
     // check if range iterators belong to the same JSON map
-    if (JSON_UNLIKELY(first.m_object != last.m_object)) {
-      JSON_THROW(invalid_iterator::create(210, "iterators do not fit"));
+    if (CONFIG_UNLIKELY(first.m_object != last.m_object)) {
+      CONFIG_THROW(invalid_iterator::create(210, "iterators do not fit"));
     }
 
     // passed iterators must belong to objects
-    if (JSON_UNLIKELY(not first.m_object->is_map()
+    if (CONFIG_UNLIKELY(not first.m_object->is_map()
                           or not first.m_object->is_map())) {
-      JSON_THROW(invalid_iterator::create(202, "iterators first and last must point to objects"));
+      CONFIG_THROW(invalid_iterator::create(202, "iterators first and last must point to objects"));
     }
 
     for (auto it = first; it != last; ++it) {
@@ -1575,28 +1575,28 @@ class basic_config_define {
 
   void swap(array_t &other) {
     // swap only works for arrays
-    if (JSON_LIKELY(is_array())) {
+    if (CONFIG_LIKELY(is_array())) {
       std::swap(*(m_value.array), other);
     } else {
-      JSON_THROW(type_error::create(310, "cannot use swap() with " + std::string(type_name())));
+      CONFIG_THROW(type_error::create(310, "cannot use swap() with " + std::string(type_name())));
     }
   }
 
   void swap(map_t &other) {
     // swap only works for objects
-    if (JSON_LIKELY(is_map())) {
+    if (CONFIG_LIKELY(is_map())) {
       std::swap(*(m_value.map), other);
     } else {
-      JSON_THROW(type_error::create(310, "cannot use swap() with " + std::string(type_name())));
+      CONFIG_THROW(type_error::create(310, "cannot use swap() with " + std::string(type_name())));
     }
   }
 
   void swap(string_t &other) {
     // swap only works for strings
-    if (JSON_LIKELY(is_string())) {
+    if (CONFIG_LIKELY(is_string())) {
       std::swap(*(m_value.string), other);
     } else {
-      JSON_THROW(type_error::create(310, "cannot use swap() with " + std::string(type_name())));
+      CONFIG_THROW(type_error::create(310, "cannot use swap() with " + std::string(type_name())));
     }
   }
 

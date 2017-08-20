@@ -40,8 +40,8 @@ class config_path {
 
  private:
   std::string pop_back() {
-    if (JSON_UNLIKELY(is_root())) {
-      JSON_THROW(detail::out_of_range::create(405, "JSON pointer has no parent"));
+    if (CONFIG_UNLIKELY(is_root())) {
+      CONFIG_THROW(detail::out_of_range::create(405, "JSON pointer has no parent"));
     }
 
     auto last = reference_tokens.back();
@@ -54,8 +54,8 @@ class config_path {
   }
 
   config_path top() const {
-    if (JSON_UNLIKELY(is_root())) {
-      JSON_THROW(detail::out_of_range::create(405, "JSON pointer has no parent"));
+    if (CONFIG_UNLIKELY(is_root())) {
+      CONFIG_THROW(detail::out_of_range::create(405, "JSON pointer has no parent"));
     }
 
     config_path result = *this;
@@ -100,8 +100,8 @@ class config_path {
     }
 
     // check if nonempty reference string begins with slash
-    if (JSON_UNLIKELY(reference_string[0] != '/')) {
-      JSON_THROW(detail::parse_error::create(107, 1,
+    if (CONFIG_UNLIKELY(reference_string[0] != '/')) {
+      CONFIG_THROW(detail::parse_error::create(107, 1,
                                              "JSON pointer must be empty or begin with '/' - was: '" +
                                                  reference_string + "'"));
     }
@@ -132,10 +132,10 @@ class config_path {
         assert(reference_token[pos] == '~');
 
         // ~ must be followed by 0 or 1
-        if (JSON_UNLIKELY(pos == reference_token.size() - 1 or
+        if (CONFIG_UNLIKELY(pos == reference_token.size() - 1 or
             (reference_token[pos + 1] != '0' and
                 reference_token[pos + 1] != '1'))) {
-          JSON_THROW(detail::parse_error::create(108, 0,
+          CONFIG_THROW(detail::parse_error::create(108, 0,
                                                  "escape character '~' must be followed with '0' or '1'"));
         }
       }
