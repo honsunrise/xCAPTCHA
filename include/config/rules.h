@@ -4,14 +4,18 @@
 
 #ifndef XCAPTCHA_RULES_H
 #define XCAPTCHA_RULES_H
+
 #include <string>
 #include <vector>
+
 namespace captcha_config {
 namespace rules {
 
 struct _base_rule {
   _base_rule() = default;
+
   virtual ~_base_rule() = default;
+
   virtual _base_rule *clone() {};
 };
 
@@ -45,6 +49,7 @@ struct _integer_rule : _base_rule {
     static_assert(std::is_integral<T>::value, "Integer required.");
     arg_value = b;
   }
+
   _base_rule *clone() override {
     return new _integer_rule(arg_value);
   }
@@ -70,12 +75,15 @@ struct int64_rule : _integer_rule<int64_t> {
 };
 
 struct string_list_rule : _list_rule<std::string> {
-  string_list_rule(std::vector<std::string> &&arg) : _list_rule(std::forward<std::vector<std::string>>(arg)) {}
+  string_list_rule(std::vector<std::string> &&arg) : _list_rule(
+      std::forward<std::vector<std::string>>(arg)) {}
 };
 
 struct regex : string_rule {
   regex(const char *arg) : string_rule(arg) {}
+
   regex(const std::string &arg) : string_rule(arg) {}
+
   regex(std::string &&arg) : string_rule(arg) {}
 };
 

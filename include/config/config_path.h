@@ -4,6 +4,7 @@
 
 #ifndef XCAPTCHA_CONFIG_PATH_H
 #define XCAPTCHA_CONFIG_PATH_H
+
 #include <string>
 #include <numeric>
 #include <vector>
@@ -134,7 +135,8 @@ class config_path {
         if (JSON_UNLIKELY(pos == reference_token.size() - 1 or
             (reference_token[pos + 1] != '0' and
                 reference_token[pos + 1] != '1'))) {
-          JSON_THROW(detail::parse_error::create(108, 0, "escape character '~' must be followed with '0' or '1'"));
+          JSON_THROW(detail::parse_error::create(108, 0,
+                                                 "escape character '~' must be followed with '0' or '1'"));
         }
       }
 

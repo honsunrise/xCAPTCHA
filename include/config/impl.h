@@ -4,6 +4,7 @@
 
 #ifndef XCAPTCHA_IMPL_H
 #define XCAPTCHA_IMPL_H
+
 #include "config.h"
 #include "config/detail/declaration.h"
 #include "config_path.h"
@@ -38,13 +39,12 @@ config_path::get_and_create(XCAPTCHA_BASIC_CONFIG_TPL &j) const {
 
       case detail::value_t::array: {
         // create an entry in the array
-        JSON_TRY
-        {
+        JSON_TRY {
           result = &result->operator[](static_cast<size_type>(std::stoi(reference_token)));
         }
-        JSON_CATCH(std::invalid_argument & )
-        {
-          JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token + "' is not a number"));
+        JSON_CATCH(std::invalid_argument &) {
+          JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token +
+              "' is not a number"));
         }
         break;
       }
@@ -102,20 +102,20 @@ config_path::get_unchecked(XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
           ptr = &ptr->operator[](ptr->m_value.array->size());
         } else {
           // convert array index to number; unchecked access
-          JSON_TRY
-          {
+          JSON_TRY {
             ptr = &ptr->operator[](
                 static_cast<size_type>(std::stoi(reference_token)));
           }
-          JSON_CATCH(std::invalid_argument & )
-          {
-            JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token + "' is not a number"));
+          JSON_CATCH(std::invalid_argument &) {
+            JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token +
+                "' is not a number"));
           }
         }
         break;
       }
 
-      default:JSON_THROW(detail::out_of_range::create(404, "unresolved reference token '" + reference_token + "'"));
+      default:JSON_THROW(
+            detail::out_of_range::create(404, "unresolved reference token '" + reference_token + "'"));
     }
   }
 
@@ -138,7 +138,8 @@ config_path::get_checked(XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
         if (JSON_UNLIKELY(reference_token == "-")) {
           // "-" always fails the range check
           JSON_THROW(detail::out_of_range::create(402,
-                                                  "array index '-' (" + std::to_string(ptr->m_value.array->size()) +
+                                                  "array index '-' (" +
+                                                      std::to_string(ptr->m_value.array->size()) +
                                                       ") is out of range"));
         }
 
@@ -150,18 +151,18 @@ config_path::get_checked(XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
         }
 
         // note: at performs range check
-        JSON_TRY
-        {
+        JSON_TRY {
           ptr = &ptr->at(static_cast<size_type>(std::stoi(reference_token)));
         }
-        JSON_CATCH(std::invalid_argument & )
-        {
-          JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token + "' is not a number"));
+        JSON_CATCH(std::invalid_argument &) {
+          JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token +
+              "' is not a number"));
         }
         break;
       }
 
-      default:JSON_THROW(detail::out_of_range::create(404, "unresolved reference token '" + reference_token + "'"));
+      default:JSON_THROW(
+            detail::out_of_range::create(404, "unresolved reference token '" + reference_token + "'"));
     }
   }
 
@@ -184,7 +185,8 @@ config_path::get_unchecked(const XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
         if (JSON_UNLIKELY(reference_token == "-")) {
           // "-" cannot be used for const access
           JSON_THROW(detail::out_of_range::create(402,
-                                                  "array index '-' (" + std::to_string(ptr->m_value.array->size()) +
+                                                  "array index '-' (" +
+                                                      std::to_string(ptr->m_value.array->size()) +
                                                       ") is out of range"));
         }
 
@@ -196,19 +198,19 @@ config_path::get_unchecked(const XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
         }
 
         // use unchecked array access
-        JSON_TRY
-        {
+        JSON_TRY {
           ptr = &ptr->operator[](
               static_cast<size_type>(std::stoi(reference_token)));
         }
-        JSON_CATCH(std::invalid_argument & )
-        {
-          JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token + "' is not a number"));
+        JSON_CATCH(std::invalid_argument &) {
+          JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token +
+              "' is not a number"));
         }
         break;
       }
 
-      default:JSON_THROW(detail::out_of_range::create(404, "unresolved reference token '" + reference_token + "'"));
+      default:JSON_THROW(
+            detail::out_of_range::create(404, "unresolved reference token '" + reference_token + "'"));
     }
   }
 
@@ -231,7 +233,8 @@ config_path::get_checked(const XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
         if (JSON_UNLIKELY(reference_token == "-")) {
           // "-" always fails the range check
           JSON_THROW(detail::out_of_range::create(402,
-                                                  "array index '-' (" + std::to_string(ptr->m_value.array->size()) +
+                                                  "array index '-' (" +
+                                                      std::to_string(ptr->m_value.array->size()) +
                                                       ") is out of range"));
         }
 
@@ -243,18 +246,18 @@ config_path::get_checked(const XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
         }
 
         // note: at performs range check
-        JSON_TRY
-        {
+        JSON_TRY {
           ptr = &ptr->at(static_cast<size_type>(std::stoi(reference_token)));
         }
-        JSON_CATCH(std::invalid_argument & )
-        {
-          JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token + "' is not a number"));
+        JSON_CATCH(std::invalid_argument &) {
+          JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token +
+              "' is not a number"));
         }
         break;
       }
 
-      default:JSON_THROW(detail::out_of_range::create(404, "unresolved reference token '" + reference_token + "'"));
+      default:JSON_THROW(
+            detail::out_of_range::create(404, "unresolved reference token '" + reference_token + "'"));
     }
   }
 
@@ -263,8 +266,8 @@ config_path::get_checked(const XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
 
 XCAPTCHA_BASIC_CONFIG_TPL_DECLARATION
 void config_path::flatten(const std::string &reference_string,
-                           const XCAPTCHA_BASIC_CONFIG_TPL &value,
-                           XCAPTCHA_BASIC_CONFIG_TPL &result) {
+                          const XCAPTCHA_BASIC_CONFIG_TPL &value,
+                          XCAPTCHA_BASIC_CONFIG_TPL &result) {
   switch (value.m_type) {
     case detail::value_t::array: {
       if (value.m_value.array->empty()) {

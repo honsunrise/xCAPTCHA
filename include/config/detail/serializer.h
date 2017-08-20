@@ -4,6 +4,7 @@
 
 #ifndef XCAPTCHA_SERIALIZER_H
 #define XCAPTCHA_SERIALIZER_H
+
 #include <utility>
 #include <vector>
 #include <cstdlib>
@@ -14,6 +15,7 @@
 #include "declaration.h"
 #include "value_type.h"
 #include "typed_constructor.h"
+
 namespace captcha_config {
 namespace detail {
 
@@ -38,7 +40,8 @@ void to_json(BasicConfigType &j, typename BasicConfigType::string_t &&s) {
 template<typename BasicConfigType, typename FloatType,
     utils::enable_if_t<std::is_floating_point<FloatType>::value, int> = 0>
 void to_json(BasicConfigType &j, FloatType val) noexcept {
-  typed_constructor<value_t::number_float>::construct(j, static_cast<typename BasicConfigType::number_float_t>(val));
+  typed_constructor<value_t::number_float>::construct(j,
+                                                      static_cast<typename BasicConfigType::number_float_t>(val));
 }
 
 template<
@@ -208,7 +211,8 @@ void from_json(const BasicConfigType &j, std::forward_list<T, Allocator> &l) {
 }
 
 template<typename BasicConfigType, typename CompatibleArrayType>
-void from_json_array_impl(const BasicConfigType &j, CompatibleArrayType &arr, utils::priority_tag<0> /*unused*/) {
+void
+from_json_array_impl(const BasicConfigType &j, CompatibleArrayType &arr, utils::priority_tag<0> /*unused*/) {
   using std::end;
 
   std::transform(j.begin(), j.end(),
@@ -326,7 +330,8 @@ struct to_config_fn {
   template<typename BasicConfigType, typename T>
   auto call(BasicConfigType &j, T &&val, utils::priority_tag<1> /*unused*/) const noexcept(noexcept(to_json(j,
                                                                                                             std::forward<
-                                                                                                                T>(val))))
+                                                                                                                T>(
+                                                                                                                val))))
   -> decltype(to_json(j, std::forward<T>(val)), void()) {
     return to_json(j, std::forward<T>(val));
   }
@@ -340,7 +345,8 @@ struct to_config_fn {
  public:
   template<typename BasicConfigType, typename T>
   void operator()(BasicConfigType &j, T &&val) const
-  noexcept(noexcept(std::declval<to_config_fn>().call(j, std::forward<T>(val), utils::priority_tag < 1 > {}))) {
+  noexcept(noexcept(std::declval<to_config_fn>().call(j, std::forward<T>(val),
+                                                      utils::priority_tag < 1 > {}))) {
     return call(j, std::forward<T>(val), utils::priority_tag<1> {});
   }
 };
@@ -355,7 +361,8 @@ struct from_config_fn {
   }
 
   template<typename BasicConfigType, typename T>
-  void call(const BasicConfigType & /*unused*/, T & /*unused*/, utils::priority_tag<0> /*unused*/) const noexcept {
+  void
+  call(const BasicConfigType & /*unused*/, T & /*unused*/, utils::priority_tag<0> /*unused*/) const noexcept {
     static_assert(sizeof(BasicConfigType) == 0,
                   "could not find from_json() method in T's namespace");
   }

@@ -4,39 +4,43 @@
 
 #ifndef XCAPTCHA_UTILS_H
 #define XCAPTCHA_UTILS_H
+
 #include <type_traits>
 #include "declaration.h"
 // allow to disable exceptions
 #if (defined(__cpp_exceptions) || defined(__EXCEPTIONS) || defined(_CPPUNWIND)) && not defined(JSON_NOEXCEPTION)
-  #define JSON_THROW(exception) throw exception
-  #define JSON_TRY try
-  #define JSON_CATCH(exception) catch(exception)
+#define JSON_THROW(exception) throw exception
+#define JSON_TRY try
+#define JSON_CATCH(exception) catch(exception)
 #else
-  #define JSON_THROW(exception) std::abort()
-  #define JSON_TRY if(true)
-  #define JSON_CATCH(exception) if(false)
+#define JSON_THROW(exception) std::abort()
+#define JSON_TRY if(true)
+#define JSON_CATCH(exception) if(false)
 #endif
 
 // manual branch prediction
 #if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
-  #define JSON_LIKELY(x)      __builtin_expect(!!(x), 1)
-  #define JSON_UNLIKELY(x)    __builtin_expect(!!(x), 0)
+#define JSON_LIKELY(x)      __builtin_expect(!!(x), 1)
+#define JSON_UNLIKELY(x)    __builtin_expect(!!(x), 0)
 #else
-  #define JSON_LIKELY(x)      x
-  #define JSON_UNLIKELY(x)    x
+#define JSON_LIKELY(x)      x
+#define JSON_UNLIKELY(x)    x
 #endif
 
 namespace captcha_config {
 namespace utils {
 
 template<typename>
-struct is_basic_config : std::false_type {};
+struct is_basic_config : std::false_type {
+};
 
 XCAPTCHA_BASIC_CONFIG_TPL_DECLARATION
-struct is_basic_config<XCAPTCHA_BASIC_CONFIG_TPL> : std::true_type {};
+struct is_basic_config<XCAPTCHA_BASIC_CONFIG_TPL > : std::true_type {
+};
 
 XCAPTCHA_BASIC_CONFIG_TPL_DECLARATION
-struct is_basic_config<XCAPTCHA_BASIC_CONFIG_DEFINE_TPL> : std::true_type {};
+struct is_basic_config<XCAPTCHA_BASIC_CONFIG_DEFINE_TPL > : std::true_type {
+};
 
 template<bool B, typename T = void>
 using enable_if_t = typename std::enable_if<B, T>::type;
@@ -50,6 +54,7 @@ template<std::size_t... Ints>
 struct index_sequence {
   using type = index_sequence;
   using value_type = std::size_t;
+
   static constexpr std::size_t size() noexcept {
     return sizeof...(Ints);
   }
@@ -70,9 +75,11 @@ struct make_index_sequence
 };
 
 template<>
-struct make_index_sequence<0> : index_sequence<> {};
+struct make_index_sequence<0> : index_sequence<> {
+};
 template<>
-struct make_index_sequence<1> : index_sequence<0> {};
+struct make_index_sequence<1> : index_sequence<0> {
+};
 
 template<typename... Ts>
 using index_sequence_for = make_index_sequence<sizeof...(Ts)>;
@@ -91,20 +98,26 @@ become very long quickly (which can slow down compilation and cause MSVC
 internal compiler errors). Only use it when you have to (see example ahead).
 */
 template<class...>
-struct conjunction : std::true_type {};
+struct conjunction : std::true_type {
+};
 template<class B1>
-struct conjunction<B1> : B1 {};
+struct conjunction<B1> : B1 {
+};
 template<class B1, class... Bn>
-struct conjunction<B1, Bn...> : std::conditional<bool(B1::value), conjunction<Bn...>, B1>::type {};
+struct conjunction<B1, Bn...> : std::conditional<bool(B1::value), conjunction<Bn...>, B1>::type {
+};
 
 template<class B>
-struct negation : std::integral_constant<bool, !B::value> {};
+struct negation : std::integral_constant<bool, !B::value> {
+};
 
 // dispatch utility (taken from ranges-v3)
 template<unsigned N>
-struct priority_tag : priority_tag<N - 1> {};
+struct priority_tag : priority_tag<N - 1> {
+};
 template<>
-struct priority_tag<0> {};
+struct priority_tag<0> {
+};
 
 ////////////////////////
 // has_/is_ functions //
@@ -132,47 +145,46 @@ contains a `mapped_type`, whereas `std::vector` fails the test.
     }
 
 NLOHMANN_JSON_HAS_HELPER(mapped_type);
+
 NLOHMANN_JSON_HAS_HELPER(key_type);
+
 NLOHMANN_JSON_HAS_HELPER(value_type);
+
 NLOHMANN_JSON_HAS_HELPER(iterator);
 
 #undef NLOHMANN_JSON_HAS_HELPER
 
-
 template<bool B, class RealType, class CompatibleObjectType>
-struct is_compatible_object_type_impl : std::false_type {};
+struct is_compatible_object_type_impl : std::false_type {
+};
 
 template<class RealType, class CompatibleObjectType>
-struct is_compatible_object_type_impl<true, RealType, CompatibleObjectType>
-{
+struct is_compatible_object_type_impl<true, RealType, CompatibleObjectType> {
   static constexpr auto value =
       std::is_constructible<typename RealType::key_type, typename CompatibleObjectType::key_type>::value and
           std::is_constructible<typename RealType::mapped_type, typename CompatibleObjectType::mapped_type>::value;
 };
 
 template<class BasicConfigType, class CompatibleObjectType>
-struct is_compatible_map_type
-{
-  static auto constexpr value = is_compatible_object_type_impl <
+struct is_compatible_map_type {
+  static auto constexpr value = is_compatible_object_type_impl<
       conjunction<negation<std::is_same<void, CompatibleObjectType>>,
                   has_mapped_type<CompatibleObjectType>,
                   has_key_type<CompatibleObjectType>>::value,
-      typename BasicConfigType::object_t, CompatibleObjectType >::value;
+      typename BasicConfigType::object_t, CompatibleObjectType>::value;
 };
 
 template<typename BasicConfigType, typename T>
-struct is_basic_config_nested_type
-{
+struct is_basic_config_nested_type {
   static auto constexpr value =
       std::is_same<T, typename BasicConfigType::iterator>::value or
-      std::is_same<T, typename BasicConfigType::const_iterator>::value or
-      std::is_same<T, typename BasicConfigType::reverse_iterator>::value or
-      std::is_same<T, typename BasicConfigType::const_reverse_iterator>::value;
+          std::is_same<T, typename BasicConfigType::const_iterator>::value or
+          std::is_same<T, typename BasicConfigType::reverse_iterator>::value or
+          std::is_same<T, typename BasicConfigType::const_reverse_iterator>::value;
 };
 
 template<class BasicConfigType, class CompatibleArrayType>
-struct is_compatible_array_type
-{
+struct is_compatible_array_type {
   static auto constexpr value =
       conjunction<negation<std::is_same<void, CompatibleArrayType>>,
                   negation<is_compatible_map_type<
@@ -185,11 +197,11 @@ struct is_compatible_array_type
 };
 
 template<bool, typename, typename>
-struct is_compatible_integer_type_impl : std::false_type {};
+struct is_compatible_integer_type_impl : std::false_type {
+};
 
 template<typename RealIntegerType, typename CompatibleNumberIntegerType>
-struct is_compatible_integer_type_impl<true, RealIntegerType, CompatibleNumberIntegerType>
-{
+struct is_compatible_integer_type_impl<true, RealIntegerType, CompatibleNumberIntegerType> {
   // is there an assert somewhere on overflows?
   using RealLimits = std::numeric_limits<RealIntegerType>;
   using CompatibleLimits = std::numeric_limits<CompatibleNumberIntegerType>;
@@ -201,43 +213,42 @@ struct is_compatible_integer_type_impl<true, RealIntegerType, CompatibleNumberIn
 };
 
 template<typename RealIntegerType, typename CompatibleNumberIntegerType>
-struct is_compatible_integer_type
-{
+struct is_compatible_integer_type {
   static constexpr auto value =
-      is_compatible_integer_type_impl <
+      is_compatible_integer_type_impl<
           std::is_integral<CompatibleNumberIntegerType>::value and
               not std::is_same<bool, CompatibleNumberIntegerType>::value,
-          RealIntegerType, CompatibleNumberIntegerType > ::value;
+          RealIntegerType, CompatibleNumberIntegerType>::value;
 };
-
 
 // trait checking if Serializer<T>::from_json(json const&, udt&) exists
 template<typename BasicConfigType, typename T>
-struct has_from_config
-{
+struct has_from_config {
  private:
   // also check the return type of from_json
   template<typename U, typename = enable_if_t<std::is_same<void, decltype(uncvref_t<U>::from_json(
-      std::declval<BasicConfigType>(), std::declval<T&>()))>::value>>
-  static int detect(U&&);
+      std::declval<BasicConfigType>(), std::declval<T &>()))>::value>>
+  static int detect(U &&);
+
   static void detect(...);
 
  public:
   static constexpr bool value = std::is_integral<decltype(
-                                                 detect(std::declval<typename BasicConfigType::template serializer<T, void>>()))>::value;
+                                                 detect(std::declval<typename BasicConfigType::template serializer<T,
+                                                                                                                   void>>()))>::value;
 };
 
 // This trait checks if Serializer<T>::from_json(json const&) exists
 // this overload is used for non-default-constructible user-defined-types
 template<typename BasicConfigType, typename T>
-struct has_non_default_from_config
-{
+struct has_non_default_from_config {
  private:
-  template <
+  template<
       typename U,
       typename = enable_if_t<std::is_same<
           T, decltype(uncvref_t<U>::from_json(std::declval<BasicConfigType>()))>::value >>
-  static int detect(U&&);
+  static int detect(U &&);
+
   static void detect(...);
 
  public:
@@ -247,12 +258,12 @@ struct has_non_default_from_config
 
 // This trait checks if BasicConfigType::serializer<T>::to_json exists
 template<typename BasicConfigType, typename T>
-struct has_to_config
-{
+struct has_to_config {
  private:
   template<typename U, typename = decltype(uncvref_t<U>::to_json(
-      std::declval<BasicConfigType&>(), std::declval<T>()))>
-  static int detect(U&&);
+      std::declval<BasicConfigType &>(), std::declval<T>()))>
+  static int detect(U &&);
+
   static void detect(...);
 
  public:

@@ -7,7 +7,6 @@
 namespace captcha_config {
 namespace detail {
 
-
 }
 }
 #endif //XCAPTCHA_DETAIL_IMPL_H

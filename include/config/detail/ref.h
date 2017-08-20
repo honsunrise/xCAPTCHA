@@ -4,6 +4,7 @@
 
 #ifndef XCAPTCHA_DETAIL_CONFIG_H
 #define XCAPTCHA_DETAIL_CONFIG_H
+
 #include <boost/noncopyable.hpp>
 #include <boost/any.hpp>
 
@@ -37,7 +38,9 @@ class config_ref {
 
   // class should be movable only
   config_ref(config_ref &&) noexcept = default;
+
   config_ref(const config_ref &) = delete;
+
   config_ref &operator=(const config_ref &) = delete;
 
   value_type moved_or_copied() const {

@@ -4,6 +4,7 @@
 
 #ifndef XCAPTCHA_CAPTCHA_CONFIG_H
 #define XCAPTCHA_CAPTCHA_CONFIG_H
+
 #include <string>
 #include <utility>
 #include <vector>
@@ -28,6 +29,7 @@ class basic_config {
   friend config_path;
   template<detail::value_t> friend
   struct detail::typed_constructor;
+
   template<typename BasicConfigType> friend
   class detail::iter_impl;
 
@@ -117,10 +119,15 @@ class basic_config {
     number_float_t number_float;
 
     config_value() = default;
+
     config_value(boolean_t v) noexcept : boolean(v) {}
+
     config_value(number_integer_t v) noexcept : number_integer(v) {}
+
     config_value(number_unsigned_t v) noexcept : number_unsigned(v) {}
+
     config_value(number_float_t v) noexcept : number_float(v) {}
+
     config_value(value_t t) {
       switch (t) {
         case value_t::map: {
@@ -164,7 +171,8 @@ class basic_config {
 
         default: {
           if (JSON_UNLIKELY(t == value_t::null)) {
-            JSON_THROW(other_error::create(500, "961c151d2e87f2686a955a9be24d316f1362bf21 2.1.1")); // LCOV_EXCL_LINE
+            JSON_THROW(other_error::create(500,
+                                           "961c151d2e87f2686a955a9be24d316f1362bf21 2.1.1")); // LCOV_EXCL_LINE
           }
           break;
         }
@@ -654,7 +662,7 @@ class basic_config {
       typename ValueType = utils::uncvref_t<ValueTypeCV>,
       utils::enable_if_t<not std::is_same<basic_config, ValueType>::value and
           utils::has_non_default_from_config<basic_config,
-                                           ValueType>::value, int> = 0>
+                                             ValueType>::value, int> = 0>
   ValueType get() const noexcept(noexcept(
   Serializer<ValueTypeCV>::from_json(std::declval<const basic_config &>()))) {
     static_assert(not std::is_reference<ValueTypeCV>::value,

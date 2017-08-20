@@ -4,6 +4,7 @@
 
 #ifndef XCAPTCHA_VALUE_TYPE_H
 #define XCAPTCHA_VALUE_TYPE_H
+
 #include <cstdint>
 
 namespace captcha_config {

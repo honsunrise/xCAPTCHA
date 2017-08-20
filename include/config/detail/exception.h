@@ -4,6 +4,7 @@
 
 #ifndef XCAPTCHA_EXCEPTION_H
 #define XCAPTCHA_EXCEPTION_H
+
 #include <string>
 #include <stdexcept>
 

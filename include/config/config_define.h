@@ -4,6 +4,7 @@
 
 #ifndef XCAPTCHA_CONFIG_DEFINE_H
 #define XCAPTCHA_CONFIG_DEFINE_H
+
 #include <string>
 #include <utility>
 #include <vector>
@@ -28,6 +29,7 @@ class basic_config_define {
   friend config_path;
   template<detail::value_t> friend
   struct detail::typed_constructor;
+
   template<typename BasicConfigType> friend
   class detail::iter_impl;
 
@@ -117,10 +119,15 @@ class basic_config_define {
     number_float_t number_float;
 
     config_value() = default;
+
     config_value(boolean_t v) noexcept : boolean(v) {}
+
     config_value(number_integer_t v) noexcept : number_integer(v) {}
+
     config_value(number_unsigned_t v) noexcept : number_unsigned(v) {}
+
     config_value(number_float_t v) noexcept : number_float(v) {}
+
     config_value(value_t t) {
       switch (t) {
         case value_t::map: {
@@ -164,7 +171,8 @@ class basic_config_define {
 
         default: {
           if (JSON_UNLIKELY(t == value_t::null)) {
-            JSON_THROW(other_error::create(500, "961c151d2e87f2686a955a9be24d316f1362bf21 2.1.1")); // LCOV_EXCL_LINE
+            JSON_THROW(other_error::create(500,
+                                           "961c151d2e87f2686a955a9be24d316f1362bf21 2.1.1")); // LCOV_EXCL_LINE
           }
           break;
         }
@@ -248,12 +256,12 @@ class basic_config_define {
     assert_invariant();
   }
 
-  template<typename CompatibleType, typename U = utils::uncvref_t <CompatibleType>,
+  template<typename CompatibleType, typename U = utils::uncvref_t<CompatibleType>,
       utils::enable_if_t<
           not std::is_base_of<std::istream, U>::value and
-          not std::is_same<U, basic_config_define>::value and
-          not utils::is_basic_config_nested_type<basic_config_define, U>::value and
-          utils::has_to_config<basic_config_define, U>::value, int> = 0>
+              not std::is_same<U, basic_config_define>::value and
+              not utils::is_basic_config_nested_type<basic_config_define, U>::value and
+              utils::has_to_config<basic_config_define, U>::value, int> = 0>
   basic_config_define(CompatibleType &&val) noexcept(noexcept(Serializer<U>::to_json(
       std::declval<basic_config_define &>(), std::forward<CompatibleType>(val)))) {
     Serializer<U>::to_json(*this, std::forward<CompatibleType>(val));
@@ -289,12 +297,13 @@ class basic_config_define {
       m_type = value_t::map;
       m_value = value_t::map;
 
-      std::for_each(init.begin(), init.end(), [this](const detail::config_ref<basic_config_define> &element_ref) {
-        auto element = element_ref.moved_or_copied();
-        m_value.map->emplace(
-            std::move(*((*element.m_value.array)[0].m_value.string)),
-            std::move((*element.m_value.array)[1]));
-      });
+      std::for_each(init.begin(), init.end(),
+                    [this](const detail::config_ref<basic_config_define> &element_ref) {
+                      auto element = element_ref.moved_or_copied();
+                      m_value.map->emplace(
+                          std::move(*((*element.m_value.array)[0].m_value.string)),
+                          std::move((*element.m_value.array)[1]));
+                    });
     } else {
       // the initializer list describes an array -> create array
       m_type = value_t::array;
@@ -395,7 +404,7 @@ class basic_config_define {
     assert_invariant();
   }
 
-  basic_config_define(const detail::config_ref <basic_config_define> &ref)
+  basic_config_define(const detail::config_ref<basic_config_define> &ref)
       : basic_config_define(ref.moved_or_copied()) {}
 
   basic_config_define(const basic_config_define &other)
@@ -620,15 +629,14 @@ class basic_config_define {
   template<
       typename BasicConfigType,
       utils::enable_if_t<std::is_same<typename std::remove_const<BasicConfigType>::type,
-                                      basic_config_define>::value,
-          int> = 0>
+                                      basic_config_define>::value, int> = 0>
   basic_config_define get() const {
     return *this;
   }
 
   template<
       typename ValueTypeCV,
-      typename ValueType = utils::uncvref_t <ValueTypeCV>,
+      typename ValueType = utils::uncvref_t<ValueTypeCV>,
       utils::enable_if_t<
           not std::is_same<basic_config_define, ValueType>::value and
               utils::has_from_config<basic_config_define, ValueType>::value and
@@ -651,10 +659,10 @@ class basic_config_define {
 
   template<
       typename ValueTypeCV,
-      typename ValueType = utils::uncvref_t <ValueTypeCV>,
+      typename ValueType = utils::uncvref_t<ValueTypeCV>,
       utils::enable_if_t<not std::is_same<basic_config_define, ValueType>::value and
           utils::has_non_default_from_config<basic_config_define,
-                                           ValueType>::value, int> = 0>
+                                             ValueType>::value, int> = 0>
   ValueType get() const noexcept(noexcept(
   Serializer<ValueTypeCV>::from_json(std::declval<const basic_config_define &>()))) {
     static_assert(not std::is_reference<ValueTypeCV>::value,
@@ -745,6 +753,7 @@ class basic_config_define {
   and not std::is_same<ValueType, typename std::string_view>::value
 #endif
   , int>::type = 0>
+
   operator ValueType() const {
     // delegate the call to get<>() const
     return get<ValueType>();
