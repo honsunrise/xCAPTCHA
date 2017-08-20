@@ -38,6 +38,8 @@ class basic_config {
   using internal_iterator = detail::internal_iterator<ConfigType>;
   template<typename ConfigType>
   using iter_impl = detail::iter_impl<ConfigType>;
+  template<typename Iterator>
+  using iteration_proxy = detail::iteration_proxy<Iterator>;
   template<typename Base> using conofig_reverse_iterator = detail::config_reverse_iterator<Base>;
 
  public:
@@ -262,9 +264,9 @@ class basic_config {
           not utils::is_basic_config_nested_type<basic_config, U>::value and
           utils::has_to_config<basic_config, U>::value,
                          int> = 0>
-  basic_config(CompatibleType &&val) noexcept(noexcept(Serializer<U>::to_json(
+  basic_config(CompatibleType &&val) noexcept(noexcept(Serializer<U>::to_config(
       std::declval<basic_config &>(), std::forward<CompatibleType>(val)))) {
-    Serializer<U>::to_json(*this, std::forward<CompatibleType>(val));
+    Serializer<U>::to_config(*this, std::forward<CompatibleType>(val));
     assert_invariant();
   }
 
@@ -643,7 +645,7 @@ class basic_config {
               not utils::has_non_default_from_config<basic_config, ValueType>::value,
           int> = 0>
   ValueType get() const noexcept(noexcept(
-  Serializer<ValueType>::from_json(std::declval<const basic_config &>(), std::declval<ValueType &>()))) {
+  Serializer<ValueType>::from_config(std::declval<const basic_config &>(), std::declval<ValueType &>()))) {
     // we cannot static_assert on ValueTypeCV being non-const, because
     // there is support for get<const basic_config_define_t>(), which is why we
     // still need the uncvref
@@ -653,7 +655,7 @@ class basic_config {
                   "types must be DefaultConstructible when used with get()");
 
     ValueType ret;
-    Serializer<ValueType>::from_json(*this, ret);
+    Serializer<ValueType>::from_config(*this, ret);
     return ret;
   }
 
@@ -664,10 +666,10 @@ class basic_config {
           utils::has_non_default_from_config<basic_config,
                                              ValueType>::value, int> = 0>
   ValueType get() const noexcept(noexcept(
-  Serializer<ValueTypeCV>::from_json(std::declval<const basic_config &>()))) {
+  Serializer<ValueTypeCV>::from_config(std::declval<const basic_config &>()))) {
     static_assert(not std::is_reference<ValueTypeCV>::value,
                   "get() cannot be used with reference types, you might want to use get_ref()");
-    return Serializer<ValueTypeCV>::from_json(*this);
+    return Serializer<ValueTypeCV>::from_config(*this);
   }
 
   template<typename PointerType, typename std::enable_if<
@@ -1172,6 +1174,16 @@ class basic_config {
     return const_reverse_iterator(cbegin());
   }
 
+  static iteration_proxy<iterator> iterator_wrapper(reference cont)
+  {
+    return iteration_proxy<iterator>(cont);
+  }
+
+  static iteration_proxy<const_iterator> iterator_wrapper(const_reference cont)
+  {
+    return iteration_proxy<const_iterator>(cont);
+  }
+
  public:
   bool empty() const noexcept {
     switch (m_type) {
@@ -1502,8 +1514,8 @@ class basic_config {
     }
 
     // passed iterators must belong to objects
-    if (JSON_UNLIKELY(not first.m_object->is_object()
-                          or not last.m_object->is_object())) {
+    if (JSON_UNLIKELY(not first.m_object->is_map()
+                          or not last.m_object->is_map())) {
       JSON_THROW(invalid_iterator::create(202, "iterators first and last must point to objects"));
     }
 

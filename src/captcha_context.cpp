@@ -4,7 +4,6 @@
 
 #include <boost/filesystem.hpp>
 #include "captcha_context.h"
-using namespace captcha_config;
 
 captcha_context::captcha_context() {
 
@@ -67,24 +66,24 @@ bool captcha_context::load_config(const std::string &path) {
 }
 
 void captcha_context::check_config(const config_define &config_define, const YAML::Node &plugin_config, config &cfg) {
-//  for (auto it : config_define) {
-//    if (it.second.is_container()) {
-//      config *inside = new config(config::config_node_type::CONTAINER);
-//      check_config(it.second, plugin_config[it.first], *inside);
-//      cfg.insert(it.first, inside);
-//    } else if (plugin_config[it.first]) {
-//      cfg.insert(it.first, new config(yaml_node_2_type(plugin_config[it.first], it.second.get_value()->type())));
-//    } else {
-//      cfg.insert(it.first, new config(it.second.get_value()));
-//    }
-//  }
+  for (const auto &it : config_define::iterator_wrapper(config_define)) {
+    if (it.value().is_map()) {
+      config inside;
+      check_config(it, plugin_config[it], inside);
+      cfg[it.value().get<std::string>()] = inside;
+    } else if (plugin_config[it.key()]) {
+      cfg[it.key()] = plugin_config[it.key()];
+    } else {
+      cfg[it.key()] = config_define[it.key()];
+    }
+  }
 }
 
 config captcha_context::check_config(const config_define &config_define,
                                      const YAML::Node &plugin_config) {
-//  config really(config::config_node_type::CONTAINER);
-//  check_config(config_define, plugin_config, really);
-//  return really;
+  config really;
+  check_config(config_define, plugin_config, really);
+  return really;
 }
 
 captcha captcha_context::generate() {

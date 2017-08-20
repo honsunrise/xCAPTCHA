@@ -8,18 +8,19 @@
 #include <yaml-cpp/yaml.h>
 #include "captcha.h"
 #include "captcha_plugin_stub.h"
+using namespace captcha_config;
 
 class captcha_context {
  public:
   captcha_context();
   bool load_config(const std::string &path);
-  captcha_config::config check_config(const captcha_config::config_define &config_define,
+  config check_config(const config_define &config_define,
                                       const YAML::Node &plugin_config);
   captcha generate();
   virtual ~captcha_context();
  private:
-  void check_config(const captcha_config::config_define &config_define,
-                    const YAML::Node &plugin_config, captcha_config::config &cfg);
+  void check_config(const config_define &config_define,
+                    const YAML::Node &plugin_config, config &cfg);
 
   captcha_api api;
   std::string config_path;

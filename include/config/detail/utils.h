@@ -171,7 +171,7 @@ struct is_compatible_map_type {
       conjunction<negation<std::is_same<void, CompatibleObjectType>>,
                   has_mapped_type<CompatibleObjectType>,
                   has_key_type<CompatibleObjectType>>::value,
-      typename BasicConfigType::object_t, CompatibleObjectType>::value;
+      typename BasicConfigType::map_t, CompatibleObjectType>::value;
 };
 
 template<typename BasicConfigType, typename T>
@@ -187,10 +187,8 @@ template<class BasicConfigType, class CompatibleArrayType>
 struct is_compatible_array_type {
   static auto constexpr value =
       conjunction<negation<std::is_same<void, CompatibleArrayType>>,
-                  negation<is_compatible_map_type<
-                      BasicConfigType, CompatibleArrayType>>,
-                  negation<std::is_constructible<typename BasicConfigType::string_t,
-                                                 CompatibleArrayType>>,
+                  negation<is_compatible_map_type<BasicConfigType, CompatibleArrayType>>,
+                  negation<std::is_constructible<typename BasicConfigType::string_t, CompatibleArrayType>>,
                   negation<is_basic_config_nested_type<BasicConfigType, CompatibleArrayType>>,
                   has_value_type<CompatibleArrayType>,
                   has_iterator<CompatibleArrayType>>::value;
@@ -221,12 +219,12 @@ struct is_compatible_integer_type {
           RealIntegerType, CompatibleNumberIntegerType>::value;
 };
 
-// trait checking if Serializer<T>::from_json(json const&, udt&) exists
+// trait checking if Serializer<T>::from_config(json const&, udt&) exists
 template<typename BasicConfigType, typename T>
 struct has_from_config {
  private:
-  // also check the return type of from_json
-  template<typename U, typename = enable_if_t<std::is_same<void, decltype(uncvref_t<U>::from_json(
+  // also check the return type of from_config
+  template<typename U, typename = enable_if_t<std::is_same<void, decltype(uncvref_t<U>::from_config(
       std::declval<BasicConfigType>(), std::declval<T &>()))>::value>>
   static int detect(U &&);
 
@@ -238,7 +236,7 @@ struct has_from_config {
                                                                                                                    void>>()))>::value;
 };
 
-// This trait checks if Serializer<T>::from_json(json const&) exists
+// This trait checks if Serializer<T>::from_config(json const&) exists
 // this overload is used for non-default-constructible user-defined-types
 template<typename BasicConfigType, typename T>
 struct has_non_default_from_config {
@@ -246,21 +244,21 @@ struct has_non_default_from_config {
   template<
       typename U,
       typename = enable_if_t<std::is_same<
-          T, decltype(uncvref_t<U>::from_json(std::declval<BasicConfigType>()))>::value >>
+          T, decltype(uncvref_t<U>::from_config(std::declval<BasicConfigType>()))>::value >>
   static int detect(U &&);
 
   static void detect(...);
 
  public:
   static constexpr bool value = std::is_integral<decltype(detect(
-      std::declval<typename BasicConfigType::template erializer<T, void>>()))>::value;
+      std::declval<typename BasicConfigType::template serializer<T, void>>()))>::value;
 };
 
-// This trait checks if BasicConfigType::serializer<T>::to_json exists
+// This trait checks if BasicConfigType::serializer<T>::to_config exists
 template<typename BasicConfigType, typename T>
 struct has_to_config {
  private:
-  template<typename U, typename = decltype(uncvref_t<U>::to_json(
+  template<typename U, typename = decltype(uncvref_t<U>::to_config(
       std::declval<BasicConfigType &>(), std::declval<T>()))>
   static int detect(U &&);
 

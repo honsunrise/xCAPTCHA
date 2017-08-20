@@ -122,9 +122,12 @@ struct internal_iterator {
   primitive_iterator_t primitive_iterator{};
 };
 
+template<typename IteratorType> class iteration_proxy;
+
 template<typename ConfigType>
 class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigType> {
   friend ConfigType;
+  friend iteration_proxy<iter_impl>;
 
   using map_t = typename ConfigType::map_t;
   using array_t = typename ConfigType::array_t;
@@ -182,7 +185,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
 
     switch (m_object->m_type) {
       case value_t::map: {
-        m_it.map_iterator = m_object->m_value.object->begin();
+        m_it.map_iterator = m_object->m_value.map->begin();
         break;
       }
 
@@ -209,7 +212,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
 
     switch (m_object->m_type) {
       case value_t::map: {
-        m_it.map_iterator = m_object->m_value.object->end();
+        m_it.map_iterator = m_object->m_value.map->end();
         break;
       }
 
@@ -231,7 +234,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
 
     switch (m_object->m_type) {
       case value_t::map: {
-        assert(m_it.map_iterator != m_object->m_value.object->end());
+        assert(m_it.map_iterator != m_object->m_value.map->end());
         return m_it.map_iterator->second;
       }
 
@@ -259,7 +262,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
 
     switch (m_object->m_type) {
       case value_t::map: {
-        assert(m_it.map_iterator != m_object->m_value.object->end());
+        assert(m_it.map_iterator != m_object->m_value.map->end());
         return &(m_it.map_iterator->second);
       }
 
@@ -472,7 +475,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
   typename map_t::key_type key() const {
     assert(m_object != nullptr);
 
-    if (JSON_LIKELY(m_object->is_object())) {
+    if (JSON_LIKELY(m_object->is_map())) {
       return m_it.map_iterator->first;
     }
 
@@ -486,6 +489,79 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
  private:
   pointer m_object = nullptr;
   internal_iterator<typename std::remove_const<ConfigType>::type> m_it = {};
+};
+
+template<typename IteratorType>
+class iteration_proxy {
+ private:
+  /// helper class for iteration
+  class iteration_proxy_internal {
+   private:
+    /// the iterator
+    IteratorType anchor;
+    /// an index for arrays (used to create key names)
+    std::size_t array_index = 0;
+
+   public:
+    explicit iteration_proxy_internal(IteratorType it) noexcept : anchor(it) {}
+
+    /// dereference operator (needed for range-based for)
+    iteration_proxy_internal &operator*() {
+      return *this;
+    }
+
+    /// increment operator (needed for range-based for)
+    iteration_proxy_internal &operator++() {
+      ++anchor;
+      ++array_index;
+
+      return *this;
+    }
+
+    /// inequality operator (needed for range-based for)
+    bool operator!=(const iteration_proxy_internal &o) const noexcept {
+      return anchor != o.anchor;
+    }
+
+    /// return key of the iterator
+    std::string key() const {
+      assert(anchor.m_object != nullptr);
+
+      switch (anchor.m_object->type()) {
+        // use integer array index as key
+        case value_t::array:return std::to_string(array_index);
+
+          // use key from the object
+        case value_t::map:return anchor.key();
+
+          // use an empty key for all primitive types
+        default:return "";
+      }
+    }
+
+    /// return value of the iterator
+    typename IteratorType::reference value() const {
+      return anchor.value();
+    }
+  };
+
+  /// the container to iterate
+  typename IteratorType::reference container;
+
+ public:
+  /// construct iteration proxy from a container
+  explicit iteration_proxy(typename IteratorType::reference cont)
+      : container(cont) {}
+
+  /// return iterator begin (needed for range-based for)
+  iteration_proxy_internal begin() noexcept {
+    return iteration_proxy_internal(container.begin());
+  }
+
+  /// return iterator end (needed for range-based for)
+  iteration_proxy_internal end() noexcept {
+    return iteration_proxy_internal(container.end());
+  }
 };
 
 template<typename Base>
