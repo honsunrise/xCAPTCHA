@@ -329,9 +329,9 @@ struct to_config_fn {
  private:
   template<typename BasicConfigType, typename T>
   auto call(BasicConfigType &j, T &&val, utils::priority_tag<1> /*unused*/) const noexcept(noexcept(to_config(j,
-                                                                                                            std::forward<
-                                                                                                                T>(
-                                                                                                                val))))
+                                                                                                              std::forward<
+                                                                                                                  T>(
+                                                                                                                  val))))
   -> decltype(to_config(j, std::forward<T>(val)), void()) {
     return to_config(j, std::forward<T>(val));
   }
@@ -394,14 +394,14 @@ template<typename, typename>
 struct adl_serializer {
   template<typename BasicConfigType, typename ValueType>
   static void from_config(BasicConfigType &&j, ValueType &val) noexcept(
-  noexcept(from_config(std::forward<BasicConfigType>(j), val))) {
-    from_config(std::forward<BasicConfigType>(j), val);
+  noexcept(::captcha_config::from_config(std::forward<BasicConfigType>(j), val))) {
+    ::captcha_config::from_config(std::forward<BasicConfigType>(j), val);
   }
 
   template<typename BasicConfigType, typename ValueType>
   static void to_config(BasicConfigType &j, ValueType &&val) noexcept(
-  noexcept(to_config(j, std::forward<ValueType>(val)))) {
-    to_config(j, std::forward<ValueType>(val));
+  noexcept(::captcha_config::to_config(j, std::forward<ValueType>(val)))) {
+    ::captcha_config::to_config(j, std::forward<ValueType>(val));
   }
 };
 }

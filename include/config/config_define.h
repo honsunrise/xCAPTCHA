@@ -9,16 +9,16 @@
 #include <vector>
 #include <map>
 #include <typeinfo>
-#include "config/detail/ref.h"
-#include "config/detail/value_type.h"
-#include "config/detail/exception.h"
-#include "config/detail/utils.h"
-#include "config/detail/iterator.h"
-#include "config/detail/typed_constructor.h"
-#include "config/detail/serializer.h"
-#include "config/detail/declaration.h"
-#include "config/rules.h"
-#include "config/config_path.h"
+#include "detail/ref.h"
+#include "detail/value_type.h"
+#include "detail/exception.h"
+#include "detail/utils.h"
+#include "detail/iterator.h"
+#include "detail/typed_constructor.h"
+#include "detail/serializer.h"
+#include "detail/declaration.h"
+#include "config_path.h"
+#include "rules.h"
 
 namespace captcha_config {
 

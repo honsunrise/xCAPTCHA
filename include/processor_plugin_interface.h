@@ -7,7 +7,6 @@
 #include "captcha.h"
 #include "captcha_api.h"
 #include "config/config.h"
-#include "config/config_define.h"
 
 using namespace captcha_config;
 class processor_plugin_interface {

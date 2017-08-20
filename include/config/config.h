@@ -10,16 +10,16 @@
 #include <vector>
 #include <map>
 #include <typeinfo>
-#include "config/detail/ref.h"
-#include "config/detail/value_type.h"
-#include "config/detail/exception.h"
-#include "config/detail/utils.h"
-#include "config/detail/iterator.h"
-#include "config/detail/typed_constructor.h"
-#include "config/detail/serializer.h"
-#include "config/detail/declaration.h"
-#include "config/rules.h"
-#include "config/config_path.h"
+#include "detail/ref.h"
+#include "detail/value_type.h"
+#include "detail/exception.h"
+#include "detail/utils.h"
+#include "detail/iterator.h"
+#include "detail/typed_constructor.h"
+#include "detail/serializer.h"
+#include "detail/declaration.h"
+#include "config_define.h"
+#include "config_path.h"
 
 namespace captcha_config {
 
@@ -174,7 +174,7 @@ class basic_config {
         default: {
           if (CONFIG_UNLIKELY(t == value_t::null)) {
             CONFIG_THROW(other_error::create(500,
-                                           "961c151d2e87f2686a955a9be24d316f1362bf21 2.1.1")); // LCOV_EXCL_LINE
+                                             "961c151d2e87f2686a955a9be24d316f1362bf21 2.1.1")); // LCOV_EXCL_LINE
           }
           break;
         }
@@ -351,7 +351,7 @@ class basic_config {
       case value_t::number_unsigned:
       case value_t::string: {
         if (CONFIG_UNLIKELY(not first.m_it.primitive_iterator.is_begin()
-                              or not last.m_it.primitive_iterator.is_end())) {
+                                or not last.m_it.primitive_iterator.is_end())) {
           CONFIG_THROW(invalid_iterator::create(204, "iterators out of range"));
         }
         break;
@@ -622,8 +622,8 @@ class basic_config {
     }
 
     CONFIG_THROW(type_error::create(303,
-                                  "incompatible ReferenceType for get_ref, actual type is "
-                                      + std::string(obj.type_name())));
+                                    "incompatible ReferenceType for get_ref, actual type is "
+                                        + std::string(obj.type_name())));
   }
 
  public:
@@ -1037,7 +1037,7 @@ class basic_config {
       case value_t::number_unsigned:
       case value_t::string: {
         if (CONFIG_LIKELY(not first.m_it.primitive_iterator.is_begin()
-                            or not last.m_it.primitive_iterator.is_end())) {
+                              or not last.m_it.primitive_iterator.is_end())) {
           CONFIG_THROW(invalid_iterator::create(204, "iterators out of range"));
         }
 
@@ -1174,13 +1174,11 @@ class basic_config {
     return const_reverse_iterator(cbegin());
   }
 
-  static iteration_proxy<iterator> iterator_wrapper(reference cont)
-  {
+  static iteration_proxy<iterator> iterator_wrapper(reference cont) {
     return iteration_proxy<iterator>(cont);
   }
 
-  static iteration_proxy<const_iterator> iterator_wrapper(const_reference cont)
-  {
+  static iteration_proxy<const_iterator> iterator_wrapper(const_reference cont) {
     return iteration_proxy<const_iterator>(cont);
   }
 
@@ -1515,7 +1513,7 @@ class basic_config {
 
     // passed iterators must belong to objects
     if (CONFIG_UNLIKELY(not first.m_object->is_map()
-                          or not last.m_object->is_map())) {
+                            or not last.m_object->is_map())) {
       CONFIG_THROW(invalid_iterator::create(202, "iterators first and last must point to objects"));
     }
 
@@ -1561,7 +1559,7 @@ class basic_config {
 
     // passed iterators must belong to objects
     if (CONFIG_UNLIKELY(not first.m_object->is_object()
-                          or not first.m_object->is_object())) {
+                            or not first.m_object->is_object())) {
       CONFIG_THROW(invalid_iterator::create(202, "iterators first and last must point to objects"));
     }
 
@@ -1829,6 +1827,16 @@ class basic_config {
 };
 
 using config = basic_config<>;
+
+template<>
+struct adl_serializer<config_define> {
+  static void to_config(config &j, const config_define &l) {
+
+  }
+
+  static void from_config(const config &j, config_define &l) {
+  }
+};
 
 }
 

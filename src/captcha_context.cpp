@@ -4,7 +4,6 @@
 
 #include <boost/filesystem.hpp>
 #include "captcha_context.h"
-
 captcha_context::captcha_context() {
 
 }
@@ -66,15 +65,36 @@ bool captcha_context::load_config(const std::string &path) {
 }
 
 void captcha_context::check_config(const config_define &config_define, const YAML::Node &plugin_config, config &cfg) {
-  for (const auto &it : config_define::iterator_wrapper(config_define)) {
+  for (auto &it : config_define::iterator_wrapper(config_define)) {
     if (it.value().is_map()) {
       config inside;
-      check_config(it, plugin_config[it], inside);
-      cfg[it.value().get<std::string>()] = inside;
-    } else if (plugin_config[it.key()]) {
-      cfg[it.key()] = plugin_config[it.key()];
+      check_config(it.value(), plugin_config[it.key()], inside);
+      cfg[it.key()] = inside;
+    } else if (plugin_config[it.key()].IsDefined()) {
+      switch (it.value().type()) {
+        case detail::value_t::string:
+          cfg[it.key()] = plugin_config[it.key()].as<std::string>();
+          break;
+        case detail::value_t::boolean:
+          cfg[it.key()] = plugin_config[it.key()].as<bool>();
+          break;
+        case detail::value_t::number_integer:
+          cfg[it.key()] = plugin_config[it.key()].as<int64_t>();
+          break;
+        case detail::value_t::number_unsigned:
+          cfg[it.key()] = plugin_config[it.key()].as<uint64_t>();
+          break;
+        case detail::value_t::number_float:
+          cfg[it.key()] = plugin_config[it.key()].as<double>();
+          break;
+        case detail::value_t::discarded:
+        case detail::value_t::null:
+        case detail::value_t::map:
+        case detail::value_t::array:
+          break;
+      }
     } else {
-      cfg[it.key()] = config_define[it.key()];
+      cfg[it.key()] = config(config_define[it.key()]);
     }
   }
 }
