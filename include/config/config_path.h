@@ -5,7 +5,11 @@
 #ifndef XCAPTCHA_CONFIG_PATH_H
 #define XCAPTCHA_CONFIG_PATH_H
 #include <string>
+#include <numeric>
+#include <vector>
+#include <cassert>
 #include "config/detail/declaration.h"
+#include "config/detail/utils.h"
 
 namespace captcha_config {
 
@@ -13,6 +17,10 @@ class config_path {
   XCAPTCHA_BASIC_CONFIG_TPL_DECLARATION
   friend
   class basic_config;
+
+  XCAPTCHA_BASIC_CONFIG_TPL_DECLARATION
+  friend
+  class basic_config_define;
 
  public:
   explicit config_path(const std::string &s = "") : reference_tokens(split(s)) {}

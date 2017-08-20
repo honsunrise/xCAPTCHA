@@ -31,7 +31,7 @@ std::map,
     template<typename U> class AllocatorType = std::allocator,
     template<typename T, typename SFINAE = void> class Serializer =
     adl_serializer>
-class base_config_define;
+class basic_config_define;
 
 #define XCAPTCHA_BASIC_CONFIG_TPL_DECLARATION                              \
     template<template<typename, typename, typename...> class ObjectType,   \
@@ -43,6 +43,11 @@ class base_config_define;
 
 #define XCAPTCHA_BASIC_CONFIG_TPL                                          \
     basic_config<ObjectType, ArrayType, StringType, BooleanType,           \
+    NumberIntegerType, NumberUnsignedType, NumberFloatType,                \
+    AllocatorType, Serializer>
+
+#define XCAPTCHA_BASIC_CONFIG_DEFINE_TPL                                   \
+    basic_config_define<ObjectType, ArrayType, StringType, BooleanType,    \
     NumberIntegerType, NumberUnsignedType, NumberFloatType,                \
     AllocatorType, Serializer>
 

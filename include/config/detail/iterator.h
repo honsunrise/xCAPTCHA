@@ -489,7 +489,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
 };
 
 template<typename Base>
-class json_reverse_iterator : public std::reverse_iterator<Base> {
+class config_reverse_iterator : public std::reverse_iterator<Base> {
  public:
   using difference_type = std::ptrdiff_t;
   /// shortcut to the reverse iterator adaptor
@@ -498,49 +498,49 @@ class json_reverse_iterator : public std::reverse_iterator<Base> {
   using reference = typename Base::reference;
 
   /// create reverse iterator from iterator
-  json_reverse_iterator(const typename base_iterator::iterator_type &it) noexcept
+  config_reverse_iterator(const typename base_iterator::iterator_type &it) noexcept
       : base_iterator(it) {}
 
   /// create reverse iterator from base class
-  json_reverse_iterator(const base_iterator &it) noexcept : base_iterator(it) {}
+  config_reverse_iterator(const base_iterator &it) noexcept : base_iterator(it) {}
 
   /// post-increment (it++)
-  json_reverse_iterator operator++(int) {
-    return static_cast<json_reverse_iterator>(base_iterator::operator++(1));
+  config_reverse_iterator operator++(int) {
+    return static_cast<config_reverse_iterator>(base_iterator::operator++(1));
   }
 
   /// pre-increment (++it)
-  json_reverse_iterator &operator++() {
-    return static_cast<json_reverse_iterator &>(base_iterator::operator++());
+  config_reverse_iterator &operator++() {
+    return static_cast<config_reverse_iterator &>(base_iterator::operator++());
   }
 
   /// post-decrement (it--)
-  json_reverse_iterator operator--(int) {
-    return static_cast<json_reverse_iterator>(base_iterator::operator--(1));
+  config_reverse_iterator operator--(int) {
+    return static_cast<config_reverse_iterator>(base_iterator::operator--(1));
   }
 
   /// pre-decrement (--it)
-  json_reverse_iterator &operator--() {
-    return static_cast<json_reverse_iterator &>(base_iterator::operator--());
+  config_reverse_iterator &operator--() {
+    return static_cast<config_reverse_iterator &>(base_iterator::operator--());
   }
 
   /// add to iterator
-  json_reverse_iterator &operator+=(difference_type i) {
-    return static_cast<json_reverse_iterator &>(base_iterator::operator+=(i));
+  config_reverse_iterator &operator+=(difference_type i) {
+    return static_cast<config_reverse_iterator &>(base_iterator::operator+=(i));
   }
 
   /// add to iterator
-  json_reverse_iterator operator+(difference_type i) const {
-    return static_cast<json_reverse_iterator>(base_iterator::operator+(i));
+  config_reverse_iterator operator+(difference_type i) const {
+    return static_cast<config_reverse_iterator>(base_iterator::operator+(i));
   }
 
   /// subtract from iterator
-  json_reverse_iterator operator-(difference_type i) const {
-    return static_cast<json_reverse_iterator>(base_iterator::operator-(i));
+  config_reverse_iterator operator-(difference_type i) const {
+    return static_cast<config_reverse_iterator>(base_iterator::operator-(i));
   }
 
   /// return difference
-  difference_type operator-(const json_reverse_iterator &other) const {
+  difference_type operator-(const config_reverse_iterator &other) const {
     return base_iterator(*this) - base_iterator(other);
   }
 
