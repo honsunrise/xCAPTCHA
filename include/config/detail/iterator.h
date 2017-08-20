@@ -129,7 +129,7 @@ class iter_impl : public std::iterator<std::random_access_iterator_tag, ConfigTy
   using map_t = typename ConfigType::map_t;
   using array_t = typename ConfigType::array_t;
   // make sure ConfigType is basic_config or const basic_config
-  static_assert(utils::is_basic_json<typename std::remove_const<ConfigType>::type>::value,
+  static_assert(utils::is_basic_config<typename std::remove_const<ConfigType>::type>::value,
                 "iter_impl only accepts (const) basic_config");
 
  public:

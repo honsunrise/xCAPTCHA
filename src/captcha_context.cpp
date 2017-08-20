@@ -67,24 +67,24 @@ bool captcha_context::load_config(const std::string &path) {
 }
 
 void captcha_context::check_config(const config_define &config_define, const YAML::Node &plugin_config, config &cfg) {
-  for (auto it : config_define) {
-    if (it.second.is_container()) {
-      config *inside = new config(config::config_node_type::CONTAINER);
-      check_config(it.second, plugin_config[it.first], *inside);
-      cfg.insert(it.first, inside);
-    } else if (plugin_config[it.first]) {
-      cfg.insert(it.first, new config(yaml_node_2_type(plugin_config[it.first], it.second.get_value()->type())));
-    } else {
-      cfg.insert(it.first, new config(it.second.get_value()));
-    }
-  }
+//  for (auto it : config_define) {
+//    if (it.second.is_container()) {
+//      config *inside = new config(config::config_node_type::CONTAINER);
+//      check_config(it.second, plugin_config[it.first], *inside);
+//      cfg.insert(it.first, inside);
+//    } else if (plugin_config[it.first]) {
+//      cfg.insert(it.first, new config(yaml_node_2_type(plugin_config[it.first], it.second.get_value()->type())));
+//    } else {
+//      cfg.insert(it.first, new config(it.second.get_value()));
+//    }
+//  }
 }
 
 config captcha_context::check_config(const config_define &config_define,
                                      const YAML::Node &plugin_config) {
-  config really(config::config_node_type::CONTAINER);
-  check_config(config_define, plugin_config, really);
-  return really;
+//  config really(config::config_node_type::CONTAINER);
+//  check_config(config_define, plugin_config, really);
+//  return really;
 }
 
 captcha captcha_context::generate() {

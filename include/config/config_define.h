@@ -249,11 +249,11 @@ class basic_config_define {
   }
 
   template<typename CompatibleType, typename U = utils::uncvref_t <CompatibleType>,
-      utils::enable_if_t<not std::is_base_of<std::istream, U>::value and
+      utils::enable_if_t<
+          not std::is_base_of<std::istream, U>::value and
           not std::is_same<U, basic_config_define>::value and
-          not utils::is_basic_json_nested_type<basic_config_define, U>::value and
-          utils::has_to_json<basic_config_define, U>::value,
-                         int> = 0>
+          not utils::is_basic_config_nested_type<basic_config_define, U>::value and
+          utils::has_to_config<basic_config_define, U>::value, int> = 0>
   basic_config_define(CompatibleType &&val) noexcept(noexcept(Serializer<U>::to_json(
       std::declval<basic_config_define &>(), std::forward<CompatibleType>(val)))) {
     Serializer<U>::to_json(*this, std::forward<CompatibleType>(val));
@@ -631,8 +631,8 @@ class basic_config_define {
       typename ValueType = utils::uncvref_t <ValueTypeCV>,
       utils::enable_if_t<
           not std::is_same<basic_config_define, ValueType>::value and
-              utils::has_from_json<basic_config_define, ValueType>::value and
-              not utils::has_non_default_from_json<basic_config_define, ValueType>::value,
+              utils::has_from_config<basic_config_define, ValueType>::value and
+              not utils::has_non_default_from_config<basic_config_define, ValueType>::value,
           int> = 0>
   ValueType get() const noexcept(noexcept(
   Serializer<ValueType>::from_json(std::declval<const basic_config_define &>(), std::declval<ValueType &>()))) {
@@ -653,7 +653,7 @@ class basic_config_define {
       typename ValueTypeCV,
       typename ValueType = utils::uncvref_t <ValueTypeCV>,
       utils::enable_if_t<not std::is_same<basic_config_define, ValueType>::value and
-          utils::has_non_default_from_json<basic_config_define,
+          utils::has_non_default_from_config<basic_config_define,
                                            ValueType>::value, int> = 0>
   ValueType get() const noexcept(noexcept(
   Serializer<ValueTypeCV>::from_json(std::declval<const basic_config_define &>()))) {

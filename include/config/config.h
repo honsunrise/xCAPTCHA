@@ -251,8 +251,8 @@ class basic_config {
   template<typename CompatibleType, typename U = utils::uncvref_t<CompatibleType>,
       utils::enable_if_t<not std::is_base_of<std::istream, U>::value and
           not std::is_same<U, basic_config>::value and
-          not utils::is_basic_json_nested_type<basic_config, U>::value and
-          utils::has_to_json<basic_config, U>::value,
+          not utils::is_basic_config_nested_type<basic_config, U>::value and
+          utils::has_to_config<basic_config, U>::value,
                          int> = 0>
   basic_config(CompatibleType &&val) noexcept(noexcept(Serializer<U>::to_json(
       std::declval<basic_config &>(), std::forward<CompatibleType>(val)))) {
@@ -631,8 +631,8 @@ class basic_config {
       typename ValueType = utils::uncvref_t<ValueTypeCV>,
       utils::enable_if_t<
           not std::is_same<basic_config, ValueType>::value and
-              utils::has_from_json<basic_config, ValueType>::value and
-              not utils::has_non_default_from_json<basic_config, ValueType>::value,
+              utils::has_from_config<basic_config, ValueType>::value and
+              not utils::has_non_default_from_config<basic_config, ValueType>::value,
           int> = 0>
   ValueType get() const noexcept(noexcept(
   Serializer<ValueType>::from_json(std::declval<const basic_config &>(), std::declval<ValueType &>()))) {
@@ -653,7 +653,7 @@ class basic_config {
       typename ValueTypeCV,
       typename ValueType = utils::uncvref_t<ValueTypeCV>,
       utils::enable_if_t<not std::is_same<basic_config, ValueType>::value and
-          utils::has_non_default_from_json<basic_config,
+          utils::has_non_default_from_config<basic_config,
                                            ValueType>::value, int> = 0>
   ValueType get() const noexcept(noexcept(
   Serializer<ValueTypeCV>::from_json(std::declval<const basic_config &>()))) {

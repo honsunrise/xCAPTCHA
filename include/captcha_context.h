@@ -19,7 +19,7 @@ class captcha_context {
   virtual ~captcha_context();
  private:
   void check_config(const captcha_config::config_define &config_define,
-                    const YAML::Node &plugin_config, captcha_config::config &config);
+                    const YAML::Node &plugin_config, captcha_config::config &cfg);
 
   captcha_api api;
   std::string config_path;
@@ -28,7 +28,6 @@ class captcha_context {
   int32_t bits;
   std::string plugin_path;
   std::map<std::string, captcha_plugin_stub> plugins;
-  void check_config(const config_define &config_define, const YAML::Node &plugin_config, config &cfg);
 };
 
 #endif //XCAPTCHA_CAPTCHA_CONTEXT_H
