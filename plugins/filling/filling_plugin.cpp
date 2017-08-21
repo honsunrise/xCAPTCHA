@@ -36,10 +36,10 @@ void filling_plugin::set_config(const captcha_config::config &node) {
 }
 
 captcha filling_plugin::pipe(captcha &in) {
+  static std::random_device rd;
   static auto
-      dice = std::bind(std::uniform_int_distribution<int32_t>(random_min, random_max), std::default_random_engine());
+      dice = std::bind(std::uniform_int_distribution<int32_t>(random_min, random_max), std::default_random_engine(rd()));
   cv::Mat image = in;
-  int type =  image.type();
   int32_t t_r = r > 0 ? r : dice();
   int32_t t_g = g > 0 ? g : dice();
   int32_t t_b = b > 0 ? b : dice();

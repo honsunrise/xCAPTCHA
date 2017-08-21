@@ -23,6 +23,8 @@ captcha_config::config_define noise_plugin::get_config_define() const {
   define["color"]["random"]["max"] = 256U;
 
   define["type"] = "line";
+  define["param"] = captcha_config::config_define();
+  define["param"]["line_number"] = 100;
   return define;
 }
 
@@ -37,28 +39,45 @@ void noise_plugin::set_config(const captcha_config::config &node) {
   random_max = random["max"];
 
   type = node["type"];
+  const auto &param = node["param"];
+  line_number = param["line_number"];
 }
 
-void MyLine(cv::Mat &img, const cv::Scalar &color, cv::Point start, cv::Point end) {
-  int thickness = 1;
-  int lineType = cv::LINE_AA;
-  cv::line(img,
-           start,
-           end,
-           color,
-           thickness,
-           lineType);
+int noise_plugin::drawing_random_lines(Mat image, int x_1, int y_1, int x_2, int y_2) {
+  static std::random_device rd;
+  static auto
+      c = std::bind(std::uniform_int_distribution<int32_t>(random_min, random_max), std::default_random_engine(rd()));
+  static auto
+      w = std::bind(std::uniform_int_distribution<int32_t>(x_1, x_2), std::default_random_engine(rd()));
+  static auto
+      h = std::bind(std::uniform_int_distribution<int32_t>(y_1, y_2), std::default_random_engine(rd()));
+
+  Point pt1, pt2;
+  for (int i = 0; i < line_number; i++) {
+    pt1.x = w();
+    pt1.y = h();
+    pt2.x = w();
+    pt2.y = h();
+
+    int t_r = r > 0 ? r : c();
+    int t_g = g > 0 ? g : c();
+    int t_b = b > 0 ? b : c();
+
+    line(image, pt1, pt2, Scalar(t_b & 255, t_g & 255, t_r & 255), 1, LINE_8);
+  }
+  return 0;
 }
 
 captcha noise_plugin::pipe(captcha &in) {
-  static auto
-      dice = std::bind(std::uniform_int_distribution<int32_t>(random_min, random_max), std::default_random_engine());
-  cv::Mat image = static_cast<cv::Mat>(in);
-  int32_t t_r = r > 0 ? r : dice();
-  int32_t t_g = g > 0 ? g : dice();
-  int32_t t_b = b > 0 ? b : dice();
-  MyLine(image, cv::Scalar(t_b, t_g, t_r), cv::Point(0,0), cv::Point(100,100));
+  Mat image = in;
+  drawing_random_lines(image, 0, 0, image.cols, image.rows);
   return captcha(image);
+}
+int noise_plugin::drawing_random_wave(Mat image, int x_1, int y_1, int x_2, int y_2) {
+  return 0;
+}
+int noise_plugin::drawing_random_circles(Mat image, int x_1, int y_1, int x_2, int y_2) {
+  return 0;
 }
 
 processor_plugin_interface *create() {

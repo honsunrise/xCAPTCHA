@@ -1,7 +1,7 @@
 ---
 global:
-  width: 256
-  height: 200
+  width: 200
+  height: 100
   bits: 32
   plugin:
     path: cmake-build-debug/plugins
@@ -11,7 +11,7 @@ pipes:
     color:
       random:
         min: 10
-        max: 200
+        max: 100
       r: -1
       g: -1
       b: -1
@@ -20,8 +20,10 @@ pipes:
     color:
       random:
         min: 10
-        max: 200
+        max: 150
       r: -1
       g: -1
       b: -1
     type: "line"
+    param:
+      line_number: 200

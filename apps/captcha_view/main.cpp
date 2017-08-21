@@ -6,9 +6,12 @@ using namespace cv;
 int main() {
   captcha_context cc;
   cc.load_config("config/demo.yaml");
-  Mat image = static_cast<Mat>(cc.generate());
   namedWindow("Display Image", WINDOW_AUTOSIZE );
-  imshow("Display Image", image);
-  waitKey(0);
+  while(1) {
+    Mat image = cc.generate();
+    imshow("Display Image", image);
+    if(waitKey(500) == 'q')
+      break;
+  }
   return 0;
 }
