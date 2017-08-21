@@ -19,7 +19,7 @@ class captcha {
   captcha &operator=(const captcha &other);
   captcha &operator=(captcha &&other) noexcept;
 
-  explicit operator cv::Mat();
+  operator cv::Mat();
   virtual ~captcha();
  private:
   int32_t rows;
