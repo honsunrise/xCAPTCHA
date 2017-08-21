@@ -3,14 +3,15 @@
 //
 
 #include "captcha.h"
-captcha::captcha(): rows(0), cols(0), data(nullptr) {
+captcha::captcha() : rows(0), cols(0), channels(3), data(nullptr) {
 }
 
 captcha::captcha(const captcha &other) {
   rows = other.rows;
   cols = other.cols;
-  data = new uint32_t[rows * cols];
-  std::memcpy(data, other.data, static_cast<size_t>(rows * cols));
+  channels = other.channels;
+  data = new uint8_t[rows * cols * channels];
+  std::memcpy(data, other.data, static_cast<size_t>(rows * cols * channels));
 }
 
 captcha::captcha(captcha &&other) noexcept {
@@ -21,59 +22,64 @@ captcha::captcha(captcha &&other) noexcept {
   other.cols = other.rows = 0;
 }
 captcha &captcha::operator=(const captcha &other) {
-  delete [] data;
+  delete[] data;
   rows = other.rows;
   cols = other.cols;
-  data = new uint32_t[rows * cols];
-  std::memcpy(data, other.data, static_cast<size_t>(rows * cols));
+  channels = other.channels;
+  data = new uint8_t[rows * cols * channels];
+  std::memcpy(data, other.data, static_cast<size_t>(rows * cols * channels));
   return *this;
 }
 captcha &captcha::operator=(captcha &&other) noexcept {
-  delete [] data;
+  delete[] data;
   rows = other.rows;
   cols = other.cols;
+  channels = other.channels;
   data = other.data;
   other.data = nullptr;
-  other.cols = other.rows = 0;
+  other.cols = other.rows = other.channels = 0;
   return *this;
 }
 
-captcha::captcha(int32_t rows, int32_t cols) : rows(rows), cols(cols) {
-  data = new uint32_t[rows * cols];
+captcha::captcha(int32_t rows, int32_t cols) : rows(rows), cols(cols), channels(3) {
+  data = new uint8_t[rows * cols * channels];
 }
 
 captcha::~captcha() {
-  cols = rows = 0;
-  delete [] data;
+  cols = rows = channels = 0;
+  delete[] data;
 }
 
 captcha::captcha(const cv::Mat &mat) {
-  cv::Mat tmp;
-  mat.convertTo(tmp, CV_8UC4);
-  cols = tmp.cols;
-  rows = tmp.rows;
-  data = new uint32_t[tmp.cols * tmp.rows];
-  if(tmp.isContinuous()) {
-    const auto *ptrDst = tmp.ptr<uint32_t>();
-    for(int i = 0; i < tmp.total(); ++i) {
-      data[i] = ptrDst[i];
-    }
+  cols = mat.cols;
+  rows = mat.rows;
+  channels = mat.channels();
+  data = new uint8_t[cols * rows * channels];
+  if (mat.isContinuous()) {
+    std::memcpy(data, mat.ptr(), static_cast<size_t>(cols * rows * channels));
   } else {
-    for(int i = 0; i < tmp.rows; ++i) {
-      const auto *ptrDst = tmp.ptr<uint32_t>(i);
-      for(int j = 0; j < tmp.cols; ++j) {
-        data[i * tmp.cols + j] = ptrDst[j];
+    for (int i = 0; i < rows; ++i) {
+      for (int j = 0; j < cols; ++j) {
+        for (int k = 0; k < channels; ++k) {
+          data[i * cols * channels + j * channels + k] = mat.at<uint8_t>(i, j * channels + k);
+        }
       }
     }
   }
 }
 
 captcha::operator cv::Mat() {
-  cv::Mat mat(rows, cols, CV_8UC4);
-  for (int i = 0; i < rows; ++i) {
-    auto *ptrDst = mat.ptr<uint32_t>(i);
-    for (int j = 0; j < cols; ++j) {
-        ptrDst[j] = data[i * cols + j];
+  cv::Mat mat(rows, cols, CV_MAKETYPE(CV_8U, channels));
+  if (mat.isContinuous()) {
+    std::memcpy(mat.ptr(), data, static_cast<size_t>(cols * rows * channels));
+  } else {
+    for (int i = 0; i < rows; ++i) {
+      auto *ptrDst = mat.ptr<uint8_t>(i);
+      for (int j = 0; j < cols; ++j) {
+        for (int k = 0; k < channels; ++k) {
+          ptrDst[j * channels + k] = data[i * cols * channels + j * channels + k];
+        }
+      }
     }
   }
   return mat;

@@ -24,7 +24,8 @@ class captcha {
  private:
   int32_t rows;
   int32_t cols;
-  uint32_t *data;
+  int32_t channels;
+  uint8_t *data;
 };
 
 #endif //XCAPTCHA_CAPTCHA_H
