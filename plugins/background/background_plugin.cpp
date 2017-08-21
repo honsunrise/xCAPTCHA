@@ -1,7 +1,7 @@
 //
 // Created by zhsyourai on 8/4/17.
 //
-
+#include <boost/filesystem.hpp>
 #include "background_plugin.h"
 
 void background_plugin::initialization(const captcha_api &api) {
@@ -14,41 +14,49 @@ void background_plugin::release() {
 
 captcha_config::config_define background_plugin::get_config_define() const {
   captcha_config::config_define define;
-  define["image_dir"] = captcha_config::config_define();
-  define["color"]["r"] = -1;
-  define["color"]["g"] = -1;
-  define["color"]["b"] = -1;
-  define["color"]["random"] = captcha_config::config_define();
-  define["color"]["random"]["min"] = 0U;
-  define["color"]["random"]["max"] = 256U;
+  define["image_dir"] = "";
   return define;
 }
 
 void background_plugin::set_config(const captcha_config::config &node) {
-  const auto &color = node["color"];
-  r = color["r"];
-  g = color["g"];
-  b = color["b"];
-
-  const auto &random = node["color"]["random"];
-  random_min = random["min"];
-  random_max = random["max"];
+  using namespace boost::filesystem;
+  image_dir = node["image_dir"];
+  if (is_directory(image_dir)) {
+    // TODO throw exception
+  }
+  file_count = std::count_if(
+      directory_iterator(image_dir),
+      directory_iterator(),
+      static_cast<bool (*)(const path &)>(is_regular_file));
+  if (is_directory(image_dir)) {
+    int i = 0;
+    for (directory_iterator it(image_dir); it != directory_iterator(); ++it) {
+      if (is_regular(*it)) {
+        file_map[i++] = it->path().filename().string();
+      }
+    }
+  }
 }
 
 captcha background_plugin::pipe(captcha &in) {
+  using namespace boost::filesystem;
   static std::random_device rd;
-  static auto
-      dice = std::bind(std::uniform_int_distribution<int32_t>(random_min, random_max), std::default_random_engine(rd()));
+  static auto engine = std::default_random_engine(rd());
+  static auto dice = std::bind(std::uniform_int_distribution<int32_t>(0, file_count-1), engine);
   cv::Mat image = in;
-  int32_t t_r = r > 0 ? r : dice();
-  int32_t t_g = g > 0 ? g : dice();
-  int32_t t_b = b > 0 ? b : dice();
-  const cv::Scalar &color = cv::Scalar(t_b, t_g, t_r);
-  cv::rectangle(image,
-                cv::Point(0, 0),
-                cv::Point(image.cols, image.rows),
-                color, cv::FILLED, cv::LINE_8);
-  return captcha(image);
+  path image_file = image_dir;
+  image_file /= file_map[dice()];
+  cv::Mat load = cv::imread(image_file.string());
+  std::uniform_int_distribution<int32_t> range_row(0, std::max(load.rows - image.rows, 0));
+  std::uniform_int_distribution<int32_t> range_col(0, std::max(load.cols - image.cols, 0));
+  if(image.cols > load.cols || image.rows > load.rows) {
+    cv::resize(load, load, cv::Size(image.cols, image.rows));
+  }
+  cv::Rect roi(range_col(engine), range_row(engine),image.cols, image.rows);
+  load = load(roi);
+  cv::Mat dst;
+  cv::addWeighted(load, 0.8, image, 0.2, 0.0, dst);
+  return captcha(load);
 }
 
 processor_plugin_interface *create() {

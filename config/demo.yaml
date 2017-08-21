@@ -16,6 +16,8 @@ pipes:
       g: -1
       b: -1
     test: aaaa
+  background:
+    image_dir: resource/background
   noise:
     color:
       random:
@@ -26,4 +28,4 @@ pipes:
       b: -1
     type: "line"
     param:
-      line_number: 200
+      line_number: 50

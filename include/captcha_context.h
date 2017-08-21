@@ -28,6 +28,7 @@ class captcha_context {
   int32_t height;
   int32_t bits;
   std::string plugin_path;
+  std::vector<std::string> order;
   std::map<std::string, captcha_plugin_stub> plugins;
 };
 

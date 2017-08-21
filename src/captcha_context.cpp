@@ -54,6 +54,7 @@ bool captcha_context::load_config(const std::string &path) {
       file /= pipe.first.as<std::string>();
       file += "_plugin.so";
 
+      order.push_back(plugin_name);
       plugins[plugin_name] = captcha_plugin_stub(file.string());
       plugins[plugin_name].get_interface()->initialization(api);
       const config_define &cd = plugins[plugin_name].get_interface()->get_config_define();
@@ -113,8 +114,8 @@ captcha captcha_context::generate() {
                 cv::Point(width, height),
                 cv::Scalar(0, 0, 0), -1, 8);
   captcha &&ca = captcha(image);
-  for (auto plugin:plugins) {
-    ca = plugin.second.get_interface()->pipe(ca);
+  for (auto plugin:order) {
+    ca = plugins[plugin].get_interface()->pipe(ca);
   }
   return ca;
 }

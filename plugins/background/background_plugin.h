@@ -17,11 +17,9 @@ class background_plugin : public processor_plugin_interface {
   captcha pipe(captcha &in) override;
  private:
   const captcha_api *api;
-  int32_t r = 0;
-  int32_t g = 0;
-  int32_t b = 0;
-  uint32_t random_min = 0;
-  uint32_t random_max = 0;
+  std::string image_dir;
+  uint32_t file_count;
+  std::map<uint32_t , std::string> file_map;
 };
 
 extern "C" {
