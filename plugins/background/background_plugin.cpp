@@ -14,7 +14,7 @@ void background_plugin::release() {
 
 captcha_config::config_define background_plugin::get_config_define() const {
   captcha_config::config_define define;
-  define["color"] = captcha_config::config_define();
+  define["image_dir"] = captcha_config::config_define();
   define["color"]["r"] = -1;
   define["color"]["g"] = -1;
   define["color"]["b"] = -1;
