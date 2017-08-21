@@ -107,7 +107,7 @@ config captcha_context::check_config(const config_define &config_define,
 }
 
 captcha captcha_context::generate() {
-  cv::Mat image = cv::Mat::zeros(height, width, CV_8UC4);
+  cv::Mat image = cv::Mat::zeros(height, width, CV_8UC3);
   cv::rectangle(image,
                 cv::Point(0, 0),
                 cv::Point(width, height),

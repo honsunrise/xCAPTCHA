@@ -6,8 +6,7 @@ using namespace cv;
 int main() {
   captcha_context cc;
   cc.load_config("config/demo.yaml");
-  captcha cap = cc.generate();
-  Mat image = static_cast<Mat>(cap);
+  Mat image = static_cast<Mat>(cc.generate());
   namedWindow("Display Image", WINDOW_AUTOSIZE );
   imshow("Display Image", image);
   waitKey(0);
