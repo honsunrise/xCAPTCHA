@@ -15,8 +15,14 @@ class image_deformation_mls {
                         const int src_h,
                         const vector<Point2d> &p,
                         const vector<Point2d> &q,
-                        const int tar_w = src_w,
-                        const int tar_h = src_h);
+                        const int tar_w,
+                        const int tar_h);
+
+  image_deformation_mls(const int src_w,
+                        const int src_h,
+                        const vector<Point2d> &p,
+                        const vector<Point2d> &q);
+
   virtual ~image_deformation_mls() {}
 
   Mat genNewImg(const Mat &oriImg);

@@ -26,6 +26,23 @@ image_deformation_mls::image_deformation_mls(const int src_w,
 
 }
 
+
+image_deformation_mls::image_deformation_mls(const int src_w,
+                                             const int src_h,
+                                             const vector<Point2d> &p,
+                                             const vector<Point2d> &q) {
+  assert(p.size() == q.size());
+  n_point = p.size();
+  this->p.reserve(n_point);
+  this->q.reserve(n_point);
+  this->p = p;
+  this->q = q;
+  this->src_h = src_h;
+  this->src_w = src_w;
+  this->tar_w = src_w;
+  this->tar_h = src_h;
+}
+
 Mat image_deformation_mls::genNewImg(const Mat &oriImg) {
   Mat newImg(tar_h, tar_w, oriImg.type());
   for (int i = 0; i < tar_h; i += grid_size)
