@@ -1,5 +1,5 @@
-#ifndef IMGTRANS_MLS_H
-#define IMGTRANS_MLS_H
+#ifndef IMAGE_DEFORMATION_MLS_H
+#define IMAGE_DEFORMATION_MLS_H
 
 #include <opencv2/opencv.hpp>
 #include <vector>
@@ -22,8 +22,8 @@ class image_deformation_mls {
                         size_t grid_size,
                         int src_w,
                         int src_h,
-                        const vector<Point2d> &p,
                         const vector<Point2d> &q,
+                        const vector<Point2d> &p,
                         int tar_w,
                         int tar_h);
 
@@ -32,8 +32,10 @@ class image_deformation_mls {
                         size_t grid_size,
                         int src_w,
                         int src_h,
-                        const vector<Point2d> &p,
-                        const vector<Point2d> &q);
+                        const vector<Point2d> &q,
+                        const vector<Point2d> &p);
+
+  image_deformation_mls(const Mat2d &delta, int src_w, int src_h, int tar_w, int tar_h);
 
   virtual ~image_deformation_mls() {}
 
@@ -41,12 +43,9 @@ class image_deformation_mls {
  protected:
   const image_deformation_engine *image_deformation;
   size_t grid_size = 5;
-  double alpha = 1;
-  vector<Point2d> p, q;
-  size_t n_point;
   Mat2d delta;
   int src_w, src_h;
   int tar_w, tar_h;
 };
 
-#endif  // IMGTRANS_MLS_H
+#endif  // IMAGE_DEFORMATION_MLS_H

@@ -19,14 +19,10 @@ image_deformation_mls::image_deformation_mls(const image_deformation_engine *ima
     : image_deformation(image_deformation),
       src_w(src_w),
       src_h(src_h),
-      q(q),
-      p(p),
       tar_w(tar_w),
       tar_h(tar_h),
-      alpha(alpha),
       grid_size(grid_size) {
   assert(p.size() == q.size());
-  n_point = p.size();
   this->delta = (*this->image_deformation)(src_w, src_h, grid_size, alpha, q, p, tar_w, tar_h);
 }
 
@@ -40,14 +36,10 @@ image_deformation_mls::image_deformation_mls(const image_deformation_engine *ima
     : image_deformation(image_deformation),
       src_w(src_w),
       src_h(src_h),
-      q(q),
-      p(p),
       tar_w(src_w),
       tar_h(src_h),
-      alpha(alpha),
       grid_size(grid_size) {
   assert(p.size() == q.size());
-  n_point = p.size();
   this->delta = (*this->image_deformation)(src_w, src_h, grid_size, alpha, q, p, tar_w, tar_h);
 }
 
@@ -56,7 +48,7 @@ Mat image_deformation_mls::genNewImg(const Mat &oriImg) {
   for (int i = 0; i < tar_h; i += grid_size) {
     for (int j = 0; j < tar_w; j += grid_size) {
       int ni = i + grid_size, nj = j + grid_size;
-      int w = grid_size, h = grid_size;
+      double w = grid_size, h = grid_size;
       if (ni >= tar_h) {
         ni = tar_h - 1;
         h = ni - i + 1;
@@ -68,9 +60,19 @@ Mat image_deformation_mls::genNewImg(const Mat &oriImg) {
       for (int di = 0; di < h; di++) {
         for (int dj = 0; dj < w; dj++) {
           double deltaX =
-              bilinear_interp(di / h, dj / w, delta(i, j)[0], delta(i, nj)[0], delta(ni, j)[0], delta(ni, nj)[0]);
+              bilinear_interp(di / h,
+                              dj / w,
+                              delta.at<cv::Vec2d>(i, j)[0],
+                              delta.at<cv::Vec2d>(i, nj)[0],
+                              delta.at<cv::Vec2d>(ni, j)[0],
+                              delta.at<cv::Vec2d>(ni, nj)[0]);
           double deltaY =
-              bilinear_interp(di / h, dj / w, delta(i, j)[1], delta(i, nj)[1], delta(ni, j)[1], delta(ni, nj)[1]);
+              bilinear_interp(di / h * 1.0,
+                              dj / w * 1.0,
+                              delta.at<cv::Vec2d>(i, j)[1],
+                              delta.at<cv::Vec2d>(i, nj)[1],
+                              delta.at<cv::Vec2d>(ni, j)[1],
+                              delta.at<cv::Vec2d>(ni, nj)[1]);
           double nx = j + dj + deltaX;
           double ny = i + di + deltaY;
           if (nx > src_w - 1) nx = src_w - 1;
@@ -102,3 +104,5 @@ Mat image_deformation_mls::genNewImg(const Mat &oriImg) {
   }
   return newImg;
 }
+image_deformation_mls::image_deformation_mls(const Mat2d &delta, int src_w, int src_h, int tar_w, int tar_h) : delta(
+    delta), src_w(src_w), src_h(src_h), tar_w(tar_w), tar_h(tar_h) {}
