@@ -18,17 +18,17 @@ void deformation_plugin::set_config(const captcha_config::config &node) {
 captcha deformation_plugin::pipe(captcha &in) {
   static std::random_device rd;
   static auto
-      dice = std::bind(std::uniform_int_distribution<int32_t>(-5, 5), std::default_random_engine(rd()));
+      dice = std::bind(std::uniform_int_distribution<int32_t>(-10, 10), std::default_random_engine(rd()));
   cv::Mat image = in;
   vector<Point2d> q;
   vector<Point2d> p;
-  const size_t grid_size = 20;
-  for (int i = 0; i <= image.cols; i += grid_size) {
-    for (int j = 0; j <= image.rows; j += grid_size) {
+  const size_t grid_size = 40;
+  for (int j = 0; j <= image.rows; j += grid_size) {
+    if (j >= image.rows)
+      j = image.rows - 1;
+    for (int i = 0; i <= image.cols; i += grid_size) {
       if (i >= image.cols)
         i = image.cols - 1;
-      if (j >= image.rows)
-        j = image.rows - 1;
       q.emplace_back(i, j);
     }
   }

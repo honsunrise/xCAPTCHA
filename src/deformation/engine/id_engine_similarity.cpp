@@ -2,7 +2,9 @@
 // Created by zhsyourai on 8/24/17.
 //
 
+#include <sys/time.h>
 #include "id_engine_similarity.h"
+
 Mat2d id_engine_similarity::calc_delta(const int src_w,
                                        const int src_h,
                                        size_t grid_size,
@@ -12,10 +14,10 @@ Mat2d id_engine_similarity::calc_delta(const int src_w,
                                        const int tar_w,
                                        const int tar_h) const {
   assert(p.size() == q.size());
-  size_t n_point = p.size();
+  const size_t n_point = p.size();
   Point2d swq, qstar, newP, tmpP;
   auto *w = new double[n_point];
-  double sum_w;
+  double sum_w = 0;
 
   Mat2d delta(tar_h, tar_w);
 

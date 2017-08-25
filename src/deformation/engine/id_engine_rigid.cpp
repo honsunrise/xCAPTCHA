@@ -16,7 +16,7 @@ Mat2d id_engine_rigid::calc_delta(const int src_w,
 
   Point2d swq, qstar, newP, tmpP;
   auto *w = new double[n_point];
-  double sum_w;
+  double sum_w = 0;
 
   Mat2d delta(tar_h, tar_w);
   if (n_point < 2) {
@@ -57,7 +57,7 @@ Mat2d id_engine_rigid::calc_delta(const int src_w,
         swq = swq + w[k] * q[k];
       }
       if (k == n_point) {
-        pstar = (1 / sum_w) * swp;
+        pstar = 1 / sum_w * swp;
         qstar = 1 / sum_w * swq;
 
         // Calc miu_r
@@ -93,8 +93,8 @@ Mat2d id_engine_rigid::calc_delta(const int src_w,
       } else {
         newP = q[k];
       }
-      delta(j, i)[0] = newP.x - i;
-      delta(j, i)[1] = newP.y - j;
+      delta.at<cv::Vec2d>(j, i)[0] = newP.x - i;
+      delta.at<cv::Vec2d>(j, i)[1] = newP.y - j;
     }
   }
   delete[] w;

@@ -1,7 +1,7 @@
 ---
 global:
-  width: 400
-  height: 200
+  width: 800
+  height: 600
   bits: 32
   plugin:
     path: cmake-build-debug/plugins
@@ -34,4 +34,3 @@ pipes:
       line_number: 50
   deformation:
     __order: 4
-    none: 0
