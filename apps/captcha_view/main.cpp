@@ -10,8 +10,11 @@ int main() {
   while(1) {
     Mat image = cc.generate();
     imshow("Display Image", image);
-    if(waitKey(500) == 'q')
+    if(waitKey() == 'q')
       break;
+    else {
+
+    }
   }
   return 0;
 }

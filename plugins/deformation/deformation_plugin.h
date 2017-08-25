@@ -8,13 +8,15 @@
 #include <cstdint>
 #include <cstddef>
 #include "processor_plugin_interface.h"
-class distortion_plugin : public processor_plugin_interface {
+class deformation_plugin : public processor_plugin_interface {
  public:
   void initialization(const captcha_api &api) override;
   void release() override;
   config_define get_config_define() const override;
   void set_config(const captcha_config::config &node) override;
   captcha pipe(captcha &in) override;
+ private:
+  const captcha_api *api;
 };
 
 extern "C" {

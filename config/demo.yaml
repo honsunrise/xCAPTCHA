@@ -1,13 +1,14 @@
 ---
 global:
-  width: 200
-  height: 100
+  width: 400
+  height: 200
   bits: 32
   plugin:
     path: cmake-build-debug/plugins
 
 pipes:
   filling:
+    __order: 1
     color:
       random:
         min: 10
@@ -17,8 +18,10 @@ pipes:
       b: -1
     test: aaaa
   background:
+    __order: 2
     image_dir: resource/background
   noise:
+    __order: 3
     color:
       random:
         min: 10
@@ -29,3 +32,6 @@ pipes:
     type: "line"
     param:
       line_number: 50
+  deformation:
+    __order: 4
+    none: 0

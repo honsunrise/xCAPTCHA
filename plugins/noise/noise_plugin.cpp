@@ -63,7 +63,7 @@ int noise_plugin::drawing_random_lines(Mat image, int x_1, int y_1, int x_2, int
     int t_g = g > 0 ? g : c();
     int t_b = b > 0 ? b : c();
 
-    line(image, pt1, pt2, Scalar(t_b & 255, t_g & 255, t_r & 255), 1, LINE_8);
+    line(image, pt1, pt2, Scalar(t_b & 255, t_g & 255, t_r & 255), 1, LINE_AA);
   }
   return 0;
 }

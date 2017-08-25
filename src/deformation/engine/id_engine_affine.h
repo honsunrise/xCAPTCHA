@@ -15,7 +15,7 @@ class id_engine_affine : public image_deformation_engine {
                    const vector<Point2d> &p,
                    const vector<Point2d> &q,
                    const int tar_w,
-                   const int tar_h) override;
+                   const int tar_h) const override;
 };
 
 #endif //XCAPTCHA_ID_ENGINE_AFFINE_H

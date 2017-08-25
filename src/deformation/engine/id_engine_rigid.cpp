@@ -10,12 +10,11 @@ Mat2d id_engine_rigid::calc_delta(const int src_w,
                                   const vector<Point2d> &p,
                                   const vector<Point2d> &q,
                                   const int tar_w,
-                                  const int tar_h) {
+                                  const int tar_h) const {
   assert(p.size() == q.size());
   size_t n_point = p.size();
 
   Point2d swq, qstar, newP, tmpP;
-  double ratio;
   auto *w = new double[n_point];
   double sum_w;
 
@@ -99,4 +98,5 @@ Mat2d id_engine_rigid::calc_delta(const int src_w,
     }
   }
   delete[] w;
+  return delta;
 }

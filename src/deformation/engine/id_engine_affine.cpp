@@ -10,7 +10,7 @@ Mat2d id_engine_affine::calc_delta(const int src_w,
                                    const vector<Point2d> &p,
                                    const vector<Point2d> &q,
                                    const int tar_w,
-                                   const int tar_h) {
+                                   const int tar_h) const {
   Mat2d delta = Mat2d::zeros(tar_h, tar_w);
   return delta;
 }

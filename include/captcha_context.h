@@ -10,6 +10,11 @@
 #include "captcha_plugin_stub.h"
 using namespace captcha_config;
 
+struct order_plugin {
+  int order;
+  std::string plugin_name;
+};
+
 class captcha_context {
  public:
   captcha_context();
@@ -28,7 +33,7 @@ class captcha_context {
   int32_t height;
   int32_t bits;
   std::string plugin_path;
-  std::vector<std::string> order;
+  std::vector<order_plugin> plugins_order;
   std::map<std::string, captcha_plugin_stub> plugins;
 };
 
