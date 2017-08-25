@@ -40,9 +40,9 @@ vector<Triangle> delaunayDiv(const vector<Point_<T> > &vP, const cv::Rect &bound
 
   for (const auto &t : triangleList) {
     Triangle tr;
-    tr.v[0] = Point(cvRound(t[0]), cvRound(t[1]));
-    tr.v[1] = Point(cvRound(t[2]), cvRound(t[3]));
-    tr.v[2] = Point(cvRound(t[4]), cvRound(t[5]));
+    tr.v[0] = Point2i(cvRound(t[0]), cvRound(t[1]));
+    tr.v[1] = Point2i(cvRound(t[2]), cvRound(t[3]));
+    tr.v[2] = Point2i(cvRound(t[4]), cvRound(t[5]));
     V.insert(tr);
   }
 

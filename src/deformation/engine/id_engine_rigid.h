@@ -8,7 +8,9 @@
 #include "image_deformation_engine.h"
 class id_engine_rigid : public image_deformation_engine {
  protected:
-  Mat2d calc_delta(size_t grid_size,
+  Mat2d calc_delta(const int src_w,
+                   const int src_h,
+                   size_t grid_size,
                    double alpha,
                    const vector<Point2d> &p,
                    const vector<Point2d> &q,

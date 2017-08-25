@@ -12,21 +12,27 @@ using std::vector;
 
 class image_deformation_engine {
  public:
-  inline Mat2d operator()(size_t grid_size,
-                          double alpha,
-                          const vector<Point2d> &p,
-                          const vector<Point2d> &q,
-                          const int tar_w,
-                          const int tar_h) {
-    return calc_delta(grid_size, alpha, p, q, tar_w, tar_h);
+  inline Mat2d operator()(
+      const int src_w,
+      const int src_h,
+      size_t grid_size,
+      double alpha,
+      const vector<Point2d> &p,
+      const vector<Point2d> &q,
+      const int tar_w,
+      const int tar_h) {
+    return calc_delta(src_w, src_h, grid_size, alpha, p, q, tar_w, tar_h);
   };
 
  protected:
-  virtual Mat2d calc_delta(size_t grid_size,
-                           double alpha,
-                           const vector<Point2d> &p,
-                           const vector<Point2d> &q,
-                           const int tar_w,
-                           const int tar_h) = 0;
+  virtual Mat2d calc_delta(
+      const int src_w,
+      const int src_h,
+      size_t grid_size,
+      double alpha,
+      const vector<Point2d> &p,
+      const vector<Point2d> &q,
+      const int tar_w,
+      const int tar_h) = 0;
 };
 #endif //XCAPTCHA_IMAGE_DEFORMATION_ENGINE_H
