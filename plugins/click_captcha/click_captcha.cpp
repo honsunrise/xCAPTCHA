@@ -67,12 +67,13 @@ captcha click_captcha::pipe(captcha &in) {
     if ((code & 0xFF)) text += (code & 0xFF);
 
     int q_height = 21;
+    int q_box_height = q_height + 1;
 
     if(i == 0) {
       std::string q = "点击图中 “" + text + "” 字";
       cv::Size text_size = ft2_q->getTextSize(q, q_height, -1, &baseline);
       cv::Point text_org(0, q_height - baseline);
-      cv::Rect box(cv::Point(0, 0), cv::Point(image.cols, q_height));
+      cv::Rect box(cv::Point(0, 0), cv::Point(image.cols, q_box_height));
       rectangle(image, box, cv::Scalar::all(255), -1, CV_AA);
       ft2_q->putText(image, q, text_org, q_height, cv::Scalar::all(0), thickness, CV_AA, true);
     }
@@ -84,7 +85,7 @@ captcha click_captcha::pipe(captcha &in) {
     }
     auto o_x = std::bind(std::uniform_int_distribution<int32_t>(text_size.width, image.cols - text_size.width),
                          std::default_random_engine(rd()));
-    auto o_y = std::bind(std::uniform_int_distribution<int32_t>(text_size.height + q_height, image.rows - text_size.height),
+    auto o_y = std::bind(std::uniform_int_distribution<int32_t>(text_size.height + q_box_height, image.rows - text_size.height),
                          std::default_random_engine(rd()));
 
     cv::Point text_org(o_x(), o_y());
