@@ -4,13 +4,6 @@
 
 #include <boost/filesystem.hpp>
 #include "captcha_context.h"
-captcha_context::captcha_context() {
-
-}
-
-captcha_context::~captcha_context() {
-
-}
 
 bool captcha_context::load_config(const std::string &path) {
   config_path = path;

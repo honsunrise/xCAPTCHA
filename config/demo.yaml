@@ -1,7 +1,7 @@
 ---
 global:
-  width: 800
-  height: 600
+  width: 230
+  height: 120
   bits: 32
   plugin:
     path: cmake-build-debug/plugins
@@ -31,6 +31,8 @@ pipes:
       b: -1
     type: "line"
     param:
-      line_number: 50
+      line_number: 20
   deformation:
     __order: 4
+  click_captcha:
+    __order: 5

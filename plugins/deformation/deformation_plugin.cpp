@@ -18,11 +18,11 @@ void deformation_plugin::set_config(const captcha_config::config &node) {
 captcha deformation_plugin::pipe(captcha &in) {
   static std::random_device rd;
   static auto
-      dice = std::bind(std::uniform_int_distribution<int32_t>(-10, 10), std::default_random_engine(rd()));
+      dice = std::bind(std::uniform_int_distribution<int32_t>(-5, 5), std::default_random_engine(rd()));
   cv::Mat image = in;
   vector<Point2d> q;
   vector<Point2d> p;
-  const size_t grid_size = 40;
+  const size_t grid_size = 20;
   for (int j = 0; j <= image.rows; j += grid_size) {
     if (j >= image.rows)
       j = image.rows - 1;
@@ -37,7 +37,7 @@ captcha deformation_plugin::pipe(captcha &in) {
     it.x += dice();
     it.y += dice();
   }
-  cv::Mat ret = api->deformation(deformation_type::SIMILARITY, q, p, 1, grid_size, image);
+  cv::Mat ret = api->deformation(deformation_type::RIGID, q, p, 1, grid_size, image);
   return captcha(ret);
 }
 

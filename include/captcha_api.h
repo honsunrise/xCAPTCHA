@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <opencv2/opencv.hpp>
+#include <locale>
 using cv::Mat;
 using cv::Point2d;
 using std::vector;
@@ -24,5 +25,7 @@ class captcha_api {
                   double alpha,
                   size_t grid_size,
                   const Mat &src) const;
+
+  uint32_t random_char(std::locale locale) const;
 };
 #endif //XCAPTCHA_CAPTCHA_API_H

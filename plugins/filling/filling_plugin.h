@@ -21,7 +21,7 @@ class filling_plugin : public processor_plugin_interface {
   int32_t g = 0;
   int32_t b = 0;
   uint32_t random_min = 0;
-  uint32_t random_max = 0;
+  uint32_t random_max = 255;
 };
 
 extern "C" {

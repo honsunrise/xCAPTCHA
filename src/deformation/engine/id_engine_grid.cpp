@@ -35,40 +35,24 @@ Mat2d id_engine_grid::calc_delta(const int src_w,
     delta(new_p[i])[0] = new_q[i].x - new_p[i].x;
     delta(new_p[i])[1] = new_q[i].y - new_p[i].y;
   }
-  cv::Mat_<uchar> imgTmpP = cv::Mat_<uchar>::zeros(tar_h, tar_w);
-  for (const auto &it:new_p) {
-    cv::circle(imgTmpP, it, 1, 255, 1, CV_AA);
-  }
-  imshow("imgTmpP", imgTmpP);
-
-  cv::Mat_<uchar> imgTmpQ = cv::Mat_<uchar>::zeros(tar_h, tar_w);
-  for (const auto &it:new_q) {
-    cv::circle(imgTmpQ, it, 1, 255, 1, CV_AA);
-  }
-  imshow("imgTmpQ", imgTmpQ);
 
   delta(0, 0) = Vec2d(0, 0);
   delta(tar_h - 1, 0) = Vec2d(0, src_h - tar_h);
   delta(0, tar_w - 1) = Vec2d(0, src_w - tar_w);
   delta(tar_h - 1, tar_w - 1) = Vec2d(src_w - tar_w, src_h - tar_h);
   cv::Rect bound_rect(0, 0, tar_w, tar_h);
-//  new_p.emplace_back(0, 0);
-//  new_p.emplace_back(0, tar_h - 1);
-//  new_p.emplace_back(tar_w - 1, 0);
-//  new_p.emplace_back(tar_w - 1, tar_h - 1);
+  new_p.emplace_back(0, 0);
+  new_p.emplace_back(0, tar_h - 1);
+  new_p.emplace_back(tar_w - 1, 0);
+  new_p.emplace_back(tar_w - 1, tar_h - 1);
   vector<Triangle> triangles = ::delaunayDiv(new_p, bound_rect);
   cv::Mat_<uchar> imgTmp = cv::Mat_<uchar>::zeros(tar_h, tar_w);
   for (auto it = triangles.begin(); it != triangles.end(); it++) {
-    cv::line(imgTmp, it->v[0], it->v[1], 255, 1, CV_AA);
-    cv::line(imgTmp, it->v[0], it->v[2], 255, 1, CV_AA);
-    cv::line(imgTmp, it->v[2], it->v[1], 255, 1, CV_AA);
     if (!(it->v[0].inside(bound_rect) && it->v[1].inside(bound_rect) && it->v[2].inside(bound_rect)))
       continue;
 
     cv::fillConvexPoly(img_mask, it->v, 3, cv::Scalar(it - triangles.begin() + 1));
   }
-  imshow("imgTmp", imgTmp);
-  cvWaitKey(10);
 
   Point2i v1, v2, curV;
   for (int i = 0;; i += grid_size) {

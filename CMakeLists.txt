@@ -6,6 +6,9 @@ set(CMAKE_CXX_STANDARD 11)
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
+find_package(Freetype REQUIRED)
+include_directories(${FREETYPE_INCLUDE_DIRS})
+
 find_package(yaml-cpp REQUIRED)
 include_directories(${yaml-cpp_INCLUDE_DIRS})
 
@@ -33,7 +36,7 @@ endif ()
 add_library(xCAPTCHA SHARED ${SOURCE_FILES})
 
 if (Boost_FOUND)
-    target_link_libraries(xCAPTCHA yaml-cpp dl ${Boost_LIBRARIES})
+    target_link_libraries(xCAPTCHA yaml-cpp dl ${Boost_LIBRARIES} ${FREETYPE_LIBRARIES} ${OpenCV_LIBRARIES})
 endif ()
 
 function(add_plugins_dir curdir)

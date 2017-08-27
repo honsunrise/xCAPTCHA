@@ -6,6 +6,7 @@
 #define XCAPTCHA_CAPTCHA_CONTEXT_H
 #include <string>
 #include <yaml-cpp/yaml.h>
+#include <boost/noncopyable.hpp>
 #include "captcha.h"
 #include "captcha_plugin_stub.h"
 using namespace captcha_config;
@@ -15,14 +16,13 @@ struct order_plugin {
   std::string plugin_name;
 };
 
-class captcha_context {
+class captcha_context : boost::noncopyable {
  public:
-  captcha_context();
+  captcha_context() = default;
   bool load_config(const std::string &path);
   config check_config(const config_define &config_define,
-                                      const YAML::Node &plugin_config);
+                      const YAML::Node &plugin_config);
   captcha generate();
-  virtual ~captcha_context();
  private:
   void check_config(const config_define &config_define,
                     const YAML::Node &plugin_config, config &cfg);
