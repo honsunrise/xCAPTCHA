@@ -49,10 +49,16 @@ captcha click_captcha::pipe(captcha &in) {
       std::bind(std::uniform_int_distribution<int32_t>(random_min, random_max), std::default_random_engine(rd()));
   static cv::Ptr<cv::freetype::FreeType2> ft2 = cv::freetype::createFreeType2();
   ft2->loadFontData("./resource/fonts/font1.ttf", 0);
+
+  static cv::Ptr<cv::freetype::FreeType2> ft2_q = cv::freetype::createFreeType2();
+  ft2_q->loadFontData("./resource/fonts/black.ttf", 0);
+
   cv::Mat image = in;
+
   std::vector<cv::Rect> other_char(char_num);
   for (int i = 0; i < char_num; ++i) {
     int baseline = 0;
+
     std::string text;
     uint32_t code = api->random_char(std::locale("zh_CN.UTF8"));
     if ((code & 0xFF000000)) text += (code & 0xFF000000) >> 24;
@@ -60,23 +66,35 @@ captcha click_captcha::pipe(captcha &in) {
     if ((code & 0xFF00)) text += (code & 0xFF00) >> 8;
     if ((code & 0xFF)) text += (code & 0xFF);
 
-    cv::Size textSize = ft2->getTextSize(text, font_height, thickness, &baseline);
+    int q_height = 21;
+
+    if(i == 0) {
+      std::string q = "点击图中 “" + text + "” 字";
+      cv::Size text_size = ft2_q->getTextSize(q, q_height, -1, &baseline);
+      cv::Point text_org(0, q_height - baseline);
+      cv::Rect box(cv::Point(0, 0), cv::Point(image.cols, q_height));
+      rectangle(image, box, cv::Scalar::all(255), -1, CV_AA);
+      ft2_q->putText(image, q, text_org, q_height, cv::Scalar::all(0), thickness, CV_AA, true);
+    }
+
+    baseline = 0;
+    cv::Size text_size = ft2->getTextSize(text, font_height, thickness, &baseline);
     if (thickness > 0) {
       baseline += thickness;
     }
-    auto o_x = std::bind(std::uniform_int_distribution<int32_t>(textSize.width, image.cols - textSize.width),
+    auto o_x = std::bind(std::uniform_int_distribution<int32_t>(text_size.width, image.cols - text_size.width),
                          std::default_random_engine(rd()));
-    auto o_y = std::bind(std::uniform_int_distribution<int32_t>(textSize.height, image.rows - textSize.height),
+    auto o_y = std::bind(std::uniform_int_distribution<int32_t>(text_size.height + q_height, image.rows - text_size.height),
                          std::default_random_engine(rd()));
 
     cv::Point text_org(o_x(), o_y());
-    cv::Rect box(text_org + cv::Point(0, baseline), text_org + cv::Point(textSize.width, -textSize.height));
+    cv::Rect box(text_org + cv::Point(0, baseline), text_org + cv::Point(text_size.width, -text_size.height));
     if (!other_char.empty()) {
       for (auto it = other_char.begin(); it != other_char.end();) {
         float present = computRectJoinUnion(box, *it);
         if (present > join_persent) {
           text_org = cv::Point(o_x(), o_y());
-          box = cv::Rect(text_org + cv::Point(0, baseline), text_org + cv::Point(textSize.width, -textSize.height));
+          box = cv::Rect(text_org + cv::Point(0, baseline), text_org + cv::Point(text_size.width, -text_size.height));
           it = other_char.begin();
         } else {
           it++;
@@ -90,7 +108,7 @@ captcha click_captcha::pipe(captcha &in) {
 
     if (is_draw_base_line)
       line(image, text_org + cv::Point(0, thickness),
-           text_org + cv::Point(textSize.width, thickness),
+           text_org + cv::Point(text_size.width, thickness),
            cv::Scalar(0, 0, 255), 1, 8);
 
     int32_t t_r = r > 0 ? r : dice();
