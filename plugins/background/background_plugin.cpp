@@ -50,7 +50,9 @@ captcha background_plugin::pipe(captcha &in) {
   std::uniform_int_distribution<int32_t> range_row(0, std::max(load.rows - image.rows, 0));
   std::uniform_int_distribution<int32_t> range_col(0, std::max(load.cols - image.cols, 0));
   if(image.cols > load.cols || image.rows > load.rows) {
-    cv::resize(load, load, cv::Size(image.cols, image.rows));
+    int h = std::max(image.rows, load.rows);
+    int w = std::max(image.cols, load.cols);
+    cv::resize(load, load, cv::Size(w, h));
   }
   cv::Rect roi(range_col(engine), range_row(engine),image.cols, image.rows);
   load = load(roi);
