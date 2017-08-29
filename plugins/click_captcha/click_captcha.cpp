@@ -69,7 +69,7 @@ captcha click_captcha::pipe(captcha &in) {
     int q_height = 21;
     int q_box_height = q_height + 1;
 
-    if(i == 0) {
+    if (i == 0) {
       std::string q = "点击图中 “" + text + "” 字";
       cv::Size text_size = ft2_q->getTextSize(q, q_height, -1, &baseline);
       cv::Point text_org(0, q_height - baseline);
@@ -83,42 +83,81 @@ captcha click_captcha::pipe(captcha &in) {
     if (thickness > 0) {
       baseline += thickness;
     }
-    auto o_x = std::bind(std::uniform_int_distribution<int32_t>(text_size.width, image.cols - text_size.width),
+    auto o_x = std::bind(std::uniform_int_distribution<int32_t>(0, image.cols - text_size.width),
                          std::default_random_engine(rd()));
-    auto o_y = std::bind(std::uniform_int_distribution<int32_t>(text_size.height + q_box_height, image.rows - text_size.height),
+    auto o_y = std::bind(std::uniform_int_distribution<int32_t>(q_box_height, image.rows - text_size.height - baseline),
                          std::default_random_engine(rd()));
 
-    cv::Point text_org(o_x(), o_y());
-    cv::Rect box(text_org + cv::Point(0, baseline), text_org + cv::Point(text_size.width, -text_size.height));
+    cv::Point text_rand(o_x(), o_y());
+    cv::Rect box_rand(text_rand, text_rand + cv::Point(text_size.width, text_size.height + baseline));
     if (!other_char.empty()) {
       for (auto it = other_char.begin(); it != other_char.end();) {
-        float present = computRectJoinUnion(box, *it);
-        if (present > join_persent) {
-          text_org = cv::Point(o_x(), o_y());
-          box = cv::Rect(text_org + cv::Point(0, baseline), text_org + cv::Point(text_size.width, -text_size.height));
+        float present = computRectJoinUnion(box_rand, *it);
+        if (present > join_percent) {
+          text_rand = cv::Point(o_x(), o_y());
+          box_rand = cv::Rect(text_rand, text_rand + cv::Point(text_size.width, text_size.height + baseline));
           it = other_char.begin();
         } else {
           it++;
         }
       }
     }
-    other_char.push_back(box);
+    other_char.push_back(box_rand);
 
-    if (is_draw_box)
-      rectangle(image, box, cv::Scalar(0, 255, 0), 1, 8);
+    {
+      cv::Mat text_image(text_size.height + baseline, text_size.width, image.type(), cv::Scalar::all(255));
+      cv::Mat mask(text_size.height + baseline, text_size.width, image.type(), cv::Scalar::all(0));
+      cv::Mat
+          background = image(cv::Rect(text_rand.x, text_rand.y, text_size.width, text_size.height + baseline)).clone();
+      cv::Mat
+          alpha_image = image(cv::Rect(text_rand.x, text_rand.y, text_size.width, text_size.height + baseline)).clone();
+      cv::Rect box(0, 0, text_size.width, text_size.height + baseline);
+      if (is_draw_box)
+        rectangle(text_image, box, cv::Scalar(0, 255, 0), 1, 8);
 
-    if (is_draw_base_line)
-      line(image, text_org + cv::Point(0, thickness),
-           text_org + cv::Point(text_size.width, thickness),
-           cv::Scalar(0, 0, 255), 1, 8);
+      if (is_draw_base_line)
+        line(text_image,
+             cv::Point(0, text_size.height),
+             cv::Point(text_size.width, text_size.height),
+             cv::Scalar(0, 0, 255),
+             1,
+             8);
 
-    int32_t t_r = r > 0 ? r : dice();
-    int32_t t_g = g > 0 ? g : dice();
-    int32_t t_b = b > 0 ? b : dice();
-    const cv::Scalar &color = cv::Scalar(t_b, t_g, t_r);
+      int32_t t_r = r > 0 ? r : dice();
+      int32_t t_g = g > 0 ? g : dice();
+      int32_t t_b = b > 0 ? b : dice();
+      const cv::Scalar &color = cv::Scalar(t_b, t_g, t_r);
 
-    ft2->putText(image, text, text_org, font_height,
-                 color, thickness, CV_AA, true);
+      ft2->putText(text_image, text, cv::Point(0, text_size.height), font_height, color, thickness, CV_AA, true);
+      ft2->putText(mask,
+                   text,
+                   cv::Point(0, text_size.height),
+                   font_height,
+                   cv::Scalar::all(255),
+                   thickness,
+                   CV_AA,
+                   true);
+
+      Mat warp_mat(2, 3, CV_32FC1);
+      cv::Point center = cv::Point(text_image.cols / 2, text_image.rows / 2);
+      auto angle = std::bind(std::uniform_int_distribution<int32_t>(min_rotation, max_rotation),
+                             std::default_random_engine(rd()));
+      auto scale = std::bind(std::uniform_real_distribution<float>(min_scale, 1.0), std::default_random_engine(rd()));
+      warp_mat = cv::getRotationMatrix2D(center, angle(), scale());
+      warpAffine(text_image, text_image, warp_mat, text_image.size());
+      warpAffine(mask, mask, warp_mat, mask.size());
+      mask.convertTo(mask, CV_32FC3, 1.0 / 255);
+      text_image.convertTo(text_image, CV_32FC3);
+      background.convertTo(background, CV_32FC3);
+      alpha_image.convertTo(alpha_image, CV_32FC3);
+      cv::multiply(mask, text_image, text_image);
+      cv::multiply(mask, alpha_image, alpha_image);
+      cv::addWeighted(text_image, alpha, alpha_image, 1 - alpha, 0, text_image);
+      cv::multiply(cv::Scalar::all(1.0) - mask, background, background);
+      cv::add(text_image, background, text_image);
+      text_image.convertTo(text_image, image.type());
+      text_image.copyTo(image(cv::Rect(text_rand.x, text_rand.y, text_size.width, text_size.height + baseline)));
+    }
 
   }
   return captcha(image);

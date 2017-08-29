@@ -25,7 +25,11 @@ class click_captcha : public processor_plugin_interface {
   int font_height = 40;
   int thickness = -1;
   uint32_t char_num = 4;
-  float join_persent = 0.1;
+  float join_percent = 0.1;
+  float alpha = 0.5;
+  int32_t min_rotation = -180;
+  int32_t max_rotation = 180;
+  float min_scale = 0.5;
 };
 
 extern "C" {
