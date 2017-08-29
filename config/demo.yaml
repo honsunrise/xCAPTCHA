@@ -1,7 +1,7 @@
 ---
 global:
-  width: 260
-  height: 120
+  width: 300
+  height: 150
   bits: 32
   plugin:
     path: cmake-build-debug/plugins

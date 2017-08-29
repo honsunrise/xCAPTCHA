@@ -43,10 +43,18 @@ float computRectJoinUnion(const cv::Rect &rc1, const cv::Rect &rc2) {
 }
 
 captcha click_captcha::pipe(captcha &in) {
+  answer ans;
+  std::vector<order_range> ranges;
   static std::random_device rd;
   static auto
       dice =
       std::bind(std::uniform_int_distribution<int32_t>(random_min, random_max), std::default_random_engine(rd()));
+  static auto
+      char_number =
+      std::bind(std::uniform_int_distribution<uint32_t>(min_char_num, max_char_num), std::default_random_engine(rd()));
+  static auto
+      select_number =
+      std::bind(std::uniform_int_distribution<uint32_t>(min_select_num, max_select_num), std::default_random_engine(rd()));
   static cv::Ptr<cv::freetype::FreeType2> ft2 = cv::freetype::createFreeType2();
   ft2->loadFontData("./resource/fonts/font1.ttf", 0);
 
@@ -55,7 +63,20 @@ captcha click_captcha::pipe(captcha &in) {
 
   cv::Mat image = in;
 
+  uint32_t char_num = char_number();
+  uint32_t select_num = select_number();
   std::vector<cv::Rect> other_char(char_num);
+  std::string q;
+  if(select_num == 1) {
+    q = "点击图中 “&” 字";
+  } else {
+    if(is_order) {
+      q = "按顺序点击图中 “&” 字";
+    } else {
+      q = "点击图中 “&” 字";
+    }
+  }
+  std::string gen;
   for (int i = 0; i < char_num; ++i) {
     int baseline = 0;
 
@@ -69,13 +90,16 @@ captcha click_captcha::pipe(captcha &in) {
     int q_height = 21;
     int q_box_height = q_height + 1;
 
-    if (i == 0) {
-      std::string q = "点击图中 “" + text + "” 字";
+    if (i == select_num - 1) {
+      gen += text;
+      q.replace(q.find('&'), 1, gen);
       cv::Size text_size = ft2_q->getTextSize(q, q_height, -1, &baseline);
       cv::Point text_org(0, q_height - baseline);
       cv::Rect box(cv::Point(0, 0), cv::Point(image.cols, q_box_height));
       rectangle(image, box, cv::Scalar::all(255), -1, CV_AA);
       ft2_q->putText(image, q, text_org, q_height, cv::Scalar::all(0), thickness, CV_AA, true);
+    } else {
+      gen += text + "、";
     }
 
     baseline = 0;
@@ -103,7 +127,10 @@ captcha click_captcha::pipe(captcha &in) {
       }
     }
     other_char.push_back(box_rand);
-
+    ranges.emplace_back(box_rand.x, box_rand.y, box_rand.width, box_rand.height, i);
+    // TODO:
+    ans.set_type();
+    ans.set_ranges();
     {
       cv::Mat text_image(text_size.height + baseline, text_size.width, image.type(), cv::Scalar::all(255));
       cv::Mat mask(text_size.height + baseline, text_size.width, image.type(), cv::Scalar::all(0));

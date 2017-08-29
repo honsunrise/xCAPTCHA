@@ -5,6 +5,7 @@
 #ifndef XCAPTCHA_CLICK_CAPTCHA_H
 #define XCAPTCHA_CLICK_CAPTCHA_H
 #include "processor_plugin_interface.h"
+#include "answer.h"
 
 class click_captcha : public processor_plugin_interface {
  public:
@@ -24,12 +25,17 @@ class click_captcha : public processor_plugin_interface {
   bool is_draw_base_line = false;
   int font_height = 40;
   int thickness = -1;
-  uint32_t char_num = 4;
+  uint32_t min_char_num = 4;
+  uint32_t max_char_num = 4;
+  uint32_t min_select_num = 2;
+  uint32_t max_select_num = 2;
+  bool is_order = true;
+  bool is_deformation = false;
   float join_percent = 0.1;
-  float alpha = 0.5;
-  int32_t min_rotation = -180;
-  int32_t max_rotation = 180;
-  float min_scale = 0.5;
+  float alpha = 1;
+  int32_t min_rotation = 0;
+  int32_t max_rotation = 0;
+  float min_scale = 1;
 };
 
 extern "C" {
