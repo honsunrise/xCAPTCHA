@@ -13,7 +13,7 @@ class click_captcha : public processor_plugin_interface {
   void release() override;
   config_define get_config_define() const override;
   void set_config(const captcha_config::config &node) override;
-  captcha pipe(captcha &in) override;
+  void pipe(captcha &in) const override;
  private:
   const captcha_api *api;
   int32_t r = 0;

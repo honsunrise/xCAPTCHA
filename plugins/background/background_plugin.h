@@ -14,12 +14,12 @@ class background_plugin : public processor_plugin_interface {
   void release() override;
   captcha_config::config_define get_config_define() const override;
   void set_config(const captcha_config::config &node) override;
-  captcha pipe(captcha &in) override;
+  void pipe(captcha &in) const override;
  private:
   const captcha_api *api;
   std::string image_dir;
   uint32_t file_count;
-  std::map<uint32_t , std::string> file_map;
+  std::map<uint32_t, std::string> file_map;
 };
 
 extern "C" {

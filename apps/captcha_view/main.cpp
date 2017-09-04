@@ -8,8 +8,8 @@ int main() {
   cc.load_config("config/demo.yaml");
   namedWindow("Display Image", WINDOW_AUTOSIZE );
   while(1) {
-    Mat image = cc.generate();
-    imshow("Display Image", image);
+    captcha ca = cc.generate();
+    imshow("Display Image", static_cast<cv::Mat>(ca.get_image()));
     if(waitKey() == 'q')
       break;
     else {

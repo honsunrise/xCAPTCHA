@@ -100,14 +100,14 @@ config captcha_context::check_config(const config_define &config_define,
 }
 
 captcha captcha_context::generate() {
-  cv::Mat image = cv::Mat::zeros(height, width, CV_8UC3);
-  cv::rectangle(image,
+  cv::Mat mat = cv::Mat::zeros(height, width, CV_8UC3);
+  cv::rectangle(mat,
                 cv::Point(0, 0),
                 cv::Point(width, height),
                 cv::Scalar(0, 0, 0), -1, 8);
-  captcha &&ca = captcha(image);
+  captcha ca = image(mat);
   for (const auto &plugin:plugins_order) {
-    ca = plugins[plugin.plugin_name].get_interface()->pipe(ca);
+    plugins[plugin.plugin_name].get_interface()->pipe(ca);
   }
   return ca;
 }

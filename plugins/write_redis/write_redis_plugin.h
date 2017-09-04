@@ -7,8 +7,11 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <redis3m/redis3m.hpp>
 #include "processor_plugin_interface.h"
-class filling_plugin : public processor_plugin_interface {
+using namespace redis3m;
+
+class write_redis_plugin : public processor_plugin_interface {
  public:
   void initialization(const captcha_api &api) override;
   void release() override;
@@ -17,11 +20,10 @@ class filling_plugin : public processor_plugin_interface {
   void pipe(captcha &in) const override;
  private:
   const captcha_api *api;
-  int32_t r = 0;
-  int32_t g = 0;
-  int32_t b = 0;
-  uint32_t random_min = 0;
-  uint32_t random_max = 255;
+  connection_pool::ptr_t pool;
+  std::string sentinel;
+  std::string master_name;
+  uint32_t port;
 };
 
 extern "C" {

@@ -36,3 +36,8 @@ pipes:
     __order: 4
   click_captcha:
     __order: 5
+  write_redis:
+    __order: 6
+    sentinel: "localhost"
+    master_name: "master"
+    port: 26379

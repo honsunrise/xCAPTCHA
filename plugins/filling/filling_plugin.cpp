@@ -35,20 +35,22 @@ void filling_plugin::set_config(const captcha_config::config &node) {
   random_max = random["max"];
 }
 
-captcha filling_plugin::pipe(captcha &in) {
+void filling_plugin::pipe(captcha &in) const {
+  image &img = in.get_image();
   static std::random_device rd;
   static auto
-      dice = std::bind(std::uniform_int_distribution<int32_t>(random_min, random_max), std::default_random_engine(rd()));
-  cv::Mat image = in;
+      dice =
+      std::bind(std::uniform_int_distribution<int32_t>(random_min, random_max), std::default_random_engine(rd()));
+  cv::Mat mat = img;
   int32_t t_r = r > 0 ? r : dice();
   int32_t t_g = g > 0 ? g : dice();
   int32_t t_b = b > 0 ? b : dice();
   const cv::Scalar &color = cv::Scalar(t_b, t_g, t_r);
-  cv::rectangle(image,
+  cv::rectangle(mat,
                 cv::Point(0, 0),
-                cv::Point(image.cols, image.rows),
+                cv::Point(mat.cols, mat.rows),
                 color, cv::FILLED, cv::LINE_8);
-  return captcha(image);
+  img = image(mat);
 }
 
 processor_plugin_interface *create() {

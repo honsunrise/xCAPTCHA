@@ -4,8 +4,8 @@
 
 #ifndef XCAPTCHA_CAPTCHA_H
 #define XCAPTCHA_CAPTCHA_H
-#include <cstdint>
-#include <opencv2/opencv.hpp>
+#include <image.h>
+#include <answer.h>
 
 class captcha {
  public:
@@ -13,19 +13,21 @@ class captcha {
   captcha(const captcha &other);
   captcha(captcha &&other) noexcept;
 
-  captcha(int32_t rows, int32_t cols);
-  explicit captcha(const cv::Mat &mat);
+  captcha(image &&i);
+  captcha(image &&i, answer &&a);
 
   captcha &operator=(const captcha &other);
   captcha &operator=(captcha &&other) noexcept;
+  image &get_image();
+  answer &get_answer();
 
-  operator cv::Mat();
+  const image &get_image() const;
+  const answer &get_answer() const;
+
   virtual ~captcha();
  private:
-  int32_t rows;
-  int32_t cols;
-  int32_t channels;
-  uint8_t *data;
+  image *i;
+  answer *a;
 };
 
 #endif //XCAPTCHA_CAPTCHA_H

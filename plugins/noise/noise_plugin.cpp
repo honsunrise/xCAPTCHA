@@ -43,7 +43,7 @@ void noise_plugin::set_config(const captcha_config::config &node) {
   line_number = param["line_number"];
 }
 
-int noise_plugin::drawing_random_lines(Mat image, int x_1, int y_1, int x_2, int y_2) {
+int noise_plugin::drawing_random_lines(Mat image, int x_1, int y_1, int x_2, int y_2) const {
   static std::random_device rd;
   static auto
       c = std::bind(std::uniform_int_distribution<int32_t>(random_min, random_max), std::default_random_engine(rd()));
@@ -68,15 +68,16 @@ int noise_plugin::drawing_random_lines(Mat image, int x_1, int y_1, int x_2, int
   return 0;
 }
 
-captcha noise_plugin::pipe(captcha &in) {
-  Mat image = in;
-  drawing_random_lines(image, 0, 0, image.cols, image.rows);
-  return captcha(image);
+void noise_plugin::pipe(captcha &in) const {
+  image &img = in.get_image();
+  Mat mat = img;
+  drawing_random_lines(mat, 0, 0, mat.cols, mat.rows);
+  img = image(mat);
 }
-int noise_plugin::drawing_random_wave(Mat image, int x_1, int y_1, int x_2, int y_2) {
+int noise_plugin::drawing_random_wave(Mat image, int x_1, int y_1, int x_2, int y_2) const {
   return 0;
 }
-int noise_plugin::drawing_random_circles(Mat image, int x_1, int y_1, int x_2, int y_2) {
+int noise_plugin::drawing_random_circles(Mat image, int x_1, int y_1, int x_2, int y_2) const {
   return 0;
 }
 
