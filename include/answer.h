@@ -8,7 +8,18 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include "json.hpp"
 
+// for convenience
+using json = nlohmann::json;
+enum class answer_type : char {
+  ANSWER_CODE,
+  ANSWER_RANGE,
+  ANSWER_ORDER_RANGE,
+  ANSWER_NONE,
+};
+
+namespace as {
 struct order_range {
   order_range();
 
@@ -27,14 +38,12 @@ struct order_range {
   int32_t order;
 };
 
-enum class answer_type:char {
-  ANSWER_CODE,
-  ANSWER_RANGE,
-  ANSWER_ORDER_RANGE,
-  ANSWER_NONE,
-};
+void to_json(json &j, const order_range &o);
+
+}
 
 class answer {
+
  public:
   answer();
   explicit answer(answer_type _type);
@@ -43,15 +52,17 @@ class answer {
   void set_code();
   void set_ranges();
 
-  answer_type get_type();
-  std::string get_code();
-  std::vector<order_range> get_ranges();
+  answer_type get_type() const;
+  std::string get_code() const;
+  std::vector<as::order_range> get_ranges() const;
+
+  std::string to_json() const;
 
   void clear();
  private:
   answer_type _type;
   std::string _code;
-  std::vector<order_range> _ranges;
+  std::vector<as::order_range> _ranges;
 };
 
 #endif //XCAPTCHA_ANSWER_H

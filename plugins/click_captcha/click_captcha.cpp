@@ -62,7 +62,7 @@ void click_captcha::pipe(captcha &in) const {
 
   answer ans;
   image &img = in.get_image();
-  std::vector<order_range> ranges;
+  std::vector<as::order_range> ranges;
   cv::Mat mat = img;
   uint32_t char_num = char_number();
   uint32_t select_num = select_number();
@@ -188,7 +188,7 @@ void click_captcha::pipe(captcha &in) const {
     }
 
   }
-  img = image(mat);
+  in = captcha(image(mat), std::move(ans));
 }
 
 processor_plugin_interface *create() {

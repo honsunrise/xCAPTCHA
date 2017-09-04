@@ -13,8 +13,18 @@ class captcha {
   captcha(const captcha &other);
   captcha(captcha &&other) noexcept;
 
-  captcha(image &&i);
-  captcha(image &&i, answer &&a);
+  template<typename I, typename std::enable_if<std::is_same<I, image>::value, int>::type = 0>
+  captcha(I &&i) {
+    this->i = new image(std::forward<image>(i));
+    this->a = nullptr;
+  };
+
+  template<typename I, typename A, typename std::enable_if<
+      std::is_same<I, image>::value and std::is_same<A, answer>::value, int>::type = 0>
+  captcha(I &&i, A &&a) {
+    this->i = new image(std::forward<image>(i));
+    this->a = new answer(std::forward<answer>(a));
+  };
 
   captcha &operator=(const captcha &other);
   captcha &operator=(captcha &&other) noexcept;

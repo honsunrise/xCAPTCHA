@@ -22,6 +22,7 @@ endif ()
 
 include_directories(include)
 include_directories(src)
+include_directories(third/json/src)
 
 file(GLOB_RECURSE sources "src/[a-zA-Z_]*.cpp")
 file(GLOB_RECURSE public_headers "include/[a-zA-Z_]*.h")
