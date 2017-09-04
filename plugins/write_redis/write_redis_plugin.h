@@ -8,7 +8,11 @@
 #include <cstdint>
 #include <cstddef>
 #include <redis3m/redis3m.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #include "processor_plugin_interface.h"
+
 using namespace redis3m;
 
 class write_redis_plugin : public processor_plugin_interface {
@@ -19,6 +23,7 @@ class write_redis_plugin : public processor_plugin_interface {
   void set_config(const captcha_config::config &node) override;
   void pipe(captcha &in) const override;
  private:
+  boost::uuids::random_generator *uuid_gen;
   const captcha_api *api;
   connection_pool::ptr_t pool;
   std::string sentinel;
