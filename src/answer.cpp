@@ -64,7 +64,16 @@ static std::string answer_type_to_string(answer_type type) {
 std::string answer::to_json() const {
   json j;
   j["type"] = answer_type_to_string(this->_type);
-  j["code"] = this->_code;
-  j["ranges"] = this->_ranges;
+  switch (this->_type) {
+    case answer_type::ANSWER_CODE:
+      j["code"] = this->_code;
+      break;
+    case answer_type::ANSWER_RANGE:
+    case answer_type::ANSWER_ORDER_RANGE:
+      j["ranges"] = this->_ranges;
+      break;
+    case answer_type::ANSWER_NONE:
+      break;
+  }
   return j.dump();
 }

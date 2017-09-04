@@ -53,12 +53,12 @@ void write_redis_plugin::pipe(captcha &in) const {
   compression_params.push_back(9);
   std::vector<uint8_t> result;
   assert(cv::imencode(".png", mat, result, compression_params));
-#if 1
+#if 0
   std::cout << base64_encode(result) << std::endl;
   std::cout << ans.to_json() << std::endl;
 #else
   connection::ptr_t c = pool->get(connection::MASTER);
-  c->run(command("HMSET") << "image" << base64_encode(result) << "answer");
+  c->run(command("HMSET") << "image" << base64_encode(result) << "answer" << ans.to_json());
   pool->put(c);
 #endif
 }

@@ -129,9 +129,8 @@ void click_captcha::pipe(captcha &in) const {
     }
     other_char.push_back(box_rand);
     ranges.emplace_back(box_rand.x, box_rand.y, box_rand.width, box_rand.height, i);
-    // TODO:
-    ans.set_type();
-    ans.set_ranges();
+    ans.set_type(answer_type::ANSWER_ORDER_RANGE);
+    ans.set_ranges(ranges);
     {
       cv::Mat text_image(text_size.height + baseline, text_size.width, mat.type(), cv::Scalar::all(255));
       cv::Mat mask(text_size.height + baseline, text_size.width, mat.type(), cv::Scalar::all(0));
