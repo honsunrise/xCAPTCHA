@@ -188,7 +188,7 @@ void click_captcha::pipe(captcha &in) const {
     }
 
   }
-  in = captcha(image(mat), std::move(ans));
+  in = captcha(image(mat), ans);
 }
 
 processor_plugin_interface *create() {

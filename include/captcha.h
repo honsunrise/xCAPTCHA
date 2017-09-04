@@ -13,17 +13,21 @@ class captcha {
   captcha(const captcha &other);
   captcha(captcha &&other) noexcept;
 
-  template<typename I, typename std::enable_if<std::is_same<I, image>::value, int>::type = 0>
+  template<typename T>
+  using uncvref_t = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
+
+  template<typename I, typename std::enable_if<std::is_same<uncvref_t<I>, image>::value, int>::type = 0>
   captcha(I &&i) {
-    this->i = new image(std::forward<image>(i));
+    this->i = new image(std::forward<I>(i));
     this->a = nullptr;
   };
 
+
   template<typename I, typename A, typename std::enable_if<
-      std::is_same<I, image>::value and std::is_same<A, answer>::value, int>::type = 0>
+      std::is_same<uncvref_t<I>, image>::value and std::is_same<uncvref_t<A>, answer>::value, int>::type = 0>
   captcha(I &&i, A &&a) {
-    this->i = new image(std::forward<image>(i));
-    this->a = new answer(std::forward<answer>(a));
+    this->i = new image(std::forward<I>(i));
+    this->a = new answer(std::forward<A>(a));
   };
 
   captcha &operator=(const captcha &other);
