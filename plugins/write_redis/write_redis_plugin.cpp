@@ -5,7 +5,6 @@
 #include <boost/archive/iterators/base64_from_binary.hpp>
 #include <boost/archive/iterators/transform_width.hpp>
 #include <boost/algorithm/string.hpp>
-
 #include "write_redis_plugin.h"
 
 void write_redis_plugin::initialization(const captcha_api &api) {
@@ -29,6 +28,7 @@ void write_redis_plugin::set_config(const captcha_config::config &node) {
   master_name = node["master_name"];
   port = node["port"];
   pool = connection_pool::create(sentinel, master_name, port);
+  uuid_gen = new boost::uuids::random_generator();
 }
 
 std::vector<uint8_t> base64_decode(const std::string &val) {
@@ -53,12 +53,14 @@ void write_redis_plugin::pipe(captcha &in) const {
   compression_params.push_back(9);
   std::vector<uint8_t> result;
   assert(cv::imencode(".png", mat, result, compression_params));
-#if 1
+#if 0
   std::cout << base64_encode(result) << std::endl;
   std::cout << ans.to_json() << std::endl;
 #else
   connection::ptr_t c = pool->get(connection::MASTER);
-  c->run(command("HMSET") << "image" << base64_encode(result) << "answer");
+  boost::uuids::uuid u = (*uuid_gen)();
+  std::string key = boost::uuids::to_string(u);
+  c->run(command("HMSET") << key <<"image" << base64_encode(result) << "answer" << ans.to_json());
   pool->put(c);
 #endif
 }

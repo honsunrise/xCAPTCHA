@@ -1,3 +1,9 @@
 [submodule "third/json"]
 	path = third/json
 	url = git@github.com:nlohmann/json.git
+[submodule "third/yaml-cpp"]
+	path = third/yaml-cpp
+	url = git@github.com:jbeder/yaml-cpp.git
+[submodule "third/redis3m"]
+	path = third/redis3m
+	url = git@github.com:luca3m/redis3m.git

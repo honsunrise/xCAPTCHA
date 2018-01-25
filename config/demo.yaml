@@ -38,6 +38,6 @@ pipes:
     __order: 5
   write_redis:
     __order: 6
-    sentinel: "localhost"
-    master_name: "master"
+    sentinel: "172.17.0.4"
+    master_name: "testing"
     port: 26379

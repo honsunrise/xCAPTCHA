@@ -48,9 +48,9 @@ class answer {
   answer();
   explicit answer(answer_type _type);
 
-  void set_type();
-  void set_code();
-  void set_ranges();
+  void set_type(answer_type type);
+  void set_code(const std::string &code);
+  void set_ranges(const std::vector<as::order_range> &ranges);
 
   answer_type get_type() const;
   std::string get_code() const;
