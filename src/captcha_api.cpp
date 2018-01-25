@@ -3,6 +3,7 @@
 //
 
 #include <codecvt>
+#include <random>
 #include "captcha_api.h"
 #include "deformation/image_deformation_mls.h"
 #include "charset.h"
