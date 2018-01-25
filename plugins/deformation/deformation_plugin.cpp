@@ -2,6 +2,7 @@
 // Created by zhsyourai on 8/17/17.
 //
 
+#include <random>
 #include "deformation_plugin.h"
 void deformation_plugin::initialization(const captcha_api &api) {
   this->api = &api;

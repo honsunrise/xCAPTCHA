@@ -2,6 +2,7 @@
 // Created by zhsyourai on 8/4/17.
 //
 
+#include <random>
 #include "filling_plugin.h"
 
 void filling_plugin::initialization(const captcha_api &api) {

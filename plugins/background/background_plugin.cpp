@@ -2,6 +2,7 @@
 // Created by zhsyourai on 8/4/17.
 //
 #include <boost/filesystem.hpp>
+#include <random>
 #include "background_plugin.h"
 
 void background_plugin::initialization(const captcha_api &api) {

@@ -3,6 +3,7 @@
 //
 
 #include <opencv2/freetype.hpp>
+#include <random>
 #include "click_captcha.h"
 void click_captcha::initialization(const captcha_api &api) {
   this->api = &api;
