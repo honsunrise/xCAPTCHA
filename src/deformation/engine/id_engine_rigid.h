@@ -6,6 +6,7 @@
 #define XCAPTCHA_ID_ENGINE_RIGID_H
 
 #include "image_deformation_engine.h"
+
 class id_engine_rigid : public image_deformation_engine {
  protected:
   Mat2d calc_delta(int src_w,

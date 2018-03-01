@@ -104,5 +104,6 @@ Mat image_deformation_mls::genNewImg(const Mat &oriImg) {
   }
   return newImg;
 }
+
 image_deformation_mls::image_deformation_mls(const Mat2d &delta, int src_w, int src_h, int tar_w, int tar_h) : delta(
     delta), src_w(src_w), src_h(src_h), tar_w(tar_w), tar_h(tar_h) {}

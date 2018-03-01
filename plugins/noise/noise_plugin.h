@@ -10,18 +10,26 @@
 #include <functional>
 #include <random>
 #include "processor_plugin_interface.h"
+
 using namespace cv;
 
 class noise_plugin : public processor_plugin_interface {
  public:
   void initialization(const captcha_api &api) override;
+
   void release() override;
+
   captcha_config::config_define get_config_define() const override;
+
   void set_config(const captcha_config::config &node) override;
+
   void pipe(captcha &in) const override;
+
  private:
   int drawing_random_lines(Mat image, int x_1, int y_1, int x_2, int y_2) const;
+
   int drawing_random_wave(Mat image, int x_1, int y_1, int x_2, int y_2) const;
+
   int drawing_random_circles(Mat image, int x_1, int y_1, int x_2, int y_2) const;
 
   const captcha_api *api;

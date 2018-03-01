@@ -2,7 +2,6 @@
 // Created by zhsyourai on 8/24/17.
 //
 
-#include <sys/time.h>
 #include "id_engine_similarity.h"
 
 Mat2d id_engine_similarity::calc_delta(const int src_w,

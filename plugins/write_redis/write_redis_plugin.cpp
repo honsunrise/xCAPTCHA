@@ -60,7 +60,7 @@ void write_redis_plugin::pipe(captcha &in) const {
   connection::ptr_t c = pool->get(connection::MASTER);
   boost::uuids::uuid u = (*uuid_gen)();
   std::string key = boost::uuids::to_string(u);
-  c->run(command("HMSET") << key <<"image" << base64_encode(result) << "answer" << ans.to_json());
+  c->run(command("HMSET") << key << "image" << base64_encode(result) << "answer" << ans.to_json());
   pool->put(c);
 #endif
 }

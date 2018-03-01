@@ -3,6 +3,7 @@
 //
 
 #include "id_engine_affine.h"
+
 Mat2d id_engine_affine::calc_delta(const int src_w,
                                    const int src_h,
                                    size_t grid_size,

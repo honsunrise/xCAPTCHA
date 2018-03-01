@@ -4,18 +4,23 @@
 
 #include <random>
 #include "deformation_plugin.h"
+
 void deformation_plugin::initialization(const captcha_api &api) {
   this->api = &api;
 }
+
 void deformation_plugin::release() {
 
 }
+
 config_define deformation_plugin::get_config_define() const {
   return nullptr;
 }
+
 void deformation_plugin::set_config(const captcha_config::config &node) {
 
 }
+
 void deformation_plugin::pipe(captcha &in) const {
   static std::random_device rd;
   static auto dice = std::bind(std::uniform_int_distribution<int32_t>(-5, 5), std::default_random_engine(rd()));

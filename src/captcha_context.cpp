@@ -56,7 +56,7 @@ bool captcha_context::load_config(const std::string &path) {
       config &&really = check_config(cd, plugin_config);
       plugins[plugin_name].get_interface()->set_config(really);
     }
-    std::sort(plugins_order.begin(), plugins_order.end(), [](order_plugin &a, order_plugin&b){
+    std::sort(plugins_order.begin(), plugins_order.end(), [](order_plugin &a, order_plugin &b) {
       return a.order < b.order;
     });
   }

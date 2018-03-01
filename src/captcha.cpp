@@ -2,8 +2,8 @@
 // Created by zhsyourai on 8/4/17.
 //
 
-#include <opencv2/core/mat.hpp>
 #include "captcha.h"
+
 captcha::captcha() : i(nullptr), a(nullptr) {
 }
 
@@ -53,12 +53,15 @@ captcha::~captcha() {
 image &captcha::get_image() {
   return *i;
 }
+
 answer &captcha::get_answer() {
   return *a;
 }
+
 const image &captcha::get_image() const {
   return *i;
 }
+
 const answer &captcha::get_answer() const {
   return *a;
 }

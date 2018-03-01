@@ -5,6 +5,7 @@
 #include <opencv2/freetype.hpp>
 #include <random>
 #include "click_captcha.h"
+
 void click_captcha::initialization(const captcha_api &api) {
   this->api = &api;
 }
@@ -50,7 +51,8 @@ void click_captcha::pipe(captcha &in) const {
       std::bind(std::uniform_int_distribution<int32_t>(random_min, random_max), std::default_random_engine(rd()));
   static auto
       char_number =
-      std::bind(std::uniform_int_distribution<uint32_t>(min_char_num, max_char_num), std::default_random_engine(rd()));
+      std::bind(std::uniform_int_distribution<uint32_t>(min_char_num, max_char_num),
+                std::default_random_engine(rd()));
   static auto
       select_number =
       std::bind(std::uniform_int_distribution<uint32_t>(min_select_num, max_select_num),
@@ -111,8 +113,9 @@ void click_captcha::pipe(captcha &in) const {
     }
     auto o_x = std::bind(std::uniform_int_distribution<int32_t>(0, mat.cols - text_size.width),
                          std::default_random_engine(rd()));
-    auto o_y = std::bind(std::uniform_int_distribution<int32_t>(q_box_height, mat.rows - text_size.height - baseline),
-                         std::default_random_engine(rd()));
+    auto o_y = std::bind(
+        std::uniform_int_distribution<int32_t>(q_box_height, mat.rows - text_size.height - baseline),
+        std::default_random_engine(rd()));
 
     cv::Point text_rand(o_x(), o_y());
     cv::Rect box_rand(text_rand, text_rand + cv::Point(text_size.width, text_size.height + baseline));
@@ -136,9 +139,11 @@ void click_captcha::pipe(captcha &in) const {
       cv::Mat text_image(text_size.height + baseline, text_size.width, mat.type(), cv::Scalar::all(255));
       cv::Mat mask(text_size.height + baseline, text_size.width, mat.type(), cv::Scalar::all(0));
       cv::Mat
-          background = mat(cv::Rect(text_rand.x, text_rand.y, text_size.width, text_size.height + baseline)).clone();
+          background = mat(
+          cv::Rect(text_rand.x, text_rand.y, text_size.width, text_size.height + baseline)).clone();
       cv::Mat
-          alpha_image = mat(cv::Rect(text_rand.x, text_rand.y, text_size.width, text_size.height + baseline)).clone();
+          alpha_image = mat(
+          cv::Rect(text_rand.x, text_rand.y, text_size.width, text_size.height + baseline)).clone();
       cv::Rect box(0, 0, text_size.width, text_size.height + baseline);
       if (is_draw_box)
         rectangle(text_image, box, cv::Scalar(0, 255, 0), 1, 8);
@@ -170,7 +175,8 @@ void click_captcha::pipe(captcha &in) const {
       cv::Point center = cv::Point(text_image.cols / 2, text_image.rows / 2);
       auto angle = std::bind(std::uniform_int_distribution<int32_t>(min_rotation, max_rotation),
                              std::default_random_engine(rd()));
-      auto scale = std::bind(std::uniform_real_distribution<float>(min_scale, 1.0), std::default_random_engine(rd()));
+      auto scale = std::bind(std::uniform_real_distribution<float>(min_scale, 1.0),
+                             std::default_random_engine(rd()));
       warp_mat = cv::getRotationMatrix2D(center, angle(), scale());
       warpAffine(text_image, text_image, warp_mat, text_image.size());
       warpAffine(mask, mask, warp_mat, mask.size());

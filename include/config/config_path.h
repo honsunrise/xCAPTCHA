@@ -102,8 +102,8 @@ class config_path {
     // check if nonempty reference string begins with slash
     if (CONFIG_UNLIKELY(reference_string[0] != '/')) {
       CONFIG_THROW(detail::parse_error::create(107, 1,
-                                             "JSON pointer must be empty or begin with '/' - was: '" +
-                                                 reference_string + "'"));
+                                               "JSON pointer must be empty or begin with '/' - was: '" +
+                                                   reference_string + "'"));
     }
 
     // extract the reference tokens:
@@ -136,7 +136,7 @@ class config_path {
             (reference_token[pos + 1] != '0' and
                 reference_token[pos + 1] != '1'))) {
           CONFIG_THROW(detail::parse_error::create(108, 0,
-                                                 "escape character '~' must be followed with '0' or '1'"));
+                                                   "escape character '~' must be followed with '0' or '1'"));
         }
       }
 

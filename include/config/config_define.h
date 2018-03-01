@@ -4,6 +4,7 @@
 
 #ifndef XCAPTCHA_CONFIG_DEFINE_H
 #define XCAPTCHA_CONFIG_DEFINE_H
+
 #include <string>
 #include <utility>
 #include <vector>
@@ -28,6 +29,7 @@ class basic_config_define {
   friend config_path;
   template<detail::value_t> friend
   struct detail::typed_constructor;
+
   template<typename BasicConfigType> friend
   class detail::iter_impl;
 
@@ -45,7 +47,7 @@ class basic_config_define {
   template<typename T, typename SFINAE>
   using serializer = Serializer<T, SFINAE>;
 
-  using initializer_list_t = std::initializer_list<detail::config_ref < basic_config_define>>;
+  using initializer_list_t = std::initializer_list<detail::config_ref<basic_config_define>>;
 
 
   using exception = detail::exception;
@@ -119,10 +121,15 @@ class basic_config_define {
     number_float_t number_float;
 
     config_value() = default;
+
     config_value(boolean_t v) noexcept : boolean(v) {}
+
     config_value(number_integer_t v) noexcept : number_integer(v) {}
+
     config_value(number_unsigned_t v) noexcept : number_unsigned(v) {}
+
     config_value(number_float_t v) noexcept : number_float(v) {}
+
     config_value(value_t t) {
       switch (t) {
         case value_t::map: {
@@ -166,7 +173,8 @@ class basic_config_define {
 
         default: {
           if (CONFIG_UNLIKELY(t == value_t::null)) {
-            CONFIG_THROW(other_error::create(500, "961c151d2e87f2686a955a9be24d316f1362bf21 2.1.1")); // LCOV_EXCL_LINE
+            CONFIG_THROW(other_error::create(500,
+                                             "961c151d2e87f2686a955a9be24d316f1362bf21 2.1.1")); // LCOV_EXCL_LINE
           }
           break;
         }
@@ -250,13 +258,13 @@ class basic_config_define {
     assert_invariant();
   }
 
-  template<typename CompatibleType, typename U = utils::uncvref_t <CompatibleType>,
+  template<typename CompatibleType, typename U = utils::uncvref_t<CompatibleType>,
       utils::enable_if_t<
           not std::is_base_of<std::istream, U>::value and
-          not std::is_same<U, basic_config_define>::value and
-          not utils::is_basic_config_nested_type<basic_config_define, U>::value and
-          utils::has_to_config<basic_config_define, U>::value,
-                         int> = 0>
+              not std::is_same<U, basic_config_define>::value and
+              not utils::is_basic_config_nested_type<basic_config_define, U>::value and
+              utils::has_to_config<basic_config_define, U>::value,
+          int> = 0>
   basic_config_define(CompatibleType &&val) noexcept(noexcept(Serializer<U>::to_config(
       std::declval<basic_config_define &>(), std::forward<CompatibleType>(val)))) {
     Serializer<U>::to_config(*this, std::forward<CompatibleType>(val));
@@ -292,12 +300,13 @@ class basic_config_define {
       m_type = value_t::map;
       m_value = value_t::map;
 
-      std::for_each(init.begin(), init.end(), [this](const detail::config_ref<basic_config_define> &element_ref) {
-        auto element = element_ref.moved_or_copied();
-        m_value.map->emplace(
-            std::move(*((*element.m_value.array)[0].m_value.string)),
-            std::move((*element.m_value.array)[1]));
-      });
+      std::for_each(init.begin(), init.end(),
+                    [this](const detail::config_ref<basic_config_define> &element_ref) {
+                      auto element = element_ref.moved_or_copied();
+                      m_value.map->emplace(
+                          std::move(*((*element.m_value.array)[0].m_value.string)),
+                          std::move((*element.m_value.array)[1]));
+                    });
     } else {
       // the initializer list describes an array -> create array
       m_type = value_t::array;
@@ -344,7 +353,7 @@ class basic_config_define {
       case value_t::number_unsigned:
       case value_t::string: {
         if (CONFIG_UNLIKELY(not first.m_it.primitive_iterator.is_begin()
-                              or not last.m_it.primitive_iterator.is_end())) {
+                                or not last.m_it.primitive_iterator.is_end())) {
           CONFIG_THROW(invalid_iterator::create(204, "iterators out of range"));
         }
         break;
@@ -398,7 +407,7 @@ class basic_config_define {
     assert_invariant();
   }
 
-  basic_config_define(const detail::config_ref <basic_config_define> &ref)
+  basic_config_define(const detail::config_ref<basic_config_define> &ref)
       : basic_config_define(ref.moved_or_copied()) {}
 
   basic_config_define(const basic_config_define &other)
@@ -615,8 +624,8 @@ class basic_config_define {
     }
 
     CONFIG_THROW(type_error::create(303,
-                                  "incompatible ReferenceType for get_ref, actual type is "
-                                      + std::string(obj.type_name())));
+                                    "incompatible ReferenceType for get_ref, actual type is "
+                                        + std::string(obj.type_name())));
   }
 
  public:
@@ -624,14 +633,14 @@ class basic_config_define {
       typename BasicConfigType,
       utils::enable_if_t<std::is_same<typename std::remove_const<BasicConfigType>::type,
                                       basic_config_define>::value,
-          int> = 0>
+                         int> = 0>
   basic_config_define get() const {
     return *this;
   }
 
   template<
       typename ValueTypeCV,
-      typename ValueType = utils::uncvref_t <ValueTypeCV>,
+      typename ValueType = utils::uncvref_t<ValueTypeCV>,
       utils::enable_if_t<
           not std::is_same<basic_config_define, ValueType>::value and
               utils::has_from_config<basic_config_define, ValueType>::value and
@@ -654,7 +663,7 @@ class basic_config_define {
 
   template<
       typename ValueTypeCV,
-      typename ValueType = utils::uncvref_t <ValueTypeCV>,
+      typename ValueType = utils::uncvref_t<ValueTypeCV>,
       utils::enable_if_t<not std::is_same<basic_config_define, ValueType>::value and
           utils::has_non_default_from_config<basic_config_define, ValueType>::value, int> = 0>
   ValueType get() const noexcept(noexcept(
@@ -738,15 +747,15 @@ class basic_config_define {
 
   template<typename ValueType, typename std::enable_if<
       not std::is_pointer<ValueType>::value and
-          not std::is_same<ValueType, detail::config_ref < basic_config_define>>::value and
-  not std::is_same<ValueType, typename string_t::value_type>::value
+          not std::is_same<ValueType, detail::config_ref<basic_config_define>>::value and
+          not std::is_same<ValueType, typename string_t::value_type>::value
 #ifndef _MSC_VER  // fix for issue #167 operator<< ambiguity under VS2015
-  and not std::is_same<ValueType, std::initializer_list<typename string_t::value_type>>::value
+          and not std::is_same<ValueType, std::initializer_list<typename string_t::value_type>>::value
 #endif
 #if (defined(__cplusplus) && __cplusplus >= 201703L) || (defined(_MSC_VER) && _MSC_VER > 1900 && defined(_HAS_CXX17) && _HAS_CXX17 == 1) // fix for issue #464
-  and not std::is_same<ValueType, typename std::string_view>::value
+      and not std::is_same<ValueType, typename std::string_view>::value
 #endif
-  , int>::type = 0>
+      , int>::type = 0>
   operator ValueType() const {
     // delegate the call to get<>() const
     return get<ValueType>();
@@ -1029,7 +1038,7 @@ class basic_config_define {
       case value_t::number_unsigned:
       case value_t::string: {
         if (CONFIG_LIKELY(not first.m_it.primitive_iterator.is_begin()
-                            or not last.m_it.primitive_iterator.is_end())) {
+                              or not last.m_it.primitive_iterator.is_end())) {
           CONFIG_THROW(invalid_iterator::create(204, "iterators out of range"));
         }
 
@@ -1166,13 +1175,11 @@ class basic_config_define {
     return const_reverse_iterator(cbegin());
   }
 
-  static iteration_proxy<iterator> iterator_wrapper(reference cont)
-  {
+  static iteration_proxy<iterator> iterator_wrapper(reference cont) {
     return iteration_proxy<iterator>(cont);
   }
 
-  static iteration_proxy<const_iterator> iterator_wrapper(const_reference cont)
-  {
+  static iteration_proxy<const_iterator> iterator_wrapper(const_reference cont) {
     return iteration_proxy<const_iterator>(cont);
   }
 
@@ -1507,7 +1514,7 @@ class basic_config_define {
 
     // passed iterators must belong to objects
     if (CONFIG_UNLIKELY(not first.m_object->is_map()
-                          or not last.m_object->is_map())) {
+                            or not last.m_object->is_map())) {
       CONFIG_THROW(invalid_iterator::create(202, "iterators first and last must point to objects"));
     }
 
@@ -1553,7 +1560,7 @@ class basic_config_define {
 
     // passed iterators must belong to objects
     if (CONFIG_UNLIKELY(not first.m_object->is_map()
-                          or not first.m_object->is_map())) {
+                            or not first.m_object->is_map())) {
       CONFIG_THROW(invalid_iterator::create(202, "iterators first and last must point to objects"));
     }
 

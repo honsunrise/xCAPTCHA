@@ -3,18 +3,19 @@
 //
 #include <dlfcn.h>
 #include "captcha_plugin_stub.h"
+
 captcha_plugin_stub::captcha_plugin_stub(const std::string &plugin_path) : plugin_path(plugin_path), handle(nullptr) {
   handle = dlopen(plugin_path.c_str(), RTLD_LAZY);
   if (!handle) {
     std::cerr << "Cannot load library: " << dlerror() << '\n';
   }
-  create_fn = (create_t*) dlsym(handle, "create");
-  const char* dlsym_error = dlerror();
+  create_fn = (create_t *) dlsym(handle, "create");
+  const char *dlsym_error = dlerror();
   if (dlsym_error) {
     std::cerr << "Cannot load symbol create: " << dlsym_error << '\n';
   }
 
-  destroy_fn = (destroy_t*) dlsym(handle, "destroy");
+  destroy_fn = (destroy_t *) dlsym(handle, "destroy");
   dlsym_error = dlerror();
   if (dlsym_error) {
     std::cerr << "Cannot load symbol destroy: " << dlsym_error << '\n';
@@ -23,7 +24,7 @@ captcha_plugin_stub::captcha_plugin_stub(const std::string &plugin_path) : plugi
   plugin_interface = create_fn();
 }
 
-captcha_plugin_stub::captcha_plugin_stub(captcha_plugin_stub &&rhs) noexcept  {
+captcha_plugin_stub::captcha_plugin_stub(captcha_plugin_stub &&rhs) noexcept {
   handle = rhs.handle;
   plugin_path = std::move(rhs.plugin_path);
   plugin_interface = rhs.plugin_interface;

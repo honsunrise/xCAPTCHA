@@ -93,8 +93,8 @@ config_path::get_unchecked(XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
         // error condition (cf. RFC 6901, Sect. 4)
         if (CONFIG_UNLIKELY(reference_token.size() > 1 and reference_token[0] == '0')) {
           CONFIG_THROW(detail::parse_error::create(106, 0,
-                                                 "array index '" + reference_token +
-                                                     "' must not begin with '0'"));
+                                                   "array index '" + reference_token +
+                                                       "' must not begin with '0'"));
         }
 
         if (reference_token == "-") {
@@ -138,16 +138,16 @@ config_path::get_checked(XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
         if (CONFIG_UNLIKELY(reference_token == "-")) {
           // "-" always fails the range check
           CONFIG_THROW(detail::out_of_range::create(402,
-                                                  "array index '-' (" +
-                                                      std::to_string(ptr->m_value.array->size()) +
-                                                      ") is out of range"));
+                                                    "array index '-' (" +
+                                                        std::to_string(ptr->m_value.array->size()) +
+                                                        ") is out of range"));
         }
 
         // error condition (cf. RFC 6901, Sect. 4)
         if (CONFIG_UNLIKELY(reference_token.size() > 1 and reference_token[0] == '0')) {
           CONFIG_THROW(detail::parse_error::create(106, 0,
-                                                 "array index '" + reference_token +
-                                                     "' must not begin with '0'"));
+                                                   "array index '" + reference_token +
+                                                       "' must not begin with '0'"));
         }
 
         // note: at performs range check
@@ -185,16 +185,16 @@ config_path::get_unchecked(const XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
         if (CONFIG_UNLIKELY(reference_token == "-")) {
           // "-" cannot be used for const access
           CONFIG_THROW(detail::out_of_range::create(402,
-                                                  "array index '-' (" +
-                                                      std::to_string(ptr->m_value.array->size()) +
-                                                      ") is out of range"));
+                                                    "array index '-' (" +
+                                                        std::to_string(ptr->m_value.array->size()) +
+                                                        ") is out of range"));
         }
 
         // error condition (cf. RFC 6901, Sect. 4)
         if (CONFIG_UNLIKELY(reference_token.size() > 1 and reference_token[0] == '0')) {
           CONFIG_THROW(detail::parse_error::create(106, 0,
-                                                 "array index '" + reference_token +
-                                                     "' must not begin with '0'"));
+                                                   "array index '" + reference_token +
+                                                       "' must not begin with '0'"));
         }
 
         // use unchecked array access
@@ -233,16 +233,16 @@ config_path::get_checked(const XCAPTCHA_BASIC_CONFIG_TPL *ptr) const {
         if (CONFIG_UNLIKELY(reference_token == "-")) {
           // "-" always fails the range check
           CONFIG_THROW(detail::out_of_range::create(402,
-                                                  "array index '-' (" +
-                                                      std::to_string(ptr->m_value.array->size()) +
-                                                      ") is out of range"));
+                                                    "array index '-' (" +
+                                                        std::to_string(ptr->m_value.array->size()) +
+                                                        ") is out of range"));
         }
 
         // error condition (cf. RFC 6901, Sect. 4)
         if (CONFIG_UNLIKELY(reference_token.size() > 1 and reference_token[0] == '0')) {
           CONFIG_THROW(detail::parse_error::create(106, 0,
-                                                 "array index '" + reference_token +
-                                                     "' must not begin with '0'"));
+                                                   "array index '" + reference_token +
+                                                       "' must not begin with '0'"));
         }
 
         // note: at performs range check

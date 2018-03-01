@@ -4,13 +4,16 @@
 
 #ifndef XCAPTCHA_CAPTCHA_H
 #define XCAPTCHA_CAPTCHA_H
+
 #include <image.h>
 #include <answer.h>
 
 class captcha {
  public:
   captcha();
+
   captcha(const captcha &other);
+
   captcha(captcha &&other) noexcept;
 
   template<typename T>
@@ -22,7 +25,6 @@ class captcha {
     this->a = nullptr;
   };
 
-
   template<typename I, typename A, typename std::enable_if<
       std::is_same<uncvref_t<I>, image>::value and std::is_same<uncvref_t<A>, answer>::value, int>::type = 0>
   captcha(I &&i, A &&a) {
@@ -31,14 +33,19 @@ class captcha {
   };
 
   captcha &operator=(const captcha &other);
+
   captcha &operator=(captcha &&other) noexcept;
+
   image &get_image();
+
   answer &get_answer();
 
   const image &get_image() const;
+
   const answer &get_answer() const;
 
   virtual ~captcha();
+
  private:
   image *i;
   answer *a;

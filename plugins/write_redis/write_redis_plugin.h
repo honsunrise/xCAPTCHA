@@ -18,10 +18,15 @@ using namespace redis3m;
 class write_redis_plugin : public processor_plugin_interface {
  public:
   void initialization(const captcha_api &api) override;
+
   void release() override;
+
   captcha_config::config_define get_config_define() const override;
+
   void set_config(const captcha_config::config &node) override;
+
   void pipe(captcha &in) const override;
+
  private:
   boost::uuids::random_generator *uuid_gen;
   const captcha_api *api;

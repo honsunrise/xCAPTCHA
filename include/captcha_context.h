@@ -4,11 +4,13 @@
 
 #ifndef XCAPTCHA_CAPTCHA_CONTEXT_H
 #define XCAPTCHA_CAPTCHA_CONTEXT_H
+
 #include <string>
 #include <yaml-cpp/yaml.h>
 #include <boost/noncopyable.hpp>
 #include "captcha.h"
 #include "captcha_plugin_stub.h"
+
 using namespace captcha_config;
 
 struct order_plugin {
@@ -19,10 +21,14 @@ struct order_plugin {
 class captcha_context : boost::noncopyable {
  public:
   captcha_context() = default;
+
   bool load_config(const std::string &path);
+
   config check_config(const config_define &config_define,
                       const YAML::Node &plugin_config);
+
   captcha generate();
+
  private:
   void check_config(const config_define &config_define,
                     const YAML::Node &plugin_config, config &cfg);

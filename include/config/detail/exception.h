@@ -9,26 +9,26 @@
 #include <stdexcept>
 
 namespace captcha_config {
-namespace detail {
+    namespace detail {
 
-class exception : public std::exception {
- public:
-  const char *what() const noexcept override {
-    return m.what();
-  }
+        class exception : public std::exception {
+        public:
+            const char *what() const noexcept override {
+                return m.what();
+            }
 
-  const int id;
+            const int id;
 
- protected:
-  exception(int id_, const char *what_arg) : id(id_), m(what_arg) {}
+        protected:
+            exception(int id_, const char *what_arg) : id(id_), m(what_arg) {}
 
-  static std::string name(const std::string &ename, int id) {
-    return "[xcaptcha.config." + ename + "." + std::to_string(id) + "] ";
-  }
+            static std::string name(const std::string &ename, int id) {
+                return "[xcaptcha.config." + ename + "." + std::to_string(id) + "] ";
+            }
 
- private:
-  std::runtime_error m;
-};
+        private:
+            std::runtime_error m;
+        };
 
 /*!
 @brief exception indicating a parse error
@@ -63,38 +63,38 @@ json.exception.parse_error.113 | parse error at 2: expected a CBOR string; last 
 
 @since version 3.0.0
 */
-class parse_error : public exception {
- public:
-  /*!
-  @brief create a parse error exception
-  @param[in] id        the id of the exception
-  @param[in] byte_     the byte index where the error occurred (or 0 if the
-                       position cannot be determined)
-  @param[in] what_arg  the explanatory string
-  @return parse_error object
-  */
-  static parse_error create(int id, std::size_t byte_, const std::string &what_arg) {
-    std::string w = exception::name("parse_error", id) + "parse error" +
-        (byte_ != 0 ? (" at " + std::to_string(byte_)) : "") +
-        ": " + what_arg;
-    return parse_error(id, byte_, w.c_str());
-  }
+        class parse_error : public exception {
+        public:
+            /*!
+            @brief create a parse error exception
+            @param[in] id        the id of the exception
+            @param[in] byte_     the byte index where the error occurred (or 0 if the
+                                 position cannot be determined)
+            @param[in] what_arg  the explanatory string
+            @return parse_error object
+            */
+            static parse_error create(int id, std::size_t byte_, const std::string &what_arg) {
+                std::string w = exception::name("parse_error", id) + "parse error" +
+                                (byte_ != 0 ? (" at " + std::to_string(byte_)) : "") +
+                                ": " + what_arg;
+                return parse_error(id, byte_, w.c_str());
+            }
 
-  /*!
-  @brief byte index of the parse error
+            /*!
+            @brief byte index of the parse error
 
-  The byte index of the last read character in the input file.
+            The byte index of the last read character in the input file.
 
-  @note For an input with n bytes, 1 is the index of the first character and
-        n+1 is the index of the terminating null byte or the end of file.
-        This also holds true when reading a byte vector (CBOR or MessagePack).
-  */
-  const std::size_t byte;
+            @note For an input with n bytes, 1 is the index of the first character and
+                  n+1 is the index of the terminating null byte or the end of file.
+                  This also holds true when reading a byte vector (CBOR or MessagePack).
+            */
+            const std::size_t byte;
 
- private:
-  parse_error(int id_, std::size_t byte_, const char *what_arg)
-      : exception(id_, what_arg), byte(byte_) {}
-};
+        private:
+            parse_error(int id_, std::size_t byte_, const char *what_arg)
+                    : exception(id_, what_arg), byte(byte_) {}
+        };
 
 /*!
 @brief exception indicating errors with iterators
@@ -118,17 +118,17 @@ json.exception.invalid_iterator.214 | cannot get value | Cannot get value for it
 
 @since version 3.0.0
 */
-class invalid_iterator : public exception {
- public:
-  static invalid_iterator create(int id, const std::string &what_arg) {
-    std::string w = exception::name("invalid_iterator", id) + what_arg;
-    return invalid_iterator(id, w.c_str());
-  }
+        class invalid_iterator : public exception {
+        public:
+            static invalid_iterator create(int id, const std::string &what_arg) {
+                std::string w = exception::name("invalid_iterator", id) + what_arg;
+                return invalid_iterator(id, w.c_str());
+            }
 
- private:
-  invalid_iterator(int id_, const char *what_arg)
-      : exception(id_, what_arg) {}
-};
+        private:
+            invalid_iterator(int id_, const char *what_arg)
+                    : exception(id_, what_arg) {}
+        };
 
 /*!
 @brief exception indicating executing a member function with a wrong type
@@ -155,16 +155,16 @@ json.exception.type_error.315 | values in object must be primitive | The @ref un
 
 @since version 3.0.0
 */
-class type_error : public exception {
- public:
-  static type_error create(int id, const std::string &what_arg) {
-    std::string w = exception::name("type_error", id) + what_arg;
-    return type_error(id, w.c_str());
-  }
+        class type_error : public exception {
+        public:
+            static type_error create(int id, const std::string &what_arg) {
+                std::string w = exception::name("type_error", id) + what_arg;
+                return type_error(id, w.c_str());
+            }
 
- private:
-  type_error(int id_, const char *what_arg) : exception(id_, what_arg) {}
-};
+        private:
+            type_error(int id_, const char *what_arg) : exception(id_, what_arg) {}
+        };
 
 /*!
 @brief exception indicating access out of the defined range
@@ -182,16 +182,16 @@ json.exception.out_of_range.406 | number overflow parsing '10E1000' | A parsed n
 
 @since version 3.0.0
 */
-class out_of_range : public exception {
- public:
-  static out_of_range create(int id, const std::string &what_arg) {
-    std::string w = exception::name("out_of_range", id) + what_arg;
-    return out_of_range(id, w.c_str());
-  }
+        class out_of_range : public exception {
+        public:
+            static out_of_range create(int id, const std::string &what_arg) {
+                std::string w = exception::name("out_of_range", id) + what_arg;
+                return out_of_range(id, w.c_str());
+            }
 
- private:
-  out_of_range(int id_, const char *what_arg) : exception(id_, what_arg) {}
-};
+        private:
+            out_of_range(int id_, const char *what_arg) : exception(id_, what_arg) {}
+        };
 
 /*!
 @brief exception indicating other errors
@@ -205,16 +205,16 @@ json.exception.other_error.502 | invalid object size for conversion | Some conve
 
 @since version 3.0.0
 */
-class other_error : public exception {
- public:
-  static other_error create(int id, const std::string &what_arg) {
-    std::string w = exception::name("other_error", id) + what_arg;
-    return other_error(id, w.c_str());
-  }
+        class other_error : public exception {
+        public:
+            static other_error create(int id, const std::string &what_arg) {
+                std::string w = exception::name("other_error", id) + what_arg;
+                return other_error(id, w.c_str());
+            }
 
- private:
-  other_error(int id_, const char *what_arg) : exception(id_, what_arg) {}
-};
-}
+        private:
+            other_error(int id_, const char *what_arg) : exception(id_, what_arg) {}
+        };
+    }
 }
 #endif //XCAPTCHA_EXCEPTION_H

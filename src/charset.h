@@ -4,7 +4,9 @@
 
 #ifndef XCAPTCHA_CHARSET_H
 #define XCAPTCHA_CHARSET_H
+
 #include <cstdint>
+
 const wchar_t english_charset[] = L"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const wchar_t chinese_simplified_charset[] = L"啊阿埃挨哎唉哀皑癌蔼矮艾碍爱隘鞍氨安俺按暗岸胺"
     "案肮昂盎凹敖熬翱袄傲奥懊澳芭捌扒叭吧笆八疤巴拔"

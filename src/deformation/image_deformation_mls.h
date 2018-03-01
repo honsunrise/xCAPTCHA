@@ -40,6 +40,7 @@ class image_deformation_mls {
   virtual ~image_deformation_mls() {}
 
   Mat genNewImg(const Mat &oriImg);
+
  protected:
   const image_deformation_engine *image_deformation;
   size_t grid_size = 5;

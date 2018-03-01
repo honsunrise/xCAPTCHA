@@ -4,9 +4,11 @@
 
 #include "delaunay.h"
 #include "id_engine_grid.h"
+
 using cv::Mat1i;
 using cv::Mat1b;
 using cv::Vec2d;
+
 Mat2d id_engine_grid::calc_delta(const int src_w,
                                  const int src_h,
                                  size_t grid_size,

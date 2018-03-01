@@ -7,6 +7,7 @@
 
 #include <vector>
 #include "image_deformation_engine.h"
+
 using std::vector;
 
 class id_engine_similarity : public image_deformation_engine {

@@ -46,7 +46,8 @@ void noise_plugin::set_config(const captcha_config::config &node) {
 int noise_plugin::drawing_random_lines(Mat image, int x_1, int y_1, int x_2, int y_2) const {
   static std::random_device rd;
   static auto
-      c = std::bind(std::uniform_int_distribution<int32_t>(random_min, random_max), std::default_random_engine(rd()));
+      c = std::bind(std::uniform_int_distribution<int32_t>(random_min, random_max),
+                    std::default_random_engine(rd()));
   static auto
       w = std::bind(std::uniform_int_distribution<int32_t>(x_1, x_2), std::default_random_engine(rd()));
   static auto
@@ -74,9 +75,11 @@ void noise_plugin::pipe(captcha &in) const {
   drawing_random_lines(mat, 0, 0, mat.cols, mat.rows);
   img = image(mat);
 }
+
 int noise_plugin::drawing_random_wave(Mat image, int x_1, int y_1, int x_2, int y_2) const {
   return 0;
 }
+
 int noise_plugin::drawing_random_circles(Mat image, int x_1, int y_1, int x_2, int y_2) const {
   return 0;
 }

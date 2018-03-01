@@ -4,16 +4,22 @@
 
 #ifndef XCAPTCHA_CLICK_CAPTCHA_H
 #define XCAPTCHA_CLICK_CAPTCHA_H
+
 #include "processor_plugin_interface.h"
 #include "answer.h"
 
 class click_captcha : public processor_plugin_interface {
  public:
   void initialization(const captcha_api &api) override;
+
   void release() override;
+
   config_define get_config_define() const override;
+
   void set_config(const captcha_config::config &node) override;
+
   void pipe(captcha &in) const override;
+
  private:
   const captcha_api *api;
   int32_t r = 0;

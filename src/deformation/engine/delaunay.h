@@ -4,6 +4,7 @@
 #include <map>
 #include <set>
 #include <vector>
+
 using cv::Point2i;
 using cv::Point_;
 using cv::Vec6f;
@@ -27,27 +28,57 @@ inline bool operator<(const Triangle &t1, const Triangle &t2) {
 }
 
 template<typename T>
-vector<Triangle> delaunayDiv(const vector<Point_<T> > &vP, const cv::Rect &boundRect) {
-  cv::Subdiv2D subdiv(boundRect);
+vector<Triangle> delaunayDiv(const vector<Point_ < T>
+> &vP,
+const cv::Rect &boundRect
+) {
+cv::Subdiv2D subdiv(boundRect);
 
-  for (size_t e = 0; e < vP.size(); e++) {
-    subdiv.insert(vP[e]);
-  }
+for (
+size_t e = 0;
+e<vP.
+size();
+e++) {
+subdiv.
+insert(vP[e]);
+}
 
-  set<Triangle> V;
-  vector<Vec6f> triangleList;
-  subdiv.getTriangleList(triangleList);
+set<Triangle> V;
+vector<Vec6f> triangleList;
+subdiv.
+getTriangleList(triangleList);
 
-  for (const auto &t : triangleList) {
-    Triangle tr;
-    tr.v[0] = Point2i(cvRound(t[0]), cvRound(t[1]));
-    tr.v[1] = Point2i(cvRound(t[2]), cvRound(t[3]));
-    tr.v[2] = Point2i(cvRound(t[4]), cvRound(t[5]));
-    V.insert(tr);
-  }
+for (
+const auto &t :
+triangleList) {
+Triangle tr;
+tr.v[0] =
+Point2i(cvRound(t[0]), cvRound(t[1])
+);
+tr.v[1] =
+Point2i(cvRound(t[2]), cvRound(t[3])
+);
+tr.v[2] =
+Point2i(cvRound(t[4]), cvRound(t[5])
+);
+V.
+insert(tr);
+}
 
-  vector<Triangle> ans;
-  ans.resize(V.size());
-  std::copy(V.begin(), V.end(), ans.begin());
-  return ans;
+vector<Triangle> ans;
+ans.
+resize(V
+.
+size()
+);
+std::copy(V
+.
+begin(), V
+.
+end(), ans
+.
+begin()
+);
+return
+ans;
 }

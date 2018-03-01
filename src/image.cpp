@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cstring>
 #include "image.h"
+
 image::image() : rows(0), cols(0), channels(3), data(nullptr) {
 }
 
@@ -24,6 +25,7 @@ image::image(image &&other) noexcept {
   other.data = nullptr;
   other.cols = other.rows = other.channels = 0;
 }
+
 image &image::operator=(const image &other) {
   delete[] data;
   rows = other.rows;
@@ -33,6 +35,7 @@ image &image::operator=(const image &other) {
   std::memcpy(data, other.data, static_cast<size_t>(rows * cols * channels));
   return *this;
 }
+
 image &image::operator=(image &&other) noexcept {
   delete[] data;
   rows = other.rows;
@@ -71,7 +74,7 @@ image::image(const cv::Mat &mat) {
   }
 }
 
-image::operator cv::Mat() const{
+image::operator cv::Mat() const {
   cv::Mat mat(rows, cols, CV_MAKETYPE(CV_8U, channels));
   if (mat.isContinuous()) {
     std::memcpy(mat.ptr(), data, static_cast<size_t>(cols * rows * channels));
